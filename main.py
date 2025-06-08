@@ -127,7 +127,10 @@ def LineToBinary(line: str):
         # Format is either R, RI, or MEM
         if parsed[2]:
             # Format is either RI or MEM
-            return OpCodeToBinOpCode(parsed[0])+DataToBinData(parsed[1])+"000000", ImmediateToBin(parsed[2])
+            if OpCodeToBinOpCode(parsed[0]) == "0110001":
+                return OpCodeToBinOpCode(parsed[0]) + "000" + DataToBinData(parsed[1]) + "000", ImmediateToBin(parsed[2])
+            else:
+                return OpCodeToBinOpCode(parsed[0])+DataToBinData(parsed[1])+"000000", ImmediateToBin(parsed[2])
         else:
             # Format is R
             return OpCodeToBinOpCode(parsed[0])+DataToBinData(parsed[1])+"000000"
