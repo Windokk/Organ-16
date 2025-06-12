@@ -133,7 +133,10 @@ def LineToBinary(line: str):
                 return OpCodeToBinOpCode(parsed[0])+DataToBinData(parsed[1])+"000000", ImmediateToBin(parsed[2])
         else:
             # Format is R
-            return OpCodeToBinOpCode(parsed[0])+DataToBinData(parsed[1])+"000000"
+            if OpCodeToBinOpCode(parsed[0]) == "1010000":
+                return OpCodeToBinOpCode(parsed[0])+ "000" + DataToBinData(parsed[1]) + "000"
+            else:
+                return OpCodeToBinOpCode(parsed[0])+ DataToBinData(parsed[1]) + "000000"
     elif len(parsed[1]) == 2:
         # Format is RR
         return OpCodeToBinOpCode(parsed[0]) + DataToBinData(parsed[1])+"000"
