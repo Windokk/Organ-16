@@ -23,7 +23,6 @@ A simple 16-bit CPU architecture and it's assembly-to-machine-code compiler
   - Stack Pointer (SP) (16-bits) – points to the top of the software-managed stack in RAM. 
   - Status Register (FLAGS) (4-bits) – holds condition flags: Zero (Z), Negative (N), Carry (C), and Overflow (O).
 
-
 ## ISA : 
 Each instruction is 16 bits wide but can be extended to 32 bits in exceptional cases.
 - The first 3 bits of the first word represent the Opcode.
@@ -60,8 +59,8 @@ Here is the complete list of instructions :
 | JLE ✅                                                                         | `100`    | `1000`      | JMP (2 words) | JLE 0x1000       | Jump if less or equal (signed)    |
 | JG ✅                                                                          | `100`    | `1001`      | JMP (2 words) | JG 0x1000        | Jump if greater (signed)          |
 | JGE ✅                                                                         | `100`    | `1010`      | JMP (2 words) | JGE 0x1000       | Jump if greater or equal (signed) |
-| JSR ❌                                                                         | `100`    | `1011`      | JMP (2 words) | JSR 0x1000       | Push PC, jump to subroutine       |
-| RTS ❌                                                                         | `100`    | `1100`      | JMP (2 words) | RTS              | Pop return address, jump to it    |
+| JSR ✅                                                                         | `100`    | `1011`      | JMP (2 words) | JSR 0x1000       | Push PC, jump to subroutine       |
+| RTS ✅                                                                         | `100`    | `1100`      | JMP (2 words) | RTS              | Pop return address, jump to it    |
 | HLT ✅                                                                         | `111`    | `0000`      | HLT (1 word)  | HLT              | Halt the CPU                      |
 | CMP ✅                                                                         | `001`    | `1010`      | RR (1 word)   | CMP R1, R2       | Compare R1 and R2                 |
 | PUSH ✅                                                                        | `101`    | `0000`      | R (1 word)    | PUSH R1          | Push R1 onto the stack            |

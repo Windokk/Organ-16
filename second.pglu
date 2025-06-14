@@ -1,0 +1,26 @@
+LABEL2:
+    CMP R1, R1             ; 5 == 5
+    JBE LABEL3             ; Should jump
+    JA  LABEL3             ; Should be skipped
+
+LABEL3:
+    ; === Stack Test ===
+    PUSH R1
+    PUSH R2
+    POP R6                # R6 = R2 = 3
+    POP R7                # R7 = R1 = 5
+
+    # === Memory Operations ===
+    STORE R1, 0x0010       # Mem[0x0010] = 5
+    LOAD  R2, 0x0010       # R2 = Mem[0x0010] = 5
+
+    # === Subroutine Test ===
+    JSR FUNC
+    MOV R3, 0x9999          # After return from FUNC
+
+    # === Halt ===
+    HLT
+
+FUNC:
+    MOV R4, 0x1234         # Subroutine content
+    RTS
