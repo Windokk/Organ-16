@@ -70,8 +70,8 @@ Here is the complete list of instructions :
 
 | Format | OpCode | Word Count | Structure                                                                          |
 |--------|--------|------------|------------------------------------------------------------------------------------|
-| RRR    | 000    | 1 word     | [3b opcode][4b sub-op][3b RA][3b RB][3b RC]                                        |
-| RR     | 001    | 1 word     | [3b opcode][4b sub-op][3b RA][3b RB][3b unused]                                    |
+| RRR    | 000    | 1 word     | [3b opcode][4b sub-op][3b Rdest][3b RB][3b RC]                                     |
+| RR     | 001    | 1 word     | [3b opcode][4b sub-op][3b unused][3b RA][3b RB]                                    |
 | RI     | 010    | 2 words    | Word 1: [3b opcode][4b sub-op][3b Rdest][6b unused]  <br> Word 2: 16-bit immediate |
 | MEM    | 011    | 2 words    | Word 1: [3b opcode][4b sub-op][3b Rdest][6b unused]  <br> Word 2: 16-bit address   |
 | JMP    | 100    | 2 words    | Word 1: [3b opcode][4b sub-op][9b unused]          <br> Word 2: 16-bit address     |
