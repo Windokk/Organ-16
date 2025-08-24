@@ -48,6 +48,7 @@ Here is the complete list of instructions :
 | MOV ✅                                                                         | `010`    | `0000`      | RI (2 words)  | MOV R1, 0x1234   | Move 16-bit immediate into R1     |
 | LOAD ✅                                                                        | `011`    | `0000`      | MEM (2 words) | LOAD R1, 0x1000  | Load from memory to R1            |
 | STORE ✅                                                                       | `011`    | `0001`      | MEM (2 words) | STORE R1, 0x1000 | Store R1 to memory                |
+| STORER ✅                                                                      | `011`    | `0010`      | RR (1 word)   | STORER, R3, R0   | Store R3 at memory[R0]            |
 | JMP ✅                                                                         | `100`    | `0000`      | JMP (2 words) | JMP 0x1000       | Unconditional jump                |
 | JE ✅                                                                          | `100`    | `0001`      | JMP (2 words) | JE 0x1000        | Jump if equal                     |
 | JNE ✅                                                                         | `100`    | `0010`      | JMP (2 words) | JNE 0x1000       | Jump if not equal                 |

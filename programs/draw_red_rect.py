@@ -1,7 +1,7 @@
 import compiler
 
-if __name__ == "__draw_red_rect__":
+if __name__ == "__main__":
     segments = [
-        ("first_test.pglu", 0x0000)
+        ("draw_red_rect.pglu", 0x0000)
     ]
     compiler.CompileMultiple(segments, "draw.bin")

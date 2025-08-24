@@ -1,16 +1,16 @@
 MAIN:
     MOV R0, 0x8000              ; i = R0
     MOV R1, 0x1                 ; i += 1
-    MOV R2, 0x800A              ; i < R2
+    MOV R2, 0xBFFF              ; i < R2
     MOV R3, 0xF800              ; Color
     JSR DRAWING_LOOP
 
 DRAWING_LOOP:
-    STORE R3, R0
+    STORER R3, R0
     ADD R0, R0, R1              ; R0 += R1 --> R0 += 1
     CMP R0, R2
-    JE END
     JNE DRAWING_LOOP
+    JE END
 
 
 END:
