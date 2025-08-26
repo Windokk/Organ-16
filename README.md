@@ -1,5 +1,5 @@
 # Potiglu 16
-A simple 16-bit CPU architecture and it's assembly-to-machine-code compiler
+A simple 16-bit CPU architecture and its assembly-to-machine-code compiler
 
 ## Architecture - Overview
 
