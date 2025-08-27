@@ -3,7 +3,7 @@ MAIN:
     MOV R1, 0x1                 ; i += 1
     MOV R2, 0xC000              ; i < R2
     MOV R3, 0xF800              ; Color
-    JSR DRAWING_LOOP
+    JMP DRAWING_LOOP
 
 DRAWING_LOOP:
     STORER R3, R0
