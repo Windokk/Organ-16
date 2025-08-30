@@ -1,5 +1,6 @@
 # Potiglu 16
 A simple 16-bit CPU architecture and its assembly-to-machine-code compiler
+Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 ## Architecture - Overview
 
@@ -82,6 +83,7 @@ Here is the complete list of instructions :
 ### Future plans :
 
 - [ ] IRL breadboard implementation
+- [ ] Basically more instructions
 - [ ] Support for operations and comparisons between memory-registers and memory-memory
 - [ ] PCB version
 - [ ] 32 bits ??
