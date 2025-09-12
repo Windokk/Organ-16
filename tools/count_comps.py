@@ -6,10 +6,10 @@ def count_components(circ_file):
         tree = ET.parse(circ_file)
         root = tree.getroot()
     except ET.ParseError:
-        print("❌ Error: Unable to parse the .circ file. Is it a valid Logisim file?")
+        print("Error: Unable to parse the .circ file. Is it a valid Logisim file?")
         return
     except FileNotFoundError:
-        print("❌ Error: File not found.")
+        print("Error: File not found.")
         return
 
     circuit_components = defaultdict(Counter)

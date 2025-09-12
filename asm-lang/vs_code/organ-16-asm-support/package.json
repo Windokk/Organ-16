@@ -1,0 +1,90 @@
+{
+  "name": "organ-16-asm-support",
+  "displayName": "Organ-16 ASM Support",
+  "description": "Simple support for Organ-16 assembly language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:organ-16-asm-support"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "organ",
+        "aliases": [
+          "Organ-16 ASM",
+          "Organ-16"
+        ],
+        "extensions": [
+          ".org"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "organ-link",
+        "aliases": [
+          "Organ-16 Linker",
+          "Organ-16 Linker Script"
+        ],
+        "extensions": [
+          ".l"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "organ",
+        "scopeName": "source.org",
+        "path": "./syntaxes/organ.tmLanguage.json"
+      },
+      {
+        "language": "organ-link",
+        "scopeName": "source.l",
+        "path": "./syntaxes/linker.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "organ-16-asm-support.compile",
+        "title": "Organ-16 ASM: Compile"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.103.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.32.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "publisher":"windokk"
+}

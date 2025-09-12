@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "organ",
+  "scopeName": "source.org",
+  "fileTypes": ["org"],
+  "patterns": [
+    { "include": "#instructions" },
+    { "include": "#registers" },
+    { "include": "#numbers" },
+    { "include": "#comments" }
+  ],
+  "repository": {
+    "instructions": {
+      "patterns": [
+        {
+          "name": "keyword.instruction.organ",
+          "match": "\\b(ADD|SUB|MUL|DIV|MOD|AND|OR|NAND|NOR|XOR|NOT|MOV|LOAD|STORE|STORER|JMP|JE|JNE|JB|JBE|JA|JAE|JL|JLE|JG|JGE|JSR|RTS|HLT|CMP|PUSH|POP)\\b"
+        }
+      ]
+    },
+    "registers": {
+      "patterns": [
+        {
+          "name": "variable.register.organ",
+          "match": "\\bR[0-7]\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.binary.organ",
+          "match": "\\b0b[01]+\\b"
+        },
+        {
+          "name": "constant.numeric.hex.organ",
+          "match": "\\b0x[0-9A-Fa-f]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.organ",
+          "match": "\\b-?\\d+\\b"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+			"name": "comment.line.semicolon.organ",
+			"match": ";.*$"
+		},
+		{
+			"name": "comment.line.number-sign.organ",
+			"match": "#.*$"
+		}
+      ]
+    }
+  }
+}

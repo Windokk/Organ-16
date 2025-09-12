@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/style">
+        <file>stylesheets/scrollarea.qss</file>
+        <file>stylesheets/lineedit.qss</file>
+        <file>stylesheets/ram_panel.qss</file>
+        <file>stylesheets/menu.qss</file>
+        <file>stylesheets/slider.qss</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file>imgs/RESET.png</file>
+        <file>imgs/CLOCK.png</file>
+        <file>imgs/FLAGS.png</file>
+        <file>imgs/RAM_ADDRESS.png</file>
+        <file>imgs/IR0.png</file>
+        <file>imgs/IR1.png</file>
+        <file>imgs/PC.png</file>
+        <file>imgs/R0.png</file>
+        <file>imgs/R1.png</file>
+        <file>imgs/R2.png</file>
+        <file>imgs/R3.png</file>
+        <file>imgs/R4.png</file>
+        <file>imgs/R5.png</file>
+        <file>imgs/R6.png</file>
+        <file>imgs/R7.png</file>
+        <file>imgs/SP.png</file>
+        <file>imgs/arrow.png</file>
+        <file>imgs/checkmark.png</file>
+        <file>imgs/crossmark.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,18 @@
+DEBUG:asyncio:Using proactor: IocpProactor
+INFO:pygls.feature_manager:Registered builtin feature exit
+INFO:pygls.feature_manager:Registered builtin feature initialize
+INFO:pygls.feature_manager:Registered builtin feature initialized
+INFO:pygls.feature_manager:Registered builtin feature notebookDocument/didChange
+INFO:pygls.feature_manager:Registered builtin feature notebookDocument/didClose
+INFO:pygls.feature_manager:Registered builtin feature notebookDocument/didOpen
+INFO:pygls.feature_manager:Registered builtin feature $/setTrace
+INFO:pygls.feature_manager:Registered builtin feature shutdown
+INFO:pygls.feature_manager:Registered builtin feature textDocument/didChange
+INFO:pygls.feature_manager:Registered builtin feature textDocument/didClose
+INFO:pygls.feature_manager:Registered builtin feature textDocument/didOpen
+INFO:pygls.feature_manager:Registered builtin feature window/workDoneProgress/cancel
+INFO:pygls.feature_manager:Registered builtin feature workspace/didChangeWorkspaceFolders
+INFO:pygls.feature_manager:Registered builtin feature workspace/executeCommand
+INFO:pygls.feature_manager:Registered "textDocument/didChange" with options "None"
+INFO:pygls.feature_manager:Registered "textDocument/didOpen" with options "None"
+INFO:pygls.server:Starting IO server

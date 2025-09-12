@@ -1,0 +1,15 @@
+QLineEdit {
+    border: none;
+    background: transparent;
+    color: #a7a7a7;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 2px 4px;
+    selection-background-color: #0080ff;
+    selection-color: #000000;
+}
+QLineEdit:focus {
+    background: #ffffff;
+    color: #333333;
+    outline: none;
+}

@@ -1,0 +1,74 @@
+QTableView {
+    background-color: #5e5e5e;
+    alternate-background-color: #5e5e5e;
+    border: none;
+    gridline-color: #1d1d1d;
+    selection-background-color: #b1b1b1;
+    selection-color: #000000;
+    font-family: Consolas, monospace;
+    font-size: 11pt;
+}
+
+QHeaderView::section {
+    background-color: #4d4d4d;
+    color: #0c0c0c;
+    padding: 4px;
+    border: none;
+    font-weight: bold;
+    font-family: Consolas, monospace;
+    font-size: 10pt;
+}
+
+QHeaderView::section:horizontal {
+    border-bottom: 1px solid #383838;
+}
+
+QHeaderView::section:vertical {
+    border-right: 1px solid #383838;
+}
+
+QTableView QScrollBar:vertical {
+    background: #b9b9b9;
+    width: 10px;
+    border-radius: 5px;
+}
+
+QTableView QScrollBar::handle:vertical {
+    background: #888;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QTableView QScrollBar::add-line:vertical,
+QTableView QScrollBar::sub-line:vertical {
+    height: 0;
+    background: none;
+}
+
+QTableView QScrollBar::add-page:vertical,
+QTableView QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QTableView QScrollBar:horizontal {
+    background: #F0F0F0;
+    height: 10px;
+    border-radius: 5px;
+}
+
+QTableView QScrollBar::handle:horizontal {
+    background: #888;
+    min-width: 20px;
+    border-radius: 4px;
+}
+
+QTableView QScrollBar::add-line:horizontal,
+QTableView QScrollBar::sub-line:horizontal {
+    width: 0;
+    background: none;
+}
+
+QTableView QScrollBar::add-page:horizontal,
+QTableView QScrollBar::sub-page:horizontal {
+    background: none;
+}
