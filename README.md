@@ -2,7 +2,7 @@
   
   # Organ 16
 
-  <img src="LogoGithub.png" width="20%">
+  <img src="LogoGithub.png" width="30%">
 
   </br>
   
