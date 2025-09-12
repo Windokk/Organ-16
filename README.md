@@ -18,6 +18,8 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 </div>
 
+</br>
+
 ## Repository Guide
 
 - [asm-lang/](asm-lang/)  : contains extension(s) for common IDEs to support Organ16 assembly
