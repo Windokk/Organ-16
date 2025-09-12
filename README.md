@@ -1,8 +1,16 @@
-# Organ 16
+<div align="center">
+  
+  # Organ 16
 
-<div margin="auto">
   <img src="LogoGithub.png" width="20%">
+
+  </br>
+  
+  <img src="https://img.shields.io/static/v1?label=Version&message=1.0.0&color=33cc33&style=for-the-badge"/>
 </div>
+
+</br>
+</br>
 
 A simple 16-bit CPU architecture and its assembly-to-machine-code compiler
 Designed with CMOS IRL implementation in mind (on breadboard for now)
