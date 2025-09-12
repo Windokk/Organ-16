@@ -26,7 +26,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 #### Address Width: 16 bits
 
-- Allows for a total of 128KB of addressable memory space, mapped linearly.
+- Allows for a total of 1Mbit of addressable memory space, mapped linearly.
 
 #### Instruction Width: 16 bits per word
 
