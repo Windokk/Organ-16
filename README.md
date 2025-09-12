@@ -1,7 +1,7 @@
 # Organ 16
 
 <div margin="auto">
-  <img src="LogoGithub.png" width="10%">
+  <img src="LogoGithub.png" width="20%">
 </div>
 
 A simple 16-bit CPU architecture and its assembly-to-machine-code compiler
