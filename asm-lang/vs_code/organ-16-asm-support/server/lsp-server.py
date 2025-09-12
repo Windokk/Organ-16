@@ -1,3 +1,4 @@
+import json
 from pygls.server import LanguageServer
 from lsprotocol.types import (
     Diagnostic,
@@ -86,11 +87,39 @@ def validate_org_source(lines):
     diagnostics = []
     labels_defined = {}
     labels_used = set()
+    defined_constants = {}
+
     for lineno, line in enumerate(lines):
         code = line.split('#')[0].split(';')[0].strip()
         if not code:
             continue
 
+        # Handle @define directive
+        if code.startswith("@define"):
+            tokens = code.split()
+            if len(tokens) != 3:
+                diagnostics.append(make_error(lineno, 0, len(code), "Invalid @define format. Use: @define NAME VALUE"))
+                continue
+
+            _, name, value = tokens
+            if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name):
+                diagnostics.append(make_error(lineno, 0, len(name), f"Invalid constant name '{name}'"))
+                continue
+            if not is_immediate(value):
+                diagnostics.append(make_error(
+                    lineno,
+                    code.find(value),
+                    code.find(value) + len(value),
+                    f"Invalid value '{value}' for @define"
+                ))
+                continue
+            if name in defined_constants:
+                diagnostics.append(make_error(lineno, 0, len(name), f"Constant '{name}' already defined"))
+                continue
+            defined_constants[name] = value
+            continue  # Done processing this line
+
+        # Handle labels (e.g., loop:)
         if ':' in code:
             label_part, rest = code.split(':', 1)
             label = label_part.strip()
@@ -125,75 +154,77 @@ def validate_org_source(lines):
         def is_invalid_register(token):
             return token.upper().startswith('R') and token.upper() not in VALID_REGISTERS
 
-        def is_immediate(token):
-            return IMMEDIATE_REGEX.match(token)
+        def is_valid_operand_immediate_or_constant(token):
+            return is_immediate(token) or token in defined_constants
 
         # Validate operands by format
         if fmt == 'RRR':
             for op in operands:
                 if is_invalid_register(op):
-                    diagnostics.append(make_error(lineno, line.find(op), line.find(op)+len(op), f"Invalid register '{op}'"))
+                    diagnostics.append(make_error(
+                        lineno, line.find(op), line.find(op) + len(op), f"Invalid register '{op}'"))
         elif fmt == 'RR':
             for op in operands:
                 if is_invalid_register(op):
-                    diagnostics.append(make_error(lineno, line.find(op), line.find(op)+len(op), f"Invalid register '{op}'"))
+                    diagnostics.append(make_error(
+                        lineno, line.find(op), line.find(op) + len(op), f"Invalid register '{op}'"))
         elif fmt == 'RI':
             if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0])+len(operands[0]), f"Invalid register '{operands[0]}'"))
-            if not is_immediate(operands[1]):
-                diagnostics.append(make_error(lineno, line.find(operands[1]), line.find(operands[1])+len(operands[1]), f"Invalid immediate value '{operands[1]}'"))
+                diagnostics.append(make_error(
+                    lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]),
+                    f"Invalid register '{operands[0]}'"))
+            if not is_valid_operand_immediate_or_constant(operands[1]):
+                diagnostics.append(make_error(
+                    lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]),
+                    f"Invalid immediate or constant '{operands[1]}'"))
         elif fmt == 'MEM':
             if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0])+len(operands[0]), f"Invalid register '{operands[0]}'"))
-            if not is_immediate(operands[1]):
-                diagnostics.append(make_error(lineno, line.find(operands[1]), line.find(operands[1])+len(operands[1]), f"Invalid memory address '{operands[1]}'"))
+                diagnostics.append(make_error(
+                    lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]),
+                    f"Invalid register '{operands[0]}'"))
+            if not is_valid_operand_immediate_or_constant(operands[1]):
+                diagnostics.append(make_error(
+                    lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]),
+                    f"Invalid memory address or constant '{operands[1]}'"))
         elif fmt == 'JMP':
             if expected_operands == 1 and len(operands) == 1:
-                if not is_immediate(operands[0]) and not operands[0] in labels_defined:
-                    diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0])+len(operands[0]), f"Invalid jump address '{operands[0]}'"))
+                op = operands[0]
+                if not is_immediate(op) and op not in labels_defined and op not in defined_constants:
+                    diagnostics.append(make_error(
+                        lineno, line.find(op), line.find(op) + len(op),
+                        f"Invalid jump address or label '{op}'"))
             elif expected_operands == 2:
-                if len(operands) != 1:
-                    diagnostics.append(make_error(lineno, len(instr)+1, len(line), f"Instruction '{instr}' expects 1 operand"))
-                elif not is_immediate(operands[0]):
-                    diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0])+len(operands[0]), f"Invalid jump address '{operands[0]}'"))
+                diagnostics.append(make_error(
+                    lineno, line.find(instr), len(line),
+                    f"Instruction '{instr}' expects 1 operand"))
         elif fmt == 'R':
             if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0])+len(operands[0]), f"Invalid register '{operands[0]}'"))
+                diagnostics.append(make_error(
+                    lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]),
+                    f"Invalid register '{operands[0]}'"))
 
-
-        start_search_index = 0
-        char_start = -1
-        char_end = -1
-        # Collect labels used for non-register, non-immediate tokens only
+        # Track labels/constants used in operands (for undefined reference check)
         for op in operands:
-            if is_invalid_register(op):
-                # Invalid registers already reported above, don't treat as label
+            if is_invalid_register(op) or op.upper() in VALID_REGISTERS or is_immediate(op):
                 continue
-            if op.upper() in VALID_REGISTERS:
-                # Valid register, ignore for label checks
-                continue
-            if is_immediate(op):
-                # Immediate value, ignore
-                continue
-            pos = line.find(op, start_search_index)
-            if pos != -1:
-                char_start = pos
-                char_end = pos + len(op)
+            # Track only if it's not already defined as constant or label
+            if op not in labels_defined and op not in defined_constants:
+                pos = line.find(op)
+                labels_used.add((op, lineno, pos, pos + len(op)))
 
-            labels_used.add((op, lineno, char_start, char_end))
-
-    # Validate label usage
-    for label in labels_used:
-        if label[0] not in labels_defined:
-            diagnostics.append(make_error(label[1], label[2], label[3], f"Undefined label referenced: '{label[0]}'"))
+    # Check for undefined labels/constants
+    for label, lineno, start, end in labels_used:
+        if label not in labels_defined and label not in defined_constants:
+            diagnostics.append(make_error(
+                lineno, start, end, f"Undefined label or constant referenced: '{label}'"))
 
     return diagnostics
 
 
 
 # === Linker Script Validation ===
-
-""" def validate_linker_script(text):
+"""
+def validate_linker_script(text):
     diagnostics = []
     try:
         data = json.loads(text)
@@ -239,7 +270,7 @@ def validate_org_source(lines):
             used_ranges.append((addr, addr))  # TODO: If segment size known, check range overlaps
 
     return diagnostics
- """
+"""
 
 @server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def on_change(ls: LanguageServer, params: DidChangeTextDocumentParams):
@@ -262,15 +293,25 @@ def completions(ls: LanguageServer, params: CompletionParams):
     line = doc.lines[params.position.line]
     prefix = line[: params.position.character]
 
-    # Let's provide completion items: opcodes + registers + labels
-
-    # Extract defined labels from current document for label completion
     labels = set()
+    constants = set()
+
     for l in doc.lines:
         code = l.split('#')[0].split(';')[0].strip()
+
+        # Extract labels (e.g., loop:)
         if ':' in code:
             label = code.split(':', 1)[0].strip()
-            labels.add(label)
+            if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', label):
+                labels.add(label)
+
+        # Extract @define constants
+        if code.lower().startswith('@define'):
+            tokens = code.split()
+            if len(tokens) == 3:
+                _, const_name, const_value = tokens
+                if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', const_name):
+                    constants.add(const_name)
 
     # Build completion items for opcodes
     opcode_items = [
@@ -305,8 +346,19 @@ def completions(ls: LanguageServer, params: CompletionParams):
         for lbl in labels
     ]
 
+    # Build completion items for constants
+    constant_items = [
+        CompletionItem(
+            label=const,
+            kind=CompletionItemKind.Constant,
+            detail="Constant (@define)",
+            insert_text=const,
+        )
+        for const in constants
+    ]
+
     # Return all completion items
-    all_items = opcode_items + register_items + label_items
+    all_items = opcode_items + register_items + label_items + constant_items
 
     return CompletionList(is_incomplete=False, items=all_items)
 

@@ -18039,11 +18039,10 @@ function activate(context) {
           vscode.window.showErrorMessage(`Python Error: ${stderr}`);
         }
         if (stdout) {
-          vscode.window.showWarningMessage(`Python Warning: ${stdout}`);
+          vscode.window.showInformationMessage(`Python Info/Warning: ${stdout}`);
         }
         if (!err && !stderr) {
           vscode.window.showInformationMessage("\u2714 Compilation done!");
-          console.log("stdout:", stdout);
         }
       });
     });

@@ -7,7 +7,8 @@
     { "include": "#instructions" },
     { "include": "#registers" },
     { "include": "#numbers" },
-    { "include": "#comments" }
+    { "include": "#comments" },
+    { "include": "#preprocessor" }
   ],
   "repository": {
     "instructions": {
@@ -52,6 +53,14 @@
 			"name": "comment.line.number-sign.organ",
 			"match": "#.*$"
 		}
+      ]
+    },
+    "preprocessor": {
+      "patterns": [
+        {
+          "name": "keyword.control.preprocessor.define.organ",
+          "match": "^\\s*@\\s*define\\b"
+        }
       ]
     }
   }

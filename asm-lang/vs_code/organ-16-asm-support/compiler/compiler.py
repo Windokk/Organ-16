@@ -137,14 +137,62 @@ def LineToBinary(line: str, label_map: dict = None):
 def BinToHex(binary: str) -> str:
     return hex(int(binary, 2))[2:].zfill(4).lower()
 
+def ParseConstants(lines: List[str]) -> dict:
+    """
+    Extract constants from lines starting with '@define CONSTANT VALUE'
+    Returns a dict of {CONSTANT_NAME: int_value}
+    """
+    constants = {}
+    for line in lines:
+        line = line.strip()
+        if line.startswith("@define"):
+            parts = line.split(maxsplit=2)
+            if len(parts) == 3:
+                _, name, value = parts
+                try:
+                    if value.lower().startswith("0x"):
+                        val = int(value, 16)
+                    elif value.lower().startswith("0b"):
+                        val = int(value, 2)
+                    else:
+                        val = int(value, 10)
+                    constants[name.upper()] = val
+                except ValueError:
+                    print(f"Warning: Invalid constant value '{value}' for {name}, ignoring.")
+            else:
+                print(f"Warning: Invalid @define syntax: '{line}'")
+    return constants
+
+def ReplaceLabelsAndConstants(line: str, label_map: dict, constants_map: dict) -> str:
+    """
+    Replace label or constant names in immediate fields with their numeric values.
+    """
+    instr, regs, imm = ParseLine(line)
+    if imm:
+        imm_upper = imm.upper()
+        if imm_upper in label_map:
+            line = line.replace(imm, f"0x{label_map[imm_upper]:04X}")
+        elif imm_upper in constants_map:
+            line = line.replace(imm, str(constants_map[imm_upper]))
+    return line
+
 def CompileMultiple(segments: List[Tuple[str, int]], output_file: str):
     memory = ["0000"] * 65536  # 64K words initialized to zero
 
     global_labels = {}
     file_lines = []
+    all_constants = {}
 
     for filepath, base_addr in segments:
         lines = ReadFileLines(filepath)
+
+        # Extract constants first
+        constants = ParseConstants(lines)
+        all_constants.update(constants)
+
+        # Remove @define lines before further processing
+        lines = [line for line in lines if not line.strip().startswith("@define")]
+
         instr_count = sum(InstructionWordCount(line) for line in lines if not IsLabel(line))
         max_instr = STACK_START - base_addr
 
@@ -154,7 +202,6 @@ def CompileMultiple(segments: List[Tuple[str, int]], output_file: str):
 
         if instr_count > max_instr:
             print(f"Cropping segment '{filepath}' - {instr_count} words reduced to {max_instr} to avoid stack memory overlap.")
-            # Now we need to crop the lines to fit
             new_lines = []
             words_used = 0
             for line in lines:
@@ -170,16 +217,15 @@ def CompileMultiple(segments: List[Tuple[str, int]], output_file: str):
 
         label_map = FirstPass(lines, base_addr)
         global_labels.update(label_map)
-        file_lines.append((lines, base_addr))
-        global_labels.update(label_map)
-        file_lines.append((lines, base_addr))
+        file_lines.append((lines, base_addr, constants))  # pass constants too
 
-    for lines, base_addr in file_lines:
+    for lines, base_addr, constants in file_lines:
         addr = base_addr
         for line in lines:
             if IsLabel(line):
                 continue
-            line = ReplaceLabels(line, global_labels)
+            # Replace labels and constants
+            line = ReplaceLabelsAndConstants(line, global_labels, constants)
             binaries = LineToBinary(line, global_labels)
             if isinstance(binaries, (tuple, list)):
                 for b in binaries:
