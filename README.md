@@ -16,6 +16,15 @@ A simple 16-bit CPU architecture and its assembly-to-machine-code compiler
 
 Designed with CMOS IRL implementation in mind (on breadboard for now)
 
+## Repository Guide
+
+- asm-lang/    : contains extension(s) for common IDEs to support Organ16 assembly
+- circuits/    : contains every logisim (evolution) related files
+- docs/        : documentation on the whole project (logisim, emulator, asm, irl implementation)
+- emulator/    : the source code for the emulator (written in C++ with Qt)
+- programs/    : various test/demo programs to be executed on the emulator/on logisim
+- tools/       : various tools used for developping and building the CPU and its extensions
+
 ## Architecture - Overview
 
 16-bit CPU, designed with CMOS physical implementation in mind.
