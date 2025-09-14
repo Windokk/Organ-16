@@ -140,10 +140,12 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     }
 
     // --- containsAddress ---
-    if (OpCode == 0b011)
+    if (OpCode == 3)
         ret.containsAddress = 1;
-    else if (OpCode == 0b100)
+    else if(OpCode == 4)
         ret.containsAddress = static_cast<uint8_t>(flagsMux);
+    else if(OpCode == 5 && subOpCode == 1)
+        ret.containsAddress = 1;
     else
         ret.containsAddress = 0;
 

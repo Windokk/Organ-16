@@ -8,6 +8,7 @@
 #include "memory/memory_interface.hpp"
 
 #include <iostream>
+#include <QDebug>
 
 void UpdateVisualRAMCurrentAddress(uint16_t oldAddress, uint16_t newAddress);
 

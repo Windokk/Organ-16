@@ -75,34 +75,34 @@ using Register4 = Register<uint8_t, 0x0F>;     // 4-bit register
 using Register16 = Register<uint16_t>;        // 16-bit register
 
 struct RegsOutOnChange{
-    uint16_t RA;
-    uint16_t RB;
-    uint16_t PC;
-    uint16_t SP;
-    uint8_t FLAGS;
-    uint16_t RAM_ADDRESS;
+    uint16_t RA = 0;
+    uint16_t RB = 0;
+    uint16_t PC = 0;
+    uint16_t SP = 0;
+    uint8_t FLAGS = 0;
+    uint16_t RAM_ADDRESS = 0;
 };
 
 struct RegsOutOnIdle{
-    uint16_t IR0;
-    uint16_t IR1;
+    uint16_t IR0 = 0;
+    uint16_t IR1 = 0;
 };
 
 struct RegsOut{
-    uint16_t R0;
-    uint16_t R1;
-    uint16_t R2;
-    uint16_t R3;
-    uint16_t R4;
-    uint16_t R5;
-    uint16_t R6;
-    uint16_t R7;
-    uint16_t PC;
-    uint16_t SP;
-    uint8_t FLAGS;
-    uint16_t RAM_ADDRESS;
-    uint16_t IR0;
-    uint16_t IR1;
+    uint16_t R0 = 0;
+    uint16_t R1 = 0;
+    uint16_t R2 = 0;
+    uint16_t R3 = 0;
+    uint16_t R4 = 0;
+    uint16_t R5 = 0;
+    uint16_t R6 = 0;
+    uint16_t R7 = 0;
+    uint16_t PC = 0;
+    uint16_t SP = 0;
+    uint8_t FLAGS = 0;
+    uint16_t RAM_ADDRESS = 0;
+    uint16_t IR0 = 0;
+    uint16_t IR1 = 0;
 };
 
 struct RegsInOnChange{

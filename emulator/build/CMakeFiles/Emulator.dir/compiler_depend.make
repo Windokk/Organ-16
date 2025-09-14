@@ -464,6 +464,7 @@ CMakeFiles/Emulator.dir/src/backend/control_unit/control_unit.cpp.obj: C:/Users/
   C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/control_unit/control_unit.hpp
 
 CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/cpu.cpp \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug \
   C:/Qt/6.9.2/mingw_64/include/QtCore/q17memory.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/q20functional.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/q20memory.h \
@@ -489,28 +490,50 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/Qt/6.9.2/mingw_64/include/QtCore/qconfig.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qconstructormacros.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainerfwd.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainerinfo.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainertools_impl.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qcontiguouscache.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qdarwinhelpers.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qdatastream.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qdebug.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qexceptionhandling.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qflags.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qfloat16.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qforeach.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qfunctionaltools_impl.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qfunctionpointer.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qgenericatomic.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qglobal.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qglobalstatic.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qhash.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qhashfunctions.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qiodevicebase.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qiterable.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qiterator.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qlatin1stringview.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qlist.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qlogging.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qmalloc.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qmap.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qmath.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qmetacontainer.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qmetatype.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qminmax.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qnamespace.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qnumeric.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qobjectdefs.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qobjectdefs_impl.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qoverload.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qpair.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qprocessordetection.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qrefcount.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qscopedpointer.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qscopeguard.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qset.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qshareddata.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qshareddata_impl.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qsharedpointer.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qsharedpointer_impl.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qstdlibdetection.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qstring.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qstringalgorithms.h \
@@ -526,6 +549,7 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/Qt/6.9.2/mingw_64/include/QtCore/qswap.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qsysinfo.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qsystemdetection.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qtaggedpointer.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtclasshelpermacros.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtconfiginclude.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtconfigmacros.h \
@@ -535,6 +559,8 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtdeprecationdefinitions.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtdeprecationmarkers.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtenvironmentvariables.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qtextstream.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qtformat_impl.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtmetamacros.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtnoop.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtpreprocessorsupport.h \
@@ -546,6 +572,7 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtypeinfo.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qtypes.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qutf8stringview.h \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/qvarlengtharray.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qversiontagging.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qxptype_traits.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/qyieldcpu.h \
@@ -602,6 +629,7 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/msys64/mingw64/include/c++/13.2.0/bits/invoke.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/ios_base.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/istream.tcc \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/list.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/locale_classes.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/locale_classes.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/locale_conv.h \
@@ -643,11 +671,17 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_iterator.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_iterator_base_funcs.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_iterator_base_types.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/stl_list.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/stl_map.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/stl_multimap.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/stl_multiset.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_numeric.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_pair.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_raw_storage_iter.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_relops.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/stl_set.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_tempbuf.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/stl_tree.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_uninitialized.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_vector.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stream_iterator.h \
@@ -659,12 +693,15 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/msys64/mingw64/include/c++/13.2.0/bits/unique_lock.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/unique_ptr.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/unordered_map.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/unordered_set.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/uses_allocator.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/uses_allocator_args.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/utility.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/vector.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/cctype \
   C:/msys64/mingw64/include/c++/13.2.0/cerrno \
+  C:/msys64/mingw64/include/c++/13.2.0/chrono \
+  C:/msys64/mingw64/include/c++/13.2.0/climits \
   C:/msys64/mingw64/include/c++/13.2.0/clocale \
   C:/msys64/mingw64/include/c++/13.2.0/cmath \
   C:/msys64/mingw64/include/c++/13.2.0/compare \
@@ -695,7 +732,9 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/msys64/mingw64/include/c++/13.2.0/istream \
   C:/msys64/mingw64/include/c++/13.2.0/iterator \
   C:/msys64/mingw64/include/c++/13.2.0/limits \
+  C:/msys64/mingw64/include/c++/13.2.0/list \
   C:/msys64/mingw64/include/c++/13.2.0/locale \
+  C:/msys64/mingw64/include/c++/13.2.0/map \
   C:/msys64/mingw64/include/c++/13.2.0/memory \
   C:/msys64/mingw64/include/c++/13.2.0/mutex \
   C:/msys64/mingw64/include/c++/13.2.0/new \
@@ -708,6 +747,7 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/msys64/mingw64/include/c++/13.2.0/pstl/glue_numeric_defs.h \
   C:/msys64/mingw64/include/c++/13.2.0/pstl/pstl_config.h \
   C:/msys64/mingw64/include/c++/13.2.0/ratio \
+  C:/msys64/mingw64/include/c++/13.2.0/set \
   C:/msys64/mingw64/include/c++/13.2.0/sstream \
   C:/msys64/mingw64/include/c++/13.2.0/stdexcept \
   C:/msys64/mingw64/include/c++/13.2.0/stdlib.h \
@@ -731,6 +771,7 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: C:/Users/elipt/Desktop/Organ-16
   C:/msys64/mingw64/include/c++/13.2.0/type_traits \
   C:/msys64/mingw64/include/c++/13.2.0/typeinfo \
   C:/msys64/mingw64/include/c++/13.2.0/unordered_map \
+  C:/msys64/mingw64/include/c++/13.2.0/unordered_set \
   C:/msys64/mingw64/include/c++/13.2.0/utility \
   C:/msys64/mingw64/include/c++/13.2.0/variant \
   C:/msys64/mingw64/include/c++/13.2.0/vector \
@@ -1644,6 +1685,8 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/bit \
   C:/msys64/mingw64/include/c++/13.2.0/bits/alloc_traits.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/allocator.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/basic_ios.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/basic_ios.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/basic_string.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/basic_string.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/char_traits.h \
@@ -1664,6 +1707,12 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/bits/hashtable.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/hashtable_policy.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/invoke.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/ios_base.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/istream.tcc \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/locale_classes.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/locale_classes.tcc \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/locale_facets.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/locale_facets.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/localefwd.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/memory_resource.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/memoryfwd.h \
@@ -1671,6 +1720,7 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/bits/nested_exception.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/new_allocator.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/node_handle.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/ostream.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/ostream_insert.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/parse_numbers.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/postypes.h \
@@ -1688,6 +1738,8 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_iterator_base_funcs.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_iterator_base_types.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stl_pair.h \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/streambuf.tcc \
+  C:/msys64/mingw64/include/c++/13.2.0/bits/streambuf_iterator.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/string_view.tcc \
   C:/msys64/mingw64/include/c++/13.2.0/bits/stringfwd.h \
   C:/msys64/mingw64/include/c++/13.2.0/bits/unique_lock.h \
@@ -1704,6 +1756,7 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/cstdlib \
   C:/msys64/mingw64/include/c++/13.2.0/ctime \
   C:/msys64/mingw64/include/c++/13.2.0/cwchar \
+  C:/msys64/mingw64/include/c++/13.2.0/cwctype \
   C:/msys64/mingw64/include/c++/13.2.0/debug/assertions.h \
   C:/msys64/mingw64/include/c++/13.2.0/debug/debug.h \
   C:/msys64/mingw64/include/c++/13.2.0/exception \
@@ -1714,15 +1767,22 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/ext/string_conversions.h \
   C:/msys64/mingw64/include/c++/13.2.0/ext/type_traits.h \
   C:/msys64/mingw64/include/c++/13.2.0/initializer_list \
+  C:/msys64/mingw64/include/c++/13.2.0/ios \
   C:/msys64/mingw64/include/c++/13.2.0/iosfwd \
+  C:/msys64/mingw64/include/c++/13.2.0/iostream \
+  C:/msys64/mingw64/include/c++/13.2.0/istream \
   C:/msys64/mingw64/include/c++/13.2.0/limits \
   C:/msys64/mingw64/include/c++/13.2.0/mutex \
   C:/msys64/mingw64/include/c++/13.2.0/new \
+  C:/msys64/mingw64/include/c++/13.2.0/ostream \
   C:/msys64/mingw64/include/c++/13.2.0/pstl/pstl_config.h \
   C:/msys64/mingw64/include/c++/13.2.0/ratio \
+  C:/msys64/mingw64/include/c++/13.2.0/stdexcept \
   C:/msys64/mingw64/include/c++/13.2.0/stdlib.h \
+  C:/msys64/mingw64/include/c++/13.2.0/streambuf \
   C:/msys64/mingw64/include/c++/13.2.0/string \
   C:/msys64/mingw64/include/c++/13.2.0/string_view \
+  C:/msys64/mingw64/include/c++/13.2.0/system_error \
   C:/msys64/mingw64/include/c++/13.2.0/tuple \
   C:/msys64/mingw64/include/c++/13.2.0/type_traits \
   C:/msys64/mingw64/include/c++/13.2.0/typeinfo \
@@ -1732,6 +1792,8 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/c++config.h \
   C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/c++locale.h \
   C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/cpu_defines.h \
+  C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/ctype_base.h \
+  C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/ctype_inline.h \
   C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/error_constants.h \
   C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/gthr-default.h \
   C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32/bits/gthr.h \
@@ -1768,6 +1830,7 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
   C:/msys64/mingw64/include/time.h \
   C:/msys64/mingw64/include/vadefs.h \
   C:/msys64/mingw64/include/wchar.h \
+  C:/msys64/mingw64/include/wctype.h \
   C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/limits.h \
   C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/mm_malloc.h \
   C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/stddef.h \
@@ -1777,6 +1840,7 @@ CMakeFiles/Emulator.dir/src/backend/temp_values/temp_values.cpp.obj: C:/Users/el
 
 CMakeFiles/Emulator.dir/src/layouts/ram_panel.cpp.obj: C:/Users/elipt/Desktop/Organ-16/emulator/src/layouts/ram_panel.cpp \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QAbstractTableModel \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QString \
   C:/Qt/6.9.2/mingw_64/include/QtCore/q17memory.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/q20functional.h \
@@ -3066,6 +3130,7 @@ CMakeFiles/Emulator.dir/src/main.cpp.obj: C:/Users/elipt/Desktop/Organ-16/emulat
   C:/Qt/6.9.2/mingw_64/include/QtConcurrent/qtconcurrentversion.h \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QAbstractTableModel \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QDeadlineTimer \
+  C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QEvent \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QFile \
   C:/Qt/6.9.2/mingw_64/include/QtCore/QHash \
@@ -3914,9 +3979,9 @@ C:/Qt/6.9.2/mingw_64/include/QtCore/QRect:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/clzerointrin.h:
 
-C:/Qt/6.9.2/mingw_64/include/QtGui/qvalidator.h:
-
 C:/msys64/mingw64/include/c++/13.2.0/chrono:
+
+C:/Qt/6.9.2/mingw_64/include/QtGui/qvalidator.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/cxxabi_forced.h:
 
@@ -4292,8 +4357,6 @@ C:/Qt/6.9.2/mingw_64/include/QtGui/qbrush.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/pstl/execution_defs.h:
 
-C:/msys64/mingw64/include/c++/13.2.0/map:
-
 C:/Qt/6.9.2/mingw_64/include/QtCore/qlibrary.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/new:
@@ -4301,6 +4364,8 @@ C:/msys64/mingw64/include/c++/13.2.0/new:
 C:/msys64/mingw64/include/c++/13.2.0/bits/vector.tcc:
 
 C:/Qt/6.9.2/mingw_64/include/QtWidgets/QTableView:
+
+C:/msys64/mingw64/include/c++/13.2.0/map:
 
 C:/msys64/mingw64/include/c++/13.2.0/filesystem:
 
@@ -4548,6 +4613,14 @@ C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/control_unit/control_unit.h
 
 C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/cpu.cpp:
 
+C:/Qt/6.9.2/mingw_64/include/QtCore/qscopedvaluerollback.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/uniform_int_dist.h:
+
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vnnivlintrin.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug:
+
 C:/Qt/6.9.2/mingw_64/include/QtCore/q20functional.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/uintrintrin.h:
@@ -4606,7 +4679,21 @@ C:/Qt/6.9.2/mingw_64/include/QtCore/qtversion.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainerfwd.h:
 
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vpopcntdqvlintrin.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainerinfo.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/stl_multiset.h:
+
 C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainertools_impl.h:
+
+C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/memory/ram.hpp:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qdatastream.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qdebug.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/stl_algo.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qexceptionhandling.h:
 
@@ -4614,23 +4701,47 @@ C:/Qt/6.9.2/mingw_64/include/QtCore/qabstracteventdispatcher.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qflags.h:
 
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512cdintrin.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/stream_iterator.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtConcurrent/QtConcurrent:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qfloat16.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qbytearraymatcher.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qfunctionaltools_impl.h:
+
 C:/Qt/6.9.2/mingw_64/include/QtCore/qglobalstatic.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qelapsedtimer.h:
 
-C:/Qt/6.9.2/mingw_64/include/QtCore/qsequentialiterable.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qsharedpointer_impl.h:
-
 C:/Qt/6.9.2/mingw_64/include/QtCore/qlatin1stringview.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qstringlist.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qsequentialiterable.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qsharedpointer_impl.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qthread.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qlist.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qlogging.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qeventloop.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtConcurrent/qtconcurrentiteratekernel.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qmap.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qmetacontainer.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qtemporaryfile.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qmetatype.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qnamespace.h:
 
@@ -4641,6 +4752,16 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/tbmintrin.h:
 C:/Qt/6.9.2/mingw_64/include/QtCore/qoverload.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtGui/qtransform.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qscopedpointer.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qset.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qxmlstream.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qshareddata.h:
+
+C:/Users/elipt/Desktop/Organ-16/emulator/src/main.cpp:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qstdlibdetection.h:
 
@@ -4690,6 +4811,10 @@ C:/Qt/6.9.2/mingw_64/include/QtGui/qtextdocument.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qsystemdetection.h:
 
+C:/Qt/6.9.2/mingw_64/include/QtWidgets/qrubberband.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qtaggedpointer.h:
+
 C:/Qt/6.9.2/mingw_64/include/QtCore/qtconfigmacros.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qtcoreexports.h:
@@ -4697,6 +4822,16 @@ C:/Qt/6.9.2/mingw_64/include/QtCore/qtcoreexports.h:
 C:/Qt/6.9.2/mingw_64/include/QtCore/qfuture_impl.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qtenvironmentvariables.h:
+
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512fp16intrin.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qtextstream.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qtformat_impl.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/shared_ptr_base.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtGui/qevent.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qtnoop.h:
 
@@ -4723,6 +4858,10 @@ C:/Qt/6.9.2/mingw_64/include/QtGui/qvector2d.h:
 C:/Qt/6.9.2/mingw_64/include/QtCore/qfileselector.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qutf8stringview.h:
+
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/vpclmulqdqintrin.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtCore/qvarlengtharray.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/wmmintrin.h:
 
@@ -4784,6 +4923,12 @@ C:/Qt/6.9.2/mingw_64/include/QtGui/qtextformat.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/codecvt.h:
 
+C:/Qt/6.9.2/mingw_64/include/QtCore/QtCoreDepends:
+
+C:/Qt/6.9.2/mingw_64/include/QtConcurrent/qtconcurrentrun.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/list.tcc:
+
 C:/Qt/6.9.2/mingw_64/include/QtGui/qpixelformat.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qabstractnativeeventfilter.h:
@@ -4796,25 +4941,25 @@ C:/msys64/mingw64/include/c++/13.2.0/bits/quoted_string.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/shared_ptr_atomic.h:
 
-C:/msys64/mingw64/include/c++/13.2.0/bits/shared_ptr_base.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qtformat_impl.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtGui/qevent.h:
-
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/hresetintrin.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/specfun.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/std_function.h:
 
-C:/msys64/mingw64/include/c++/13.2.0/bits/stl_algo.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qdebug.h:
-
 C:/msys64/mingw64/include/c++/13.2.0/bits/stl_bvector.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/stl_heap.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/stl_list.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtGui/qkeysequence.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtWidgets/QMessageBox:
+
+C:/Qt/6.9.2/mingw_64/include/QtGui/qscreen.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/stl_map.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/stl_numeric.h:
 
@@ -4822,19 +4967,13 @@ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_raw_storage_iter.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/bits/stl_tempbuf.h:
 
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512cdintrin.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/stream_iterator.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtConcurrent/QtConcurrent:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qfloat16.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qscopedvaluerollback.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/uniform_int_dist.h:
-
 C:/msys64/mingw64/include/c++/13.2.0/bits/unique_ptr.h:
+
+C:/Qt/6.9.2/mingw_64/include/QtGui/QMouseEvent:
+
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512bitalgintrin.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/bits/unordered_set.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtWidgets/QMenuBar:
 
@@ -4858,6 +4997,10 @@ C:/msys64/mingw64/include/c++/13.2.0/pstl/glue_algorithm_defs.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/pstl/glue_numeric_defs.h:
 
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/amxtileintrin.h:
+
+C:/msys64/mingw64/include/c++/13.2.0/set:
+
 C:/msys64/mingw64/include/c++/13.2.0/tr1/ell_integral.tcc:
 
 C:/msys64/mingw64/include/c++/13.2.0/tr1/hypergeometric.tcc:
@@ -4873,6 +5016,10 @@ C:/msys64/mingw64/include/c++/13.2.0/tr1/poly_laguerre.tcc:
 C:/Qt/6.9.2/mingw_64/include/QtCore/qpauseanimation.h:
 
 C:/msys64/mingw64/include/c++/13.2.0/tr1/riemann_zeta.tcc:
+
+C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/cpu.hpp:
+
+C:/msys64/mingw64/include/c++/13.2.0/unordered_set:
 
 C:/msys64/mingw64/include/c++/13.2.0/utility:
 
@@ -4902,15 +5049,7 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/stdarg.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/stdbool.h:
 
-C:/msys64/mingw64/include/c++/13.2.0/unordered_set:
-
-C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/cpu.hpp:
-
 C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/memory/memory_interface.hpp:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qdatastream.h:
-
-C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/memory/ram.hpp:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qbasictimer.h:
 
@@ -4938,61 +5077,17 @@ C:/Qt/6.9.2/mingw_64/include/QtCore/q23utility.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qbindingstorage.h:
 
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vpopcntdqvlintrin.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainerinfo.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/stl_multiset.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qbytearraymatcher.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qfunctionaltools_impl.h:
-
 C:/Qt/6.9.2/mingw_64/include/QtWidgets/qmenubar.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qitemselectionmodel.h:
 
-C:/Qt/6.9.2/mingw_64/include/QtCore/qeventloop.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtConcurrent/qtconcurrentiteratekernel.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qmap.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qmetacontainer.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qtemporaryfile.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qmetatype.h:
-
 C:/Qt/6.9.2/mingw_64/include/QtCore/qobject.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qscopedpointer.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qset.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qxmlstream.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qshareddata.h:
-
-C:/Users/elipt/Desktop/Organ-16/emulator/src/main.cpp:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qvariant.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qsize.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtCore/qspan.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtWidgets/qrubberband.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qtaggedpointer.h:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512fp16intrin.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qtextstream.h:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/vpclmulqdqintrin.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtCore/qvarlengtharray.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtGui/qaction.h:
 
@@ -5005,10 +5100,6 @@ C:/Qt/6.9.2/mingw_64/include/QtGui/qbitmap.h:
 C:/Qt/6.9.2/mingw_64/include/QtGui/qfontinfo.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtGui/qimage.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtGui/qkeysequence.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/stl_list.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtGui/qpaintdevice.h:
 
@@ -5032,29 +5123,7 @@ C:/Qt/6.9.2/mingw_64/include/QtWidgets/qtabbar.h:
 
 C:/Qt/6.9.2/mingw_64/include/QtWidgets/qtabwidget.h:
 
-C:/Qt/6.9.2/mingw_64/include/QtCore/QtCoreDepends:
-
-C:/Qt/6.9.2/mingw_64/include/QtConcurrent/qtconcurrentrun.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/list.tcc:
-
-C:/Qt/6.9.2/mingw_64/include/QtWidgets/QMessageBox:
-
-C:/Qt/6.9.2/mingw_64/include/QtGui/qscreen.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/stl_map.h:
-
-C:/Qt/6.9.2/mingw_64/include/QtGui/QMouseEvent:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512bitalgintrin.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/bits/unordered_set.h:
-
 C:/msys64/mingw64/include/c++/13.2.0/cassert:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/amxtileintrin.h:
-
-C:/msys64/mingw64/include/c++/13.2.0/set:
 
 C:/Users/elipt/Desktop/Organ-16/emulator/src/layouts/regs/flow_layout.cpp:
 
@@ -5387,8 +5456,6 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vlbwintrin.h:
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vldqintrin.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vnniintrin.h:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vnnivlintrin.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/13.2.0/include/avx512vp2intersectintrin.h:
 

@@ -1,0 +1,19 @@
+
+
+JSR my_func
+
+HLT
+
+
+my_func:
+
+    MOV R0, 10
+    MOV R1, 16
+
+    PUSH R0
+    PUSH R1
+
+    POP R0
+    POP R1
+
+    RTS ; R0 = 16  R1 = 10

@@ -437,4 +437,6 @@ CMakeFiles/Emulator.dir/src/layouts/ram_panel.cpp.obj: \
  C:/msys64/mingw64/include/c++/13.2.0/iostream \
  C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/control_unit/control_unit.hpp \
  C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/temp_values/temp_values.hpp \
- C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/memory/memory_interface.hpp
+ C:/Users/elipt/Desktop/Organ-16/emulator/src/backend/memory/memory_interface.hpp \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qdebug.h

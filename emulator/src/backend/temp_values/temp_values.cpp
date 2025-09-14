@@ -1,4 +1,5 @@
 #include "temp_values.hpp"
+#include <iostream>
 
 TemporaryValues* TemporaryValues::instancePtr = nullptr;
 std::mutex TemporaryValues::mtx;

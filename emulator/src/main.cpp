@@ -170,7 +170,7 @@ void ShowDebug(){
     
     debugLayout->addLayout(gridLayout);
     HSplitterBottom->addWidget(debugPanel);
-    debugPanel->show(); 
+    debugPanel->show();
 }
 
 void UpdateVisualRAMCurrentAddress(uint16_t oldAddress, uint16_t newAddress){

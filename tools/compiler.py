@@ -11,6 +11,13 @@ MAX_MEMORY = 0x10000
 def is_stack_overlap(start_addr: int, instr_count: int) -> bool:
     return start_addr < STACK_END and (start_addr + instr_count) > STACK_START
 
+def replace_names_with_values(expr: str, mapping: dict) -> str:
+    for name in sorted(mapping.keys(), key=len, reverse=True):
+        pattern = re.compile(r'\b' + re.escape(name) + r'\b', flags=re.IGNORECASE)
+        new_expr = pattern.sub(str(mapping[name]), expr)
+        expr = new_expr
+    return expr
+
 def ReadFileLines(filename: str):
     try:
         with open(filename, 'r') as file:
@@ -25,21 +32,33 @@ def ReadFileLines(filename: str):
         print(f"File '{filename}' not found.", file=sys.stderr)
         sys.exit(1)
 
-def ImmediateToBin(immediate: str, label_map: dict = None) -> str:
+def ImmediateToBin(immediate: str, label_map: dict = None, constants_map: dict = None) -> str:
     try:
-        if immediate.lower().startswith("0x"):
-            value = int(immediate, 16)
-        elif immediate.lower().startswith("0b"):
-            value = int(immediate, 2)
-        elif immediate.isdigit():
-            value = int(immediate, 10)
-        elif label_map and immediate.upper() in label_map:
-            value = label_map[immediate.upper()]
-        else:
-            raise ValueError(f"Invalid immediate or unknown label: {immediate}")
-        return bin(value)[2:].zfill(16)
-    except ValueError:
-        raise ValueError(f"Invalid immediate value: {immediate}")
+
+        expr = immediate
+
+        if constants_map:
+            expr = replace_names_with_values(expr, constants_map)
+
+        if label_map:
+            expr = replace_names_with_values(expr, label_map)
+
+
+        # Evaluate expression safely, only allow integer operations
+        value = eval(expr, {"__builtins__": None}, {})
+
+        if isinstance(value, float):
+            if value.is_integer():
+                value = int(value)
+            else:
+                raise ValueError(...)
+        elif not isinstance(value, int):
+            raise ValueError(...)
+
+        return bin(value & 0xFFFF)[2:].zfill(16)
+
+    except Exception as e:
+        raise ValueError(f"Invalid immediate value or expression: {immediate} — {e}")
 
 def OpCodeToBinOpCode(instruction: str) -> str:
     instruction = instruction.upper().strip()
@@ -73,12 +92,18 @@ def ParseLine(line: str) -> Tuple[str, List[str], Optional[str]]:
     line = line.split(';')[0].strip()
     if not line:
         return "", [], None
+
     parts = line.split(maxsplit=1)
     instruction = parts[0].upper()
     operands = parts[1] if len(parts) > 1 else ""
-    tokens = [tok.upper() for tok in operands.replace(",", " ").split()]
-    regs = [tok for tok in tokens if re.fullmatch(r"R[0-7]", tok)]
-    imm = next((tok for tok in tokens if not re.fullmatch(r"R[0-7]", tok)), None)
+    # Tokenize by splitting on commas or spaces
+    tokens = [tok.strip() for tok in re.split(r'[,\s]+', operands) if tok.strip()]
+    # Extract registers
+    regs = [tok.upper() for tok in tokens if re.fullmatch(r"R[0-7]", tok.upper())]
+    # Remove registers from tokens, rest is the immediate
+    non_regs = [tok for tok in tokens if tok.upper() not in regs]
+    # If there's an immediate expression (e.g., CONSTANT / 2), join it
+    imm = " ".join(non_regs) if non_regs else None
     return instruction, regs, imm
 
 def IsLabel(line: str):
@@ -107,21 +132,21 @@ def ReplaceLabels(line: str, label_map: dict) -> str:
         line = line.replace(imm, f"0x{label_map[imm.upper()]:04X}")
     return line
 
-def LineToBinary(line: str, label_map: dict = None):
+def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
     instr, regs, imm = ParseLine(line)
     if not instr:
         return None
     op_bin = OpCodeToBinOpCode(instr)
     if len(regs) == 0:
         if imm:
-            return op_bin + "000000000", ImmediateToBin(imm, label_map)
+            return op_bin + "000000000", ImmediateToBin(imm, label_map, constants_map)
         return op_bin + "000000000"
     elif len(regs) == 1:
         if imm:
             if op_bin == "0110001":
-                return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map)
+                return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map, constants_map)
             else:
-                return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map)
+                return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)
         if op_bin == "1010001":
             return op_bin + DataToBinData(regs) + "000000"
         else:
@@ -140,6 +165,7 @@ def BinToHex(binary: str) -> str:
 def ParseConstants(lines: List[str]) -> dict:
     """
     Extract constants from lines starting with '@define CONSTANT VALUE'
+    Supports referencing previously defined constants.
     Returns a dict of {CONSTANT_NAME: int_value}
     """
     constants = {}
@@ -149,13 +175,17 @@ def ParseConstants(lines: List[str]) -> dict:
             parts = line.split(maxsplit=2)
             if len(parts) == 3:
                 _, name, value = parts
+                value_upper = value.upper()
                 try:
-                    if value.lower().startswith("0x"):
-                        val = int(value, 16)
-                    elif value.lower().startswith("0b"):
-                        val = int(value, 2)
-                    else:
-                        val = int(value, 10)
+                    if value_lower := value.lower():
+                        if value_lower.startswith("0x"):
+                            val = int(value_lower, 16)
+                        elif value_lower.startswith("0b"):
+                            val = int(value_lower, 2)
+                        elif value_upper in constants:
+                            val = constants[value_upper]
+                        else:
+                            val = int(value_lower, 10)
                     constants[name.upper()] = val
                 except ValueError:
                     print(f"Warning: Invalid constant value '{value}' for {name}, ignoring.")
@@ -226,7 +256,7 @@ def CompileMultiple(segments: List[Tuple[str, int]], output_file: str):
                 continue
             # Replace labels and constants
             line = ReplaceLabelsAndConstants(line, global_labels, constants)
-            binaries = LineToBinary(line, global_labels)
+            binaries = LineToBinary(line, global_labels, constants)
             if isinstance(binaries, (tuple, list)):
                 for b in binaries:
                     memory[addr] = BinToHex(b)

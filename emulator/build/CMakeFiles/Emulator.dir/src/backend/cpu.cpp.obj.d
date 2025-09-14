@@ -331,4 +331,45 @@ CMakeFiles/Emulator.dir/src/backend/cpu.cpp.obj: \
  C:/Qt/6.9.2/mingw_64/include/QtCore/qbytearraylist.h \
  C:/Qt/6.9.2/mingw_64/include/QtCore/qalgorithms.h \
  C:/Qt/6.9.2/mingw_64/include/QtCore/qstringmatcher.h \
- C:/Qt/6.9.2/mingw_64/include/QtGui/qrgba64.h
+ C:/Qt/6.9.2/mingw_64/include/QtGui/qrgba64.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qdebug.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qfloat16.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qmath.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qtformat_impl.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qtextstream.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qiodevicebase.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qcontiguouscache.h \
+ C:/msys64/mingw64/include/c++/13.2.0/climits \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qsharedpointer.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qshareddata.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qsharedpointer_impl.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qmetatype.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qdatastream.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qscopedpointer.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qiterable.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qmetacontainer.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qcontainerinfo.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qtaggedpointer.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qobjectdefs.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qobjectdefs_impl.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qfunctionaltools_impl.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qscopeguard.h \
+ C:/msys64/mingw64/include/c++/13.2.0/list \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_list.h \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/list.tcc \
+ C:/msys64/mingw64/include/c++/13.2.0/map \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_tree.h \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_map.h \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_multimap.h \
+ C:/msys64/mingw64/include/c++/13.2.0/chrono \
+ C:/msys64/mingw64/include/c++/13.2.0/set \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_set.h \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/stl_multiset.h \
+ C:/msys64/mingw64/include/c++/13.2.0/unordered_set \
+ C:/msys64/mingw64/include/c++/13.2.0/bits/unordered_set.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qmap.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qshareddata_impl.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qset.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qhash.h \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/qvarlengtharray.h

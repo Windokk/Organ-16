@@ -63,7 +63,7 @@ ALU_Data CPU::PerformALUOperations(const CU_Data& controlUnitData)
 
 TempOut CPU::UpdateTemporaryValuesOnClock(const CU_Data& oldControlUnitData, const TempOut& oldTemporaryValues, bool currentClockSignal)
 {
-    TempIn tempIn = {};
+    TempIn tempIn = {0};
     tempIn.clockSignal = currentClockSignal;
     tempIn.isNxtExt = oldControlUnitData.isNxtExt & !oldTemporaryValues.isCurrExt;
     tempIn.jsr = oldControlUnitData.jsr & !oldTemporaryValues.isCurrJsr;
@@ -106,11 +106,15 @@ RegsOutOnChange CPU::UpdateRegistersOnClock(CU_Data oldControlUnitData, const Te
     regsInOnClockChange.flagsClock = currentClockSignal;
     regsInOnClockChange.flagsWrite = oldControlUnitData.flagsWrite;
     regsInOnClockChange.gpClock = oldTemporaryValues.isCurrAddr ? !currentClockSignal : currentClockSignal;
-    regsInOnClockChange.gpData = oldTemporaryValues.isCurrSpChange ? oldRAM_OUT : (oldTemporaryValues.isCurrExt ? oldRegsOut.IR1 : oldAluData.result);
+    regsInOnClockChange.gpData = oldTemporaryValues.isCurrSpChange ? oldRAM_OUT : (oldTemporaryValues.isCurrExt ? oldRegsOut.IR1 : oldAluData.result);    
     regsInOnClockChange.gpRegToWrite = oldControlUnitData.dstR;
     regsInOnClockChange.gpRegWrite = oldControlUnitData.regWrite & (oldTemporaryValues.isCurrExt | ((oldControlUnitData.ALU_DATA & 0b10000) >> 4));
     regsInOnClockChange.negative = oldAluData.negative;
     regsInOnClockChange.overflow = oldAluData.overflow;
+
+    ///////////////////////////////////////////////////////////
+    //////// DOOMED ZONE //////////////////////////////////////
+    ///////////////////////////////////////////////////////////
 
     bool regIsAddress = false;
 
@@ -121,9 +125,12 @@ RegsOutOnChange CPU::UpdateRegistersOnClock(CU_Data oldControlUnitData, const Te
     }
 
     bool REG_IS_ADDR = regIsAddress && !oldTemporaryValues.regIsCurrAddr;
+    bool SP_CHANGE = oldControlUnitData.spChange & !oldTemporaryValues.isCurrExt & !oldTemporaryValues.isCurrSpChange;
 
-    regsInOnClockChange.pcClock = currentClockSignal & !oldTemporaryValues.isCurrJsr & !oldTemporaryValues.isCurrSpChange & 
-                                    !oldControlUnitData.spChange & !REG_IS_ADDR & !oldTemporaryValues.regIsCurrAddr;
+    regsInOnClockChange.pcClock = currentClockSignal & !newTempValues.isCurrJsr & !newTempValues.isCurrSpChange & 
+                                    !SP_CHANGE & !REG_IS_ADDR & !oldTemporaryValues.regIsCurrAddr;
+
+    /// END OF DOOMED ZONE ///
 
     regsInOnClockChange.pcData = (oldControlUnitData.rts) ? oldRAM_OUT : oldRegsOut.IR1;
     regsInOnClockChange.ramAddrClock = !currentClockSignal;
@@ -209,6 +216,7 @@ void CPU::Init(){
         (ALU_OUT.overflow << 0);
 
     RegisterFile::GetInstance()->SetRegValue(FLAGS, flagsValue);
+    RegisterFile::GetInstance()->SetRegValue(SP, 0xFFFF);
     
     UpdateVisualRAMCurrentAddress(oldRAMAddress, 0);
     oldRAMAddress = 0;

@@ -5,25 +5,25 @@
 #include <string>
 
 struct TempIn{
-    uint8_t isNxtExt;
-    uint8_t containsAddress;
-    uint8_t jsr;
-    uint8_t spChange;
-    uint8_t isCurrExt;
-    uint8_t rts;
-    uint8_t regIsAddr;
-    bool clockSignal;
+    uint8_t isNxtExt = 0;
+    uint8_t containsAddress = 0;
+    uint8_t jsr = 0;
+    uint8_t spChange = 0;
+    uint8_t isCurrExt = 0;
+    uint8_t rts = 0;
+    uint8_t regIsAddr = 0;
+    bool clockSignal = 0;
 };
 
 struct TempOut{
-    uint8_t isCurrExt;
-    uint8_t isCurrAddrBase;
-    uint8_t isCurrAddr;
-    uint8_t isCurrAddrJsr;
-    uint8_t isCurrSpChange;
-    uint8_t isCurrJsr;
-    uint8_t isCurrRts;
-    uint8_t regIsCurrAddr;
+    uint8_t isCurrExt = 0;
+    uint8_t isCurrAddrBase = 0;
+    uint8_t isCurrAddr = 0;
+    uint8_t isCurrAddrJsr = 0;
+    uint8_t isCurrSpChange = 0;
+    uint8_t isCurrJsr = 0;
+    uint8_t isCurrRts = 0;
+    uint8_t regIsCurrAddr = 0;
 };
 
 void UpdateDebugValues(std::unordered_map<std::string, bool> debugValues);

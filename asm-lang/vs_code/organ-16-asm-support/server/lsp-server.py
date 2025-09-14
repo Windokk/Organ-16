@@ -1,4 +1,5 @@
 import json
+import sys
 from pygls.server import LanguageServer
 from lsprotocol.types import (
     Diagnostic,
@@ -77,9 +78,59 @@ def make_error(line, start_char, end_char, message):
         source="Organ 16 Language"
     )
 
-def is_immediate(token: str) -> bool:
-    # Check if token is a hex, decimal or binary immediate
-    return (token.startswith('0x') or token.startswith('0b') or token.isdigit())
+def is_immediate(token, defined_constants):
+    token = token.strip()
+    # if its an integer
+    if re.match(r'^-?\d+$', token) or re.match(r'0b[01]+', token) or re.match(r'0x[0-9A-Fa-f]+', token) or token in defined_constants:
+        return True
+    # If its between parentheses
+    if token.startswith('(') and token.endswith(')'):
+        return is_valid_expr(token, defined_constants)
+    return False
+
+def split_operands(operand_str):
+    operands = []
+    current = ''
+    depth = 0
+
+    for char in operand_str:
+        if char == ',' and depth == 0:
+            operands.append(current.strip())
+            current = ''
+        else:
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                depth -= 1
+            current += char
+
+    if current.strip():
+        operands.append(current.strip())
+
+    return operands
+
+def is_valid_expr(expr, constants=None):
+    expr = expr.strip()
+    constants = constants or {}
+
+    # Si c'est un entier pur
+    if re.match(r'^-?\d+$', expr):
+        return True
+
+    # Remplace les constantes dans l'expression
+    try:
+        safe_expr = expr
+        safe_expr = re.sub(r'0x[0-9A-Fa-f]+', lambda m: str(int(m.group(), 16)), safe_expr)
+        safe_expr = re.sub(r'0b[01]+', lambda m: str(int(m.group(), 2)), safe_expr)
+        
+        for name, value in constants.items():
+            safe_expr = re.sub(rf'\b{re.escape(name)}\b', str(value), safe_expr)
+
+        # Évalue l'expression mathématique
+        eval_result = eval(safe_expr, {"__builtins__": None}, {})
+        return isinstance(eval_result, (int, float))
+    except Exception:
+        return False
 
 # === Assembly Source Validation ===
 
@@ -88,13 +139,37 @@ def validate_org_source(lines):
     labels_defined = {}
     labels_used = set()
     defined_constants = {}
+    constants_seen = set()
 
+    # 1st pass : definitions
     for lineno, line in enumerate(lines):
         code = line.split('#')[0].split(';')[0].strip()
         if not code:
             continue
 
-        # Handle @define directive
+        # Collecte des constantes (juste le nom)
+        if code.startswith("@define"):
+            tokens = code.split()
+            if len(tokens) == 3:
+                _, name, value = tokens
+                if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name):
+                    constants_seen.add(name)
+            continue
+
+        # Collecte des labels
+        if ':' in code:
+            label_part = code.split(':', 1)[0].strip()
+            if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', label_part):
+                if label_part not in labels_defined:
+                    labels_defined[label_part] = lineno
+            continue
+
+    # 2nd pass : actual diagnostic
+    for lineno, line in enumerate(lines):
+        code = line.split('#')[0].split(';')[0].strip()
+        if not code:
+            continue
+
         if code.startswith("@define"):
             tokens = code.split()
             if len(tokens) != 3:
@@ -105,172 +180,103 @@ def validate_org_source(lines):
             if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name):
                 diagnostics.append(make_error(lineno, 0, len(name), f"Invalid constant name '{name}'"))
                 continue
-            if not is_immediate(value):
+            if not is_immediate(value, defined_constants):
                 diagnostics.append(make_error(
                     lineno,
                     code.find(value),
                     code.find(value) + len(value),
-                    f"Invalid value '{value}' for @define"
+                    f"Invalid value '{value}' for @define."
                 ))
                 continue
             if name in defined_constants:
                 diagnostics.append(make_error(lineno, 0, len(name), f"Constant '{name}' already defined"))
                 continue
-            defined_constants[name] = value
-            continue  # Done processing this line
 
-        # Handle labels (e.g., loop:)
+            defined_constants[name] = value
+            continue
+
+        # Labels
         if ':' in code:
             label_part, rest = code.split(':', 1)
             label = label_part.strip()
             if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', label):
                 diagnostics.append(make_error(lineno, 0, len(label), f"Invalid label name '{label}'"))
-            else:
-                if label in labels_defined:
-                    diagnostics.append(make_error(lineno, 0, len(label), f"Duplicate label '{label}'"))
-                else:
-                    labels_defined[label] = lineno
+            elif labels_defined[label] != lineno:
+                diagnostics.append(make_error(lineno, 0, len(label), f"Duplicate label '{label}'"))
             code = rest.strip()
             if not code:
                 continue
 
-        if not code:
-            continue
-
-        tokens = [tok.strip(',') for tok in code.split()]
-        instr = tokens[0].upper()
-
+        parts = code.split(None, 1)  # Max split into: instr + operands
+        
+        instr = parts[0].upper()
         if instr not in VALID_OPCODES:
             diagnostics.append(make_error(lineno, line.find(instr), len(line), f"Unknown instruction '{instr}'"))
             continue
 
         fmt, expected_operands = VALID_OPCODES[instr]
-        operands = tokens[1:]
+
+        operands = []
+        if len(parts) > 1:
+            operands = split_operands(parts[1])
 
         if len(operands) != expected_operands:
-            diagnostics.append(make_error(lineno, line.find(instr), len(line), f"Instruction '{instr}' expects {expected_operands} operands"))
+            diagnostics.append(make_error(
+                lineno,
+                line.find(instr),
+                len(line),
+                f"Instruction '{instr}' expects {expected_operands} operands, got {len(operands)}"
+            ))
             continue
+
 
         def is_invalid_register(token):
             return token.upper().startswith('R') and token.upper() not in VALID_REGISTERS
 
         def is_valid_operand_immediate_or_constant(token):
-            return is_immediate(token) or token in defined_constants
+            return is_immediate(token, defined_constants) or token in defined_constants
 
-        # Validate operands by format
-        if fmt == 'RRR':
+        # === Validation spécifique selon format ===
+
+        if fmt in ('RRR', 'RR'):
             for op in operands:
                 if is_invalid_register(op):
-                    diagnostics.append(make_error(
-                        lineno, line.find(op), line.find(op) + len(op), f"Invalid register '{op}'"))
-        elif fmt == 'RR':
-            for op in operands:
-                if is_invalid_register(op):
-                    diagnostics.append(make_error(
-                        lineno, line.find(op), line.find(op) + len(op), f"Invalid register '{op}'"))
+                    diagnostics.append(make_error(lineno, line.find(op), line.find(op) + len(op), f"Invalid register '{op}'"))
         elif fmt == 'RI':
             if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(
-                    lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]),
-                    f"Invalid register '{operands[0]}'"))
+                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]), f"Invalid register '{operands[0]}'"))
             if not is_valid_operand_immediate_or_constant(operands[1]):
-                diagnostics.append(make_error(
-                    lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]),
-                    f"Invalid immediate or constant '{operands[1]}'"))
+                diagnostics.append(make_error(lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]), f"Invalid immediate or constant '{operands[1]}'"))
         elif fmt == 'MEM':
             if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(
-                    lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]),
-                    f"Invalid register '{operands[0]}'"))
+                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]), f"Invalid register '{operands[0]}'"))
             if not is_valid_operand_immediate_or_constant(operands[1]):
-                diagnostics.append(make_error(
-                    lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]),
-                    f"Invalid memory address or constant '{operands[1]}'"))
+                diagnostics.append(make_error(lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]), f"Invalid memory address or constant '{operands[1]}'"))
         elif fmt == 'JMP':
-            if expected_operands == 1 and len(operands) == 1:
+            if expected_operands == 1:
                 op = operands[0]
-                if not is_immediate(op) and op not in labels_defined and op not in defined_constants:
-                    diagnostics.append(make_error(
-                        lineno, line.find(op), line.find(op) + len(op),
-                        f"Invalid jump address or label '{op}'"))
-            elif expected_operands == 2:
-                diagnostics.append(make_error(
-                    lineno, line.find(instr), len(line),
-                    f"Instruction '{instr}' expects 1 operand"))
+                if not is_immediate(op, defined_constants) and op not in labels_defined and op not in defined_constants:
+                    labels_used.add((op, lineno, line.find(op), line.find(op) + len(op)))
         elif fmt == 'R':
             if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(
-                    lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]),
-                    f"Invalid register '{operands[0]}'"))
+                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]), f"Invalid register '{operands[0]}'"))
 
-        # Track labels/constants used in operands (for undefined reference check)
+        # === Enregistrement des labels/constants utilisés
         for op in operands:
-            if is_invalid_register(op) or op.upper() in VALID_REGISTERS or is_immediate(op):
+            if is_invalid_register(op) or op.upper() in VALID_REGISTERS or is_immediate(op, defined_constants):
                 continue
-            # Track only if it's not already defined as constant or label
             if op not in labels_defined and op not in defined_constants:
                 pos = line.find(op)
                 labels_used.add((op, lineno, pos, pos + len(op)))
 
-    # Check for undefined labels/constants
+    # Final verification (labels/constants)
     for label, lineno, start, end in labels_used:
         if label not in labels_defined and label not in defined_constants:
-            diagnostics.append(make_error(
-                lineno, start, end, f"Undefined label or constant referenced: '{label}'"))
+
+            diagnostics.append(make_error(lineno, start, end, f"Undefined label or constant referenced: '{label}'"))
 
     return diagnostics
 
-
-
-# === Linker Script Validation ===
-"""
-def validate_linker_script(text):
-    diagnostics = []
-    try:
-        data = json.loads(text)
-    except json.JSONDecodeError as e:
-        # JSON syntax error diagnostic
-        line = e.lineno - 1
-        col = e.colno - 1
-        diagnostics.append(make_error(line, col, col+1, f"JSON syntax error: {e.msg}"))
-        return diagnostics
-
-    if 'segments' not in data:
-        diagnostics.append(make_error(0, 0, 0, "Missing 'segments' key in linker script"))
-        return diagnostics
-
-    segments = data['segments']
-    if not isinstance(segments, list):
-        diagnostics.append(make_error(0, 0, 0, "'segments' should be a list"))
-        return diagnostics
-
-    used_ranges = []
-
-    for i, seg in enumerate(segments):
-        if not isinstance(seg, dict):
-            diagnostics.append(make_error(0, 0, 0, f"Segment {i} should be an object/dictionary"))
-            continue
-        for path, addr_str in seg.items():
-            # Validate address format
-            if not isinstance(addr_str, str):
-                diagnostics.append(make_error(0, 0, 0, f"Segment address must be a string, got {type(addr_str)}"))
-                continue
-            # Parse address (hex expected)
-            try:
-                addr = int(addr_str, 16)
-            except ValueError:
-                diagnostics.append(make_error(0, 0, 0, f"Invalid address format '{addr_str}' in segment {path}"))
-                continue
-            # Check if overlaps stack memory
-            if STACK_BASE_START <= addr <= STACK_BASE_END:
-                diagnostics.append(make_error(0, 0, 0, f"Segment '{path}' address {addr_str} overlaps with stack memory area (0xF000 - 0xFFFF)"))
-            # Check overlapping segments (basic check)
-            if any(start == addr for start, end in used_ranges):
-                diagnostics.append(make_error(0, 0, 0, f"Segment '{path}' address {addr_str} overlaps with another segment"))
-            used_ranges.append((addr, addr))  # TODO: If segment size known, check range overlaps
-
-    return diagnostics
-"""
 
 @server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def on_change(ls: LanguageServer, params: DidChangeTextDocumentParams):

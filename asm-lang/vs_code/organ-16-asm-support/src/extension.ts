@@ -8,6 +8,7 @@ import {
   ServerOptions,
   TransportKind
 } from 'vscode-languageclient/node';
+import { stdout } from 'process';
 
 let client: LanguageClient;
 

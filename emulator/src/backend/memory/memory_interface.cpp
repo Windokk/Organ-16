@@ -28,6 +28,8 @@ MI_Data MemoryInterface::GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempO
         ret.RAM_ADDRESS = oldRegsOut.PC;
     }
 
+    bool oldWriteToRAMFlipFlop = writeToRAMFlipFlop;
+
     if(!currentClockSignal){
         if(oldTempValues.isCurrExt){
             writeToRAMFlipFlop = 0;
@@ -37,7 +39,7 @@ MI_Data MemoryInterface::GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempO
         }
     }
 
-    ret.writeToRAM = writeToRAMFlipFlop | oldTempValues.regIsCurrAddr;
+    ret.writeToRAM = ((memWrite | oldTempValues.isCurrJsr) & !oldWriteToRAMFlipFlop) | oldTempValues.regIsCurrAddr;
     ret.RAM_Clock = oldTempValues.isCurrSpChange ? !currentClockSignal : currentClockSignal;
     ret.RAM_DATA = oldTempValues.isCurrJsr ? oldRegsOut.PC + 2 : oldRA;
 

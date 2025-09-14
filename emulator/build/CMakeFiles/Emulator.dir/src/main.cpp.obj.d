@@ -971,5 +971,6 @@ CMakeFiles/Emulator.dir/src/main.cpp.obj: \
  C:\Users\elipt\Desktop\Organ-16\emulator\src\backend/control_unit/control_unit.hpp \
  C:\Users\elipt\Desktop\Organ-16\emulator\src\backend/temp_values/temp_values.hpp \
  C:\Users\elipt\Desktop\Organ-16\emulator\src\backend/memory/memory_interface.hpp \
+ C:/Qt/6.9.2/mingw_64/include/QtCore/QDebug \
  C:\Users\elipt\Desktop\Organ-16\emulator\src\splitter.hpp \
  C:/Qt/6.9.2/mingw_64/include/QtWidgets/QSplitterHandle
