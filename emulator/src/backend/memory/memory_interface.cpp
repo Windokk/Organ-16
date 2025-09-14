@@ -7,7 +7,7 @@
 MemoryInterface* MemoryInterface::instancePtr = nullptr;
 std::mutex MemoryInterface::mtx;
 
-MI_Data MemoryInterface::GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempOut oldTempValues, bool currentClockSignal, bool memWrite, uint16_t oldRB, uint16_t oldRA)
+MI_Data MemoryInterface::GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempOut oldTempValues, bool currentClockSignal, bool memWrite, uint16_t oldRB, uint16_t oldRA, bool regWrite)
 {
     MI_Data ret = {};
     
@@ -39,7 +39,7 @@ MI_Data MemoryInterface::GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempO
         }
     }
 
-    ret.writeToRAM = ((memWrite | oldTempValues.isCurrJsr) & !oldWriteToRAMFlipFlop) | oldTempValues.regIsCurrAddr;
+    ret.writeToRAM = ((memWrite | oldTempValues.isCurrJsr) & !oldWriteToRAMFlipFlop) | (oldTempValues.regIsCurrAddr & !regWrite);
     ret.RAM_Clock = oldTempValues.isCurrSpChange ? !currentClockSignal : currentClockSignal;
     ret.RAM_DATA = oldTempValues.isCurrJsr ? oldRegsOut.PC + 2 : oldRA;
 

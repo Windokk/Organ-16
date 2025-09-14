@@ -53,5 +53,5 @@ class MemoryInterface{
             RAM::GetInstance()->Reset();
         }
         
-        MI_Data GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempOut oldTempValues, bool currentClockSignal, bool memWrite, uint16_t oldRB, uint16_t oldRA);
+       MI_Data GetMI_Data(CU_Data oldCUData, RegsOut oldRegsOut, TempOut oldTempValues, bool currentClockSignal, bool memWrite, uint16_t oldRB, uint16_t oldRA, bool regWrite);
 };

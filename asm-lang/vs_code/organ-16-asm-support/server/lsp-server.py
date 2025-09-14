@@ -37,6 +37,7 @@ VALID_OPCODES = {
     'NOT': ('RR', 2),
     'MOV': ('RI', 2),
     'LOAD': ('MEM', 2),
+    'LOADR': ('RR', 2),
     'STORE': ('MEM', 2),
     'STORER': ('RR', 2),
     'JMP': ('JMP', 1),

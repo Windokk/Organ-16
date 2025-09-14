@@ -3,8 +3,8 @@
 @define SCREEN_WIDTH   128
 @define SCREEN_HEIGHT  128
 
-@define PADDLE_HEIGHT   10
-@define PADDLE_SPEED    1
+@define N_MAX_SCORE 10
+@define N_MAX_ROUNDS 19
 
 @define PLAYER1_UP_ADDR 0xFF00
 @define PLAYER1_DOWN_ADDR 0xFF01
@@ -19,34 +19,217 @@
 @define BLACK ZERO
 @define WHITE 0xFFFF
 
-; Memory locations for old positions
-@define OLD_BALL_X       0xc000
-@define OLD_BALL_Y       0xc001
-@define OLD_PADDLE1_Y    0xc002
-@define OLD_PADDLE2_Y    0xc003
+; Memory locations
+@define BALL_X       0xc000
+@define BALL_Y       0xc001
+@define PADDLE1_Y    0xc002
+@define PADDLE2_Y    0xc003
 
-; Memory locations for temporary/intermediate values
-@define TEMP_COLOR       0xc004
-@define PADDLE_COUNTER   0xc005
+@define BALL_DX       0xc004
+@define BALL_DY       0xc005
+
+@define OLD_BALL_X       0xc006
+@define OLD_BALL_Y       0xc007
+
+@define PADDLE_MAX   0xc008
+
+@define ROUND_COUNTER 0xc009
+
+@define FIRST_ROUND_START_DX 0xc020
 
 
 main:
+
+    ; Initialize "random" start positions
+
     ; Initialize ball in center
     MOV R0, (SCREEN_WIDTH / 2)
     MOV R1, (SCREEN_HEIGHT / 2)
-    MOV R2, WHITE
+    STORE R0, BALL_X
+    STORE R1, BALL_Y
+
+    ; Initialize paddle 1 at vcenter
+    MOV R0, ((SCREEN_HEIGHT / 2) - 5)
+    STORE R0, PADDLE1_Y
+
+    ; Initialize paddle 2 at vcenter
+    STORE R0, PADDLE2_Y
+
+    ; Initialize ball DX, DY (-1 or 1)
+    MOV R0, -1 ; Towards left   ; Hardcoded for now (random in the future ?)
+    MOV R1, 1  ; Towards bottom ; Hardcoded for now (random in the future ?)
+    STORE R0, BALL_DX
+    STORE R1, BALL_DY
+
 
     gameLoop:
+        
+        ### Store old ball ###
+        LOAD R0, BALL_X
+        LOAD R1, BALL_Y
+        STORE R0, OLD_BALL_X
+        STORE R1, OLD_BALL_Y
 
-        JSR draw_ball
+        ### Ball collision ###
 
-        LOAD R0, 2
-        LOAD R1, (64 - (4))
-        MOV R2, WHITE
-        JSR draw_paddle
+            LOAD R6, BALL_DX
+            LOAD R7, BALL_DY
 
+            ; Screen boundaries
+            MOV R3, (SCREEN_WIDTH - 1)
+            MOV R4, (SCREEN_HEIGHT - 1)
+
+            ; Check X collision (left/right)
+            MOV R5, ZERO
+            CMP R0, R5  ; left
+            JE dx_plus_1
+
+            CMP R0, R3 ; right
+            JE dx_minus_1
+
+        y_collision:
+            ; Check Y collision (top/bottom)
+            MOV R5, ZERO ; Top
+            CMP R1, R5
+            JE dy_plus_1
+
+            CMP R1, R4   ; Bottom
+            JE dy_minus_1
+
+            JMP ball_pos_subr
+
+        dx_plus_1:
+            MOV R5, 1
+            STORE R5, BALL_DX
+            JMP y_collision
+
+        dx_minus_1:
+            MOV R5, -1
+            STORE R5, BALL_DX
+            JMP y_collision
+
+        dy_plus_1:
+            MOV R5, 1
+            STORE R5, BALL_DY
+            JMP ball_pos_subr
+
+        dy_minus_1:
+            MOV R5, -1
+            STORE R5, BALL_DY
+            JMP ball_pos_subr
+
+        ### Update ball position ###
+        ball_pos_subr:
+
+            LOAD R0, BALL_X
+            LOAD R2, BALL_DX
+            
+            MOV R4, 0
+            CMP R2, R4
+            JL x_minus_1
+            JG x_plus_1
+
+        comparisonY:
+            LOAD R1, BALL_Y
+            LOAD R3, BALL_DY
+
+            MOV R4, 0
+            CMP R3, R4
+            JL y_minus_1
+            JG y_plus_1
+        
+        draw_subr:
+
+            LOAD R0, OLD_BALL_X
+            LOAD R1, OLD_BALL_Y
+            
+            MOV R2, BLACK
+            JSR draw_pixel
+
+            LOAD R0, BALL_X
+            LOAD R1, BALL_Y
+
+            MOV R2, WHITE
+            JSR draw_pixel ; Draw the ball
+
+            #MOV R0, 3
+            #LOAD R1, PADDLE1_Y
+            #MOV R2, WHITE
+            #JSR draw_paddle ; Draw the left paddle
+
+            #MOV R0, (SCREEN_WIDTH - 3)
+            #LOAD R1, PADDLE2_Y
+            #MOV R2, WHITE
+            #JSR draw_paddle ; Draw the right paddle
+
+            JMP gameLoop
+
+
+end:
     HLT
 
+
+start_round:
+
+    MOV R0, (SCREEN_WIDTH / 2)
+    MOV R1, (SCREEN_HEIGHT / 2)
+    STORE R0, BALL_X
+    STORE R1, BALL_Y
+
+    
+
+
+
+    LOAD R0, ROUND_COUNTER
+    MOV R1, 1
+    LOAD R2, FIRST_ROUND_START_DX
+
+
+x_minus_1:
+    ; Parameters
+    ; R0 = X
+    MOV R7, 1
+    SUB R0, R0, R7
+    STORE R0, BALL_X
+    JMP comparisonY
+
+x_plus_1:
+    ; Parameters
+    ; R0 = X
+    MOV R7, 1
+    ADD R0, R0, R7
+    STORE R0, BALL_X
+    JMP comparisonY
+
+y_minus_1:
+    ; Parameters
+    ; R1 = Y
+    MOV R7, 1
+    SUB R1, R1, R7
+    STORE R1, BALL_Y
+    JMP draw_subr
+
+y_plus_1:
+    ; Parameters
+    ; R1 = Y
+    MOV R7, 1
+    ADD R1, R1, R7
+    STORE R1, BALL_Y
+    JMP draw_subr
+
+draw_pixel:
+    ; Parameters: 
+    ; R0 = X 
+    ; R1 = Y 
+    ; R2 = Color
+
+    MOV       R4, SCREEN_WIDTH
+    MOV       R7, FRAMEBUFFER
+    MUL       R5, R1, R4            ; R5 = Y * SCREEN_WIDTH
+    ADD       R5, R5, R0            ; R5 = Y * SCREEN_WIDTH + X (offset)
+    ADD       R5, R7, R5   ; R5 = FRAMEBUFFER + offset
+    STORER    R2, R5
+    RTS
 
 draw_paddle:
     ; Parameters: 
@@ -54,112 +237,18 @@ draw_paddle:
     ; R1 = Y 
     ; R2 = Color
 
-    MOV R3, 12
+    MOV R3, 8
     ADD R3, R1, R3
-    STORE R3, PADDLE_COUNTER ; Store R1 + 9 at mem[0xc005]
+    STORE R3, PADDLE_MAX ; Store Y + 8 at mem[PADDLE_MAX]
 
-    draw_ball_loop:
-        MOV R3, 3
-        ADD R1, R1, R3
-        JSR draw_ball
+    draw_paddle_loop:
+        MOV R4, 1
+        ADD R1, R1, R4
+        JSR draw_pixel
         
-        LOAD R3, 0xc005
+        LOAD R3, PADDLE_MAX
         CMP R1, R3
-        JNE draw_ball_loop
+        JNE draw_paddle_loop  # Continue if padde max is not yet reached by R1
 
     RTS
 
-
-
-draw_ball:
-    ; Parameters: 
-    ; R0 = X 
-    ; R1 = Y 
-    ; R2 = Color
-
-    ; --- Store the color in a temporary variable ---
-    STORE     R2, TEMP_COLOR
-
-    ; --- Setup constants ---
-    MOV       R3, SCREEN_WIDTH      ; R3 = 128 (screen width)
-    MOV       R6, FRAMEBUFFER       ; R6 = framebuffer base address
-
-    ; === Center Pixel (X, Y) ===
-    MUL       R4, R1, R3            ; R4 = Y * SCREEN_WIDTH
-    ADD       R5, R4, R0            ; R5 = Y * WIDTH + X (offset)
-    ADD       R5, R6, R5            ; R5 = FRAMEBUFFER + offset
-    STORER    R2, R5                ; Store color at center
-
-    ; === Left Pixel (X-1, Y) ===
-    MOV       R2, 1
-    SUB       R7, R0, R2            ; R7 = X - 1
-    MUL       R4, R1, R3
-    ADD       R5, R4, R7
-    ADD       R5, R6, R5
-    LOAD      R2, TEMP_COLOR
-    STORER    R2, R5
-
-    ; === Right Pixel (X+1, Y) ===
-    MOV       R2, 1
-    ADD       R7, R0, R2            ; R7 = X + 1
-    MUL       R4, R1, R3
-    ADD       R5, R4, R7
-    ADD       R5, R6, R5
-    LOAD      R2, TEMP_COLOR
-    STORER    R2, R5
-
-    ; === Top Pixel (X, Y-1) ===
-    MOV       R2, 1
-    SUB       R7, R1, R2            ; R7 = Y - 1
-    MUL       R4, R7, R3
-    ADD       R5, R4, R0
-    ADD       R5, R6, R5
-    LOAD      R2, TEMP_COLOR
-    STORER    R2, R5
-
-    ; === Bottom Pixel (X, Y+1) ===
-    MOV       R2, 1
-    ADD       R7, R1, R2            ; R7 = Y + 1
-    MUL       R4, R7, R3
-    ADD       R5, R4, R0
-    ADD       R5, R6, R5
-    LOAD      R2, TEMP_COLOR
-    STORER    R2, R5
-
-    ; === Top-left Pixel (X-1, Y-1) ===
-    MOV       R2, 1
-    SUB       R7, R1, R2            ; R7 = Y - 1
-    MUL       R4, R7, R3
-    SUB       R7, R0, R2            ; R7 = X - 1
-    JSR draw_ball_angles
-    
-    ; === Top-right Pixel (X+1, Y-1) ===
-    MOV       R2, 1
-    SUB       R7, R1, R2            ; R7 = Y - 1
-    MUL       R4, R7, R3
-    ADD       R7, R0, R2            ; R7 = X + 1
-    JSR draw_ball_angles
-
-    ; === Bottom-left Pixel (X-1, Y+1) ===
-    MOV       R2, 1
-    ADD       R7, R1, R2            ; R7 = Y + 1
-    MUL       R4, R7, R3
-    SUB       R7, R0, R2            ; R7 = X - 1
-    JSR draw_ball_angles
-
-    ; === Bottom-right Pixel (X+1, Y+1) ===
-    MOV       R2, 1
-    ADD       R7, R1, R2            ; R7 = Y + 1
-    MUL       R4, R7, R3
-    ADD       R7, R0, R2            ; R7 = X + 1
-    JSR draw_ball_angles
-
-    ; === Return from subroutine ===
-    RTS
-
-draw_ball_angles:
-    ADD       R5, R4, R7
-    ADD       R5, R6, R5
-    LOAD      R2, TEMP_COLOR
-    STORER    R2, R5
-    RTS

@@ -70,18 +70,6 @@ Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
 - The remaining 9 bits are used for operands, typically register identifiers.
   In certain instructions, a second 16-bit word may follow to hold a memory address or an immediate value.
 
-### Instruction Formats
-
-| Format |`OpCode`| Word Count | Structure                                                                          |
-|--------|--------|------------|------------------------------------------------------------------------------------|
-| RRR    | 000    | 1 word     | [3b opcode][4b sub-op][3b Rdest][3b RB][3b RC]                                     |
-| RR     | 001    | 1 word     | [3b opcode][4b sub-op][3b unused][3b RA][3b RB]                                    |
-| RI     | 010    | 2 words    | Word 1: [3b opcode][4b sub-op][3b Rdest][6b unused]  <br> Word 2: 16-bit immediate |
-| MEM    | 011    | 2 words    | Word 1: [3b opcode][4b sub-op][3b Rdest][6b unused]  <br> Word 2: 16-bit address   |
-| JMP    | 100    | 2 words    | Word 1: [3b opcode][4b sub-op][9b unused]          <br> Word 2: 16-bit address     |
-| R      | 101    | 1 word     | [3b opcode][4b sub-op][3b R1][6b unused]                                           |
-| HLT    | 111    | 1 word     | [3b opcode][4b sub-op][9b unused]                                                  |
-
 ### File format/Compiler :
 
 The only file extensions recognized by the compiler are ".l" linker scripts and .org asm source files
@@ -115,7 +103,7 @@ It will place every source file at the memory address specified in the linker sc
 
 - Support for signed operations is not enforced; it is up to the program to choose whether to work with signed or unsigned numbers.
 
-### Future plans (v2.0.0 ?):
+### Future plans (v2.0.0):
 
 - [x] Emulator
 - [ ] Pong program
@@ -124,10 +112,11 @@ It will place every source file at the memory address specified in the linker sc
   - [ ] XNOR
   - [ ] OUT[A/B/C] (Output 1/0 to an I/O port)
   - [ ] IN[A/B/C] (Get input from an I/O port)
-  - [ ] MOVI vs MOV (Being able to move an immediate into a register or a a register's value into another register)
+  - [ ] MOVI vs MOV (Being able to move a register's value into another register (without doing MOV R1, 0 then ADD, R1, R1, R2))
   - [ ] SHL/SHR (Shift left/right) (via a new Shifting Unit)
   - [ ] NOP (No operation = blank but not halt)
-- [ ] Support for operations and comparisons between memory-registers and memory-memory and registers-immediate (memory-immediate requires a big revision of the ISA, so not for now..)
+- [ ] Support for operations and comparisons between memory-registers and registers-immediate (memory-immediate/memory-memory requires a big revision of the ISA (2 immediates per instruction), so not for now..)
+- [ ] Random number generation
 - [ ] Interrupts ???
 - [ ] Peripherals ???
 - [ ] PCB version (In a long long time 😄)

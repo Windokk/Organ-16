@@ -1,0 +1,126 @@
+
+; Memory locations for temporary/intermediate values
+@define TEMP_COLOR       0xc004
+@define PADDLE_COUNTER   0xc005
+
+@define SCREEN_WIDTH   128
+
+@define FRAMEBUFFER 0x8000
+
+
+draw_paddle_wide:
+    ; Parameters: 
+    ; R0 = X 
+    ; R1 = Y 
+    ; R2 = Color
+
+    MOV R3, 12
+    ADD R3, R1, R3
+    STORE R3, PADDLE_COUNTER ; Store R1 + 9 at mem[0xc005]
+
+    draw_ball_loop:
+        MOV R3, 3
+        ADD R1, R1, R3
+        JSR draw_ball_wide
+        
+        LOAD R3, 0xc005
+        CMP R1, R3
+        JNE draw_ball_loop
+
+    RTS
+
+
+
+draw_ball_wide:
+    ; Parameters: 
+    ; R0 = X 
+    ; R1 = Y 
+    ; R2 = Color
+
+    ; --- Store the color in a temporary variable ---
+    STORE     R2, TEMP_COLOR
+
+    ; --- Setup constants ---
+    MOV       R3, SCREEN_WIDTH      ; R3 = 128 (screen width)
+    MOV       R6, FRAMEBUFFER       ; R6 = framebuffer base address
+
+    ; === Center Pixel (X, Y) ===
+    MUL       R4, R1, R3            ; R4 = Y * SCREEN_WIDTH
+    ADD       R5, R4, R0            ; R5 = Y * WIDTH + X (offset)
+    ADD       R5, R6, R5            ; R5 = FRAMEBUFFER + offset
+    STORER    R2, R5                ; Store color at center
+
+    ; === Left Pixel (X-1, Y) ===
+    MOV       R2, 1
+    SUB       R7, R0, R2            ; R7 = X - 1
+    MUL       R4, R1, R3
+    ADD       R5, R4, R7
+    ADD       R5, R6, R5
+    LOAD      R2, TEMP_COLOR
+    STORER    R2, R5
+
+    ; === Right Pixel (X+1, Y) ===
+    MOV       R2, 1
+    ADD       R7, R0, R2            ; R7 = X + 1
+    MUL       R4, R1, R3
+    ADD       R5, R4, R7
+    ADD       R5, R6, R5
+    LOAD      R2, TEMP_COLOR
+    STORER    R2, R5
+
+    ; === Top Pixel (X, Y-1) ===
+    MOV       R2, 1
+    SUB       R7, R1, R2            ; R7 = Y - 1
+    MUL       R4, R7, R3
+    ADD       R5, R4, R0
+    ADD       R5, R6, R5
+    LOAD      R2, TEMP_COLOR
+    STORER    R2, R5
+
+    ; === Bottom Pixel (X, Y+1) ===
+    MOV       R2, 1
+    ADD       R7, R1, R2            ; R7 = Y + 1
+    MUL       R4, R7, R3
+    ADD       R5, R4, R0
+    ADD       R5, R6, R5
+    LOAD      R2, TEMP_COLOR
+    STORER    R2, R5
+
+    ; === Top-left Pixel (X-1, Y-1) ===
+    MOV       R2, 1
+    SUB       R7, R1, R2            ; R7 = Y - 1
+    MUL       R4, R7, R3
+    SUB       R7, R0, R2            ; R7 = X - 1
+    JSR draw_ball_angles
+    
+    ; === Top-right Pixel (X+1, Y-1) ===
+    MOV       R2, 1
+    SUB       R7, R1, R2            ; R7 = Y - 1
+    MUL       R4, R7, R3
+    ADD       R7, R0, R2            ; R7 = X + 1
+    JSR draw_ball_angles
+
+    ; === Bottom-left Pixel (X-1, Y+1) ===
+    MOV       R2, 1
+    ADD       R7, R1, R2            ; R7 = Y + 1
+    MUL       R4, R7, R3
+    SUB       R7, R0, R2            ; R7 = X - 1
+    JSR draw_ball_angles
+
+    ; === Bottom-right Pixel (X+1, Y+1) ===
+    MOV       R2, 1
+    ADD       R7, R1, R2            ; R7 = Y + 1
+    MUL       R4, R7, R3
+    ADD       R7, R0, R2            ; R7 = X + 1
+    JSR draw_ball_angles
+
+    ; === Return from subroutine ===
+    RTS
+
+draw_ball_angles:
+
+    ADD       R5, R4, R7
+    ADD       R5, R6, R5
+    LOAD      R2, TEMP_COLOR
+    STORER    R2, R5
+    RTS

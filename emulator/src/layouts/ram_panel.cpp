@@ -88,6 +88,7 @@ bool RamPanel::setData(const QModelIndex &index, const QVariant &value, int role
 
     try {
         ram->Write(static_cast<uint16_t>(address), newVal, true);
+        CPU::GetInstance()->Init();
         emit dataChanged(index, index);
         return true;
     } catch (...) {

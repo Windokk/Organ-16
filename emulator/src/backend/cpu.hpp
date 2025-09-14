@@ -31,9 +31,9 @@ class CPU{
 
         TempOut UpdateTemporaryValuesOnClock(const CU_Data &oldControlUnitData, const TempOut &oldTemporaryValues, bool clockSignal);
 
-        RegsOutOnChange UpdateRegistersOnClock(CU_Data oldControlUnitData, const TempOut &oldTemporaryValues, const RegsOut &oldRegsOut, const ALU_Data &oldAluData, uint16_t oldRAM_OUT, bool currentClockSignal, const TempOut &newTempValues);
+        RegsOutOnChange UpdateRegistersOnClock(CU_Data oldControlUnitData, const TempOut &oldTemporaryValues, const RegsOut &oldRegsOut, const ALU_Data &oldAluData, uint16_t oldRAM_OUT, bool currentClockSignal, const TempOut &newTempValues, bool regWrite);
 
-        void UpdateRAMOnClock(const CU_Data &oldControlUnitData, const TempOut &oldTemporaryValues, const RegsOut &oldRegsOut, bool currentClockSignal, uint16_t oldRBValue, uint16_t oldRAValue);
+        void UpdateRAMOnClock(const CU_Data &oldControlUnitData, const TempOut &oldTemporaryValues, const RegsOut &oldRegsOut, bool currentClockSignal, uint16_t oldRBValue, uint16_t oldRAValue, bool regWrite);
 
         RegsOutOnIdle UpdateRegistersOnIdle(const TempOut &newtempValues, uint16_t newRamValue, uint16_t ir0Data, uint16_t ir1Data, bool currentClockSignal);
 

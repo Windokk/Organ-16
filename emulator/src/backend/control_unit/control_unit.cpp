@@ -80,7 +80,7 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     if(OpCode == 5 && subOpCode == 1){
         ret.regWrite = 1;
     }
-    if(OpCode == 3 && subOpCode == 0){
+    if(OpCode == 3 && (subOpCode == 0 || subOpCode == 3)){
         ret.regWrite = 1;
     }
     if(OpCode == 2){
@@ -112,7 +112,7 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     ret.memWrite = (OpCode == 0b011 && (subOpCode == 1 || subOpCode == 2));
 
     // --- memToReg ---
-    ret.memToReg = (OpCode == 0b011 && subOpCode == 0);
+    ret.memToReg = (OpCode == 3 && (subOpCode == 0 || subOpCode == 3));
 
     // --- Flags Mux Logic ---
     const bool XOR3_1 = (FlagsData & 0b1000) ^ (FlagsData & 0b0010);
@@ -167,10 +167,10 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     ret.rts = (OpCode == 0b100 && subOpCode == 12);
 
     // --- regIsAddress ---
-    ret.regIsAddress = (OpCode == 3 && subOpCode == 2);
+    ret.regIsAddress = (OpCode == 3 && (subOpCode == 2 || subOpCode == 3));
 
     // --- HLT ---
-    ret.HLT = (OpCode == 0b111);
+    ret.HLT = (OpCode == 7);
 
     return ret;
 } 

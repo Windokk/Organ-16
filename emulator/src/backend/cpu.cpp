@@ -18,12 +18,15 @@ void CPU::Tick(){
     //Current state
     Clock::GetInstance()->Increment();
     bool currentClockSignal = Clock::GetInstance()->GetClockSignal(previousControlUnitData.HLT);
+    bool regWrite = previousControlUnitData.regWrite & (previousTemp.isCurrExt | ((previousControlUnitData.ALU_DATA & 0b10000) >> 4) | previousTemp.regIsCurrAddr);
 
     //Clock Edge (Executed DURING edge (so we can only use old/previous values))
     TempOut newTempValues = UpdateTemporaryValuesOnClock(previousControlUnitData, previousTemp, currentClockSignal);
-    RegsOutOnChange newRegsValues = UpdateRegistersOnClock(previousControlUnitData, previousTemp, previousRegs, previousALUData, oldRAMvalue, currentClockSignal, newTempValues);
+    RegsOutOnChange newRegsValues = UpdateRegistersOnClock(previousControlUnitData, previousTemp, previousRegs, 
+                                                            previousALUData, oldRAMvalue, currentClockSignal, newTempValues, regWrite);
     
-    UpdateRAMOnClock(previousControlUnitData, previousTemp, previousRegs, currentClockSignal, oldRBValue, oldRAValue);
+    UpdateRAMOnClock(previousControlUnitData, previousTemp, previousRegs,
+                        currentClockSignal, oldRBValue, oldRAValue, regWrite);
 
 
     CU_Data newControlUnitData = FetchControlUnitData();
@@ -31,7 +34,7 @@ void CPU::Tick(){
     TempOut newTempOut = TemporaryValues::GetInstance()->GetValues();
     uint16_t newRBValue = RegisterFile::GetInstance()->GetRegValue(static_cast<RegisterName>(newControlUnitData.srcRB));
     uint16_t newRAValue = RegisterFile::GetInstance()->GetRegValue(static_cast<RegisterName>(newControlUnitData.srcRA));
-    MI_Data miData = MemoryInterface::GetInstance()->GetMI_Data(newControlUnitData, newRegsOut, newTempOut, currentClockSignal, 0, newRBValue, newRAValue);
+    MI_Data miData = MemoryInterface::GetInstance()->GetMI_Data(newControlUnitData, newRegsOut, newTempOut, currentClockSignal, 0, newRBValue, newRAValue, false);
     uint16_t newRAMValue = RAM::GetInstance()->Read(miData.RAM_ADDRESS);
 
     //Clock Idle (Executed AFTER edge (so we can use new values))
@@ -77,7 +80,7 @@ TempOut CPU::UpdateTemporaryValuesOnClock(const CU_Data& oldControlUnitData, con
 }
 
 RegsOutOnChange CPU::UpdateRegistersOnClock(CU_Data oldControlUnitData, const TempOut& oldTemporaryValues, const RegsOut& oldRegsOut, 
-                                           const ALU_Data& oldAluData, uint16_t oldRAM_OUT, bool currentClockSignal, const TempOut& newTempValues)
+                                           const ALU_Data& oldAluData, uint16_t oldRAM_OUT, bool currentClockSignal, const TempOut& newTempValues, bool regWrite)
 {
     // Prepare regsOutOnChangeTemp for source registers (srcRA/srcRB)
     RegsOutOnChange regsOutOnChangeTemp = {};
@@ -106,9 +109,9 @@ RegsOutOnChange CPU::UpdateRegistersOnClock(CU_Data oldControlUnitData, const Te
     regsInOnClockChange.flagsClock = currentClockSignal;
     regsInOnClockChange.flagsWrite = oldControlUnitData.flagsWrite;
     regsInOnClockChange.gpClock = oldTemporaryValues.isCurrAddr ? !currentClockSignal : currentClockSignal;
-    regsInOnClockChange.gpData = oldTemporaryValues.isCurrSpChange ? oldRAM_OUT : (oldTemporaryValues.isCurrExt ? oldRegsOut.IR1 : oldAluData.result);    
+    regsInOnClockChange.gpData = (oldTemporaryValues.isCurrSpChange | oldTemporaryValues.regIsCurrAddr) ? oldRAM_OUT : (oldTemporaryValues.isCurrExt ? oldRegsOut.IR1 : oldAluData.result);    
     regsInOnClockChange.gpRegToWrite = oldControlUnitData.dstR;
-    regsInOnClockChange.gpRegWrite = oldControlUnitData.regWrite & (oldTemporaryValues.isCurrExt | ((oldControlUnitData.ALU_DATA & 0b10000) >> 4));
+    regsInOnClockChange.gpRegWrite = regWrite;
     regsInOnClockChange.negative = oldAluData.negative;
     regsInOnClockChange.overflow = oldAluData.overflow;
 
@@ -144,11 +147,11 @@ RegsOutOnChange CPU::UpdateRegistersOnClock(CU_Data oldControlUnitData, const Te
     return RegisterFile::GetInstance()->OnClockChange(regsInOnClockChange);
 }
 
-void CPU::UpdateRAMOnClock(const CU_Data& oldControlUnitData, const TempOut& oldTemporaryValues, const RegsOut& oldRegsOut, bool currentClockSignal, uint16_t oldRBValue, uint16_t oldRAValue)
+void CPU::UpdateRAMOnClock(const CU_Data& oldControlUnitData, const TempOut& oldTemporaryValues, const RegsOut& oldRegsOut, bool currentClockSignal, uint16_t oldRBValue, uint16_t oldRAValue, bool regWrite)
 {
     bool memWrite = (oldTemporaryValues.isCurrSpChange & !oldControlUnitData.spPop) | (oldControlUnitData.memWrite & (oldTemporaryValues.isCurrExt | oldTemporaryValues.regIsCurrAddr));
 
-    MI_Data miData = MemoryInterface::GetInstance()->GetMI_Data(oldControlUnitData, oldRegsOut, oldTemporaryValues, currentClockSignal, memWrite, oldRBValue, oldRAValue);
+    MI_Data miData = MemoryInterface::GetInstance()->GetMI_Data(oldControlUnitData, oldRegsOut, oldTemporaryValues, currentClockSignal, memWrite, oldRBValue, oldRAValue, regWrite);
 
     MemoryInterface::GetInstance()->OnClockChange(miData);
 }

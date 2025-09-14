@@ -258,6 +258,14 @@ QWidget* MakeRegisterWidget(const QString& regName) {
     QString lineEditStyle = QString::fromUtf8(lineEditQss.readAll());
     lineEdit->setStyleSheet(lineEditStyle);
     layout->addWidget(lineEdit);
+    QObject::connect(lineEdit, &QLineEdit::textChanged, [regName](QString value){
+        bool ok;
+        uint16_t result = static_cast<uint16_t>(value.toUShort(&ok, 16));
+
+        if (ok) {
+            RegisterFile::GetInstance()->SetRegValue(RegisterFromString(regName.toStdString()), result);
+        }
+    });
 
     registersLineEdits.emplace(RegisterFromString(regName.toStdString()), lineEdit);
 
