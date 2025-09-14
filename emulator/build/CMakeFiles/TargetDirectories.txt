@@ -1,3 +1,0 @@
-C:/Users/elipt/Desktop/Organ-16/emulator/build/CMakeFiles/Emulator.dir
-C:/Users/elipt/Desktop/Organ-16/emulator/build/CMakeFiles/edit_cache.dir
-C:/Users/elipt/Desktop/Organ-16/emulator/build/CMakeFiles/rebuild_cache.dir
