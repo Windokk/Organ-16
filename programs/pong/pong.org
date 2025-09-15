@@ -36,31 +36,63 @@
 @define ROUND_COUNTER 0xc009
 
 @define FIRST_ROUND_START_DX 0xc020
+@define FIRST_ROUND_START_DY 0xc033
+
+pre_init:
+    MOV R0, -1
+    STORE R0, FIRST_ROUND_START_DX
+    STORE R0, (FIRST_ROUND_START_DX + 2)
+    STORE R0, (FIRST_ROUND_START_DX + 4)
+    STORE R0, (FIRST_ROUND_START_DX + 6)
+    STORE R0, (FIRST_ROUND_START_DX + 8)
+    STORE R0, (FIRST_ROUND_START_DX + 10)
+    STORE R0, (FIRST_ROUND_START_DX + 12)
+    STORE R0, (FIRST_ROUND_START_DX + 14)
+    STORE R0, (FIRST_ROUND_START_DX + 16)
+    STORE R0, (FIRST_ROUND_START_DX + 18)
+
+    STORE R0, (FIRST_ROUND_START_DY + 1)
+    STORE R0, (FIRST_ROUND_START_DY + 3)
+    STORE R0, (FIRST_ROUND_START_DY + 5)
+    STORE R0, (FIRST_ROUND_START_DY + 7)
+    STORE R0, (FIRST_ROUND_START_DY + 9)
+    STORE R0, (FIRST_ROUND_START_DY + 11)
+    STORE R0, (FIRST_ROUND_START_DY + 13)
+    STORE R0, (FIRST_ROUND_START_DY + 15)
+    STORE R0, (FIRST_ROUND_START_DY + 17)
+    STORE R0, (FIRST_ROUND_START_DY + 19)
+
+    MOV R0, 1
+    STORE R0, (FIRST_ROUND_START_DX + 1)
+    STORE R0, (FIRST_ROUND_START_DX + 3)
+    STORE R0, (FIRST_ROUND_START_DX + 5)
+    STORE R0, (FIRST_ROUND_START_DX + 7)
+    STORE R0, (FIRST_ROUND_START_DX + 9)
+    STORE R0, (FIRST_ROUND_START_DX + 11)
+    STORE R0, (FIRST_ROUND_START_DX + 13)
+    STORE R0, (FIRST_ROUND_START_DX + 15)
+    STORE R0, (FIRST_ROUND_START_DX + 17)
+    STORE R0, (FIRST_ROUND_START_DX + 19)
+
+    STORE R0, FIRST_ROUND_START_DY
+    STORE R0, (FIRST_ROUND_START_DY + 2)
+    STORE R0, (FIRST_ROUND_START_DY + 4)
+    STORE R0, (FIRST_ROUND_START_DY + 6)
+    STORE R0, (FIRST_ROUND_START_DY + 8)
+    STORE R0, (FIRST_ROUND_START_DY + 10)
+    STORE R0, (FIRST_ROUND_START_DY + 12)
+    STORE R0, (FIRST_ROUND_START_DY + 14)
+    STORE R0, (FIRST_ROUND_START_DY + 16)
+    STORE R0, (FIRST_ROUND_START_DY + 18)
 
 
 main:
 
-    ; Initialize "random" start positions
+    ; Initialize round counter at 0
+    MOV R0, ZERO
+    STORE R0, ROUND_COUNTER
 
-    ; Initialize ball in center
-    MOV R0, (SCREEN_WIDTH / 2)
-    MOV R1, (SCREEN_HEIGHT / 2)
-    STORE R0, BALL_X
-    STORE R1, BALL_Y
-
-    ; Initialize paddle 1 at vcenter
-    MOV R0, ((SCREEN_HEIGHT / 2) - 5)
-    STORE R0, PADDLE1_Y
-
-    ; Initialize paddle 2 at vcenter
-    STORE R0, PADDLE2_Y
-
-    ; Initialize ball DX, DY (-1 or 1)
-    MOV R0, -1 ; Towards left   ; Hardcoded for now (random in the future ?)
-    MOV R1, 1  ; Towards bottom ; Hardcoded for now (random in the future ?)
-    STORE R0, BALL_DX
-    STORE R1, BALL_DY
-
+    JSR start_round
 
     gameLoop:
         
@@ -168,22 +200,39 @@ main:
 end:
     HLT
 
-
 start_round:
 
+    ; Initialize ball in center
     MOV R0, (SCREEN_WIDTH / 2)
     MOV R1, (SCREEN_HEIGHT / 2)
     STORE R0, BALL_X
     STORE R1, BALL_Y
 
-    
+    ; Initialize paddle 1 at vcenter
+    MOV R0, ((SCREEN_HEIGHT / 2) - 5)
+    STORE R0, PADDLE1_Y
 
-
+    ; Initialize paddle 2 at vcenter
+    STORE R0, PADDLE2_Y
 
     LOAD R0, ROUND_COUNTER
-    MOV R1, 1
-    LOAD R2, FIRST_ROUND_START_DX
+    LOAD R7, FIRST_ROUND_START_DX
+    ADD R7, R7, R0                   ; This round's initial DX is stored at FIRST_ROUND_START_DX + ROUND_COUNTER
+    LOADR R0, R7
+    STORE R0, BALL_DX
 
+    LOAD R1, ROUND_COUNTER
+    LOAD R7, FIRST_ROUND_START_DY    ; This round's initial DY is stored at FIRST_ROUND_START_DY + ROUND_COUNTER
+    ADD R7, R7, R1
+    LOADR R1, R7
+    STORE R1, BALL_DY
+
+    LOAD R0, ROUND_COUNTER  ; Round Counter += 1
+    MOV R1, 1
+    ADD R0, R0, R1
+    STORE R0, ROUND_COUNTER
+
+    RTS
 
 x_minus_1:
     ; Parameters
