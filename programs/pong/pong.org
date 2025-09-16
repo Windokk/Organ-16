@@ -162,8 +162,8 @@ main:
         paddle_collision:
             LOAD R0, BALL_X
 
-            MOV R1, PADDLE1_X
-            MOV R2, PADDLE2_X
+            MOV R1, (PADDLE1_X + 1)
+            MOV R2, (PADDLE2_X - 1)
 
             CMP R0, R2
             JE paddle_right_collision
@@ -186,7 +186,6 @@ main:
             STORE R0, BALL_DX
 
             JMP ball_pos_subr
-
         
 
         ### Update ball position ###
@@ -349,10 +348,7 @@ paddle_right_collision:
     JB ball_pos_subr
 
     CMP R0, R2
-    
-    HLT
     JA ball_pos_subr
-
 
     MOV R0, -1
     STORE R0, BALL_DX
