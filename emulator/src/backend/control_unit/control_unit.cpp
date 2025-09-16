@@ -137,7 +137,7 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
         case 11:  flagsMux = true; break;
         default:  flagsMux = false; break;
     }
-
+    
     // --- containsAddress ---
     if (OpCode == 3)
         ret.containsAddress = 1;

@@ -2147,7 +2147,6 @@
       <a name="size" val="30"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(610,550)" name="NOT Gate"/>
     <comp lib="2" loc="(1070,380)" name="Multiplexer">
       <a name="enable" val="true"/>
       <a name="select" val="4"/>
@@ -2426,7 +2425,7 @@
     <wire from="(510,480)" to="(510,490)"/>
     <wire from="(510,490)" to="(950,490)"/>
     <wire from="(510,540)" to="(510,550)"/>
-    <wire from="(510,550)" to="(580,550)"/>
+    <wire from="(510,550)" to="(910,550)"/>
     <wire from="(510,790)" to="(510,800)"/>
     <wire from="(510,800)" to="(770,800)"/>
     <wire from="(520,1140)" to="(830,1140)"/>
@@ -2443,7 +2442,6 @@
     <wire from="(540,300)" to="(540,460)"/>
     <wire from="(600,1520)" to="(1050,1520)"/>
     <wire from="(600,1580)" to="(1060,1580)"/>
-    <wire from="(610,550)" to="(910,550)"/>
     <wire from="(740,310)" to="(1030,310)"/>
     <wire from="(740,310)" to="(740,520)"/>
     <wire from="(750,320)" to="(1030,320)"/>

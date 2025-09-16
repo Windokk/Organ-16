@@ -69,7 +69,7 @@ ALU_Data ALU::GetALU_Data(uint16_t DataRA, uint16_t DataRB, uint8_t ALU_OpCode, 
         ret.overflow = ((~(MSB_RA ^ MSB_RB)) & (MSB_RA ^ MSB_Result));
     } 
     else if (ALU_OpCode == 1 || ALU_OpCode == 10) { // SUB
-        ret.carry = (DataRA >= DataRB);
+        ret.carry = (DataRA < DataRB);
         ret.overflow = (((MSB_RA ^ MSB_RB)) & (MSB_RA ^ MSB_Result));
     }
 
