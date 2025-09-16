@@ -6,6 +6,8 @@
 @define N_MAX_SCORE 10
 @define N_MAX_ROUNDS 19
 
+@define PADDLE_HEIGHT 8
+
 @define PLAYER1_UP_ADDR 0xFF00
 @define PLAYER1_DOWN_ADDR 0xFF01
 @define PLAYER2_UP_ADDR 0xFF02
@@ -20,16 +22,19 @@
 @define WHITE 0xFFFF
 
 ; Memory locations
-@define BALL_X       0xc000
-@define BALL_Y       0xc001
-@define PADDLE1_Y    0xc002
-@define PADDLE2_Y    0xc003
+@define BALL_X          0xc000
+@define BALL_Y          0xc001
+@define PADDLE1_Y       0xc002
+@define PADDLE2_Y       0xc003
 
-@define BALL_DX       0xc004
-@define BALL_DY       0xc005
+@define PADDLE1_X       3
+@define PADDLE2_X       125
 
-@define OLD_BALL_X       0xc006
-@define OLD_BALL_Y       0xc007
+@define BALL_DX         0xc004
+@define BALL_DY         0xc005
+
+@define OLD_BALL_X      0xc006
+@define OLD_BALL_Y      0xc007
 
 @define PADDLE_MAX   0xc008
 
@@ -102,7 +107,9 @@ main:
         STORE R0, OLD_BALL_X
         STORE R1, OLD_BALL_Y
 
-        ### Ball collision ###
+        MOV R6, 0
+
+        ### Walls collision ###
 
             LOAD R6, BALL_DX
             LOAD R7, BALL_DY
@@ -128,7 +135,7 @@ main:
             CMP R1, R4   ; Bottom
             JE dy_minus_1
 
-            JMP ball_pos_subr
+            JMP paddle_collision
 
         dx_plus_1:
             MOV R5, 1
@@ -143,12 +150,44 @@ main:
         dy_plus_1:
             MOV R5, 1
             STORE R5, BALL_DY
-            JMP ball_pos_subr
+            JMP paddle_collision
 
         dy_minus_1:
             MOV R5, -1
             STORE R5, BALL_DY
+            JMP paddle_collision
+
+
+        ### Paddle collision ###
+        paddle_collision:
+            LOAD R0, BALL_X
+
+            MOV R1, PADDLE1_X
+            MOV R2, PADDLE2_X
+
+            CMP R0, R2
+            JE paddle_right_collision
+
+            CMP R0, R1
+            JNE ball_pos_subr
+
+            LOAD R0, BALL_Y
+            LOAD R1, PADDLE1_Y      ; R1 = PADDLE TOP
+            MOV R2, PADDLE_HEIGHT
+            ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
+
+            CMP R0, R1
+            JB ball_pos_subr
+
+            CMP R0, R2
+            JA ball_pos_subr
+
+            MOV R0, 1
+            STORE R0, BALL_DX
+
             JMP ball_pos_subr
+
+        
 
         ### Update ball position ###
         ball_pos_subr:
@@ -184,15 +223,15 @@ main:
             MOV R2, WHITE
             JSR draw_pixel ; Draw the ball
 
-            #MOV R0, 3
-            #LOAD R1, PADDLE1_Y
-            #MOV R2, WHITE
-            #JSR draw_paddle ; Draw the left paddle
+            MOV R0, PADDLE1_X
+            LOAD R1, PADDLE1_Y
+            MOV R2, WHITE
+            JSR draw_paddle ; Draw the left paddle
 
-            #MOV R0, (SCREEN_WIDTH - 3)
-            #LOAD R1, PADDLE2_Y
-            #MOV R2, WHITE
-            #JSR draw_paddle ; Draw the right paddle
+            MOV R0, PADDLE2_X
+            LOAD R1, PADDLE2_Y
+            MOV R2, WHITE
+            JSR draw_paddle ; Draw the right paddle
 
             JMP gameLoop
 
@@ -209,7 +248,7 @@ start_round:
     STORE R1, BALL_Y
 
     ; Initialize paddle 1 at vcenter
-    MOV R0, ((SCREEN_HEIGHT / 2) - 5)
+    MOV R0, 1
     STORE R0, PADDLE1_Y
 
     ; Initialize paddle 2 at vcenter
@@ -281,14 +320,13 @@ draw_pixel:
     RTS
 
 draw_paddle:
-    ; Parameters: 
-    ; R0 = X 
-    ; R1 = Y 
-    ; R2 = Color
+    ; Parameters: R0 = X, R1 = Y, R2 = Color
 
-    MOV R3, 8
+    MOV R3, PADDLE_HEIGHT
     ADD R3, R1, R3
-    STORE R3, PADDLE_MAX ; Store Y + 8 at mem[PADDLE_MAX]
+    STORE R3, PADDLE_MAX         ; R3 = bottom Y of paddle
+    MOV R6, 0
+    ADD R6, R6, R0               ; Save original X in R6
 
     draw_paddle_loop:
         MOV R4, 1
@@ -301,3 +339,22 @@ draw_paddle:
 
     RTS
 
+paddle_right_collision:
+    LOAD R0, BALL_Y
+    LOAD R1, PADDLE2_Y      ; R1 = PADDLE TOP
+    MOV R2, PADDLE_HEIGHT
+    ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
+
+    CMP R0, R1
+    JB ball_pos_subr
+
+    CMP R0, R2
+    
+    HLT
+    JA ball_pos_subr
+
+
+    MOV R0, -1
+    STORE R0, BALL_DX
+    
+    JMP ball_pos_subr

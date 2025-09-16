@@ -212,13 +212,7 @@ void CPU::Init(){
 
     ALU_Data ALU_OUT = ALU::GetInstance()->GetALU_Data(0, 0, ALU_exec_infos & 0b01111, ALU_exec_infos & 0b10000);
 
-    uint8_t flagsValue = 
-        (ALU_OUT.zero     << 3) |
-        (ALU_OUT.negative << 2) |
-        (ALU_OUT.carry    << 1) |
-        (ALU_OUT.overflow << 0);
-
-    RegisterFile::GetInstance()->SetRegValue(FLAGS, flagsValue);
+    
     RegisterFile::GetInstance()->SetRegValue(SP, 0xFFFF);
     
     UpdateVisualRAMCurrentAddress(oldRAMAddress, 0);

@@ -59,14 +59,18 @@ ALU_Data ALU::GetALU_Data(uint16_t DataRA, uint16_t DataRB, uint8_t ALU_OpCode, 
     ret.zero = (ret.result == 0);
     ret.negative = (ret.result & 0x8000) != 0;  // MSB = 1 means negative in signed 16-bit
 
+    uint8_t MSB_RA = DataRA & 0x8000;
+    uint8_t MSB_RB = DataRB & 0x8000;
+    uint8_t MSB_Result = ret.result & 0x8000;
+
     // Carry detection (only for ADD and SUB)
     if (ALU_OpCode == 0) { // ADD
         ret.carry = (temp_result > 0xFFFF);
-        ret.overflow = ((~(DataRA ^ DataRB)) & (DataRA ^ ret.result)) & 0x8000;
+        ret.overflow = ((~(MSB_RA ^ MSB_RB)) & (MSB_RA ^ MSB_Result));
     } 
     else if (ALU_OpCode == 1 || ALU_OpCode == 10) { // SUB
         ret.carry = (DataRA >= DataRB);
-        ret.overflow = (((DataRA ^ DataRB)) & (DataRA ^ ret.result)) & 0x8000;
+        ret.overflow = (((MSB_RA ^ MSB_RB)) & (MSB_RA ^ MSB_Result));
     }
 
     return ret;

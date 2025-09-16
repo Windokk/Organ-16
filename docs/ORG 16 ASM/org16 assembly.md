@@ -12,41 +12,41 @@
 
 Here are the 33 currently usable instructions :
 
-| Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description                       |
-|-------------|----------|-------------|------------|------------------|-----------------------------------|
-| ADD         | `000`    | `0000`      | (1 word)   | ADD R1, R2, R3   | Add R2 and R3, store in R1        |
-| SUB         | `000`    | `0001`      | (1 word)   | SUB R1, R2, R3   | Subtract R3 from R2, store in R1  |
-| MUL         | `000`    | `0010`      | (1 word)   | MUL R1, R2, R3   | Multiply R2 and R3, store in R1   |
-| DIV         | `000`    | `0011`      | (1 word)   | DIV R1, R2, R3   | Divide R2 by R3, store in R1      |
-| MOD         | `000`    | `0100`      | (1 word)   | MOD R1, R2, R3   | Modulo R2 % R3, store in R1       |
-| AND         | `000`    | `0101`      | (1 word)   | AND R1, R2, R3   | Bitwise AND, store in R1          |
-| OR          | `000`    | `0110`      | (1 word)   | OR R1, R2, R3    | Bitwise OR, store in R1           |
-| NAND        | `000`    | `0111`      | (1 word)   | NAND R1, R2, R3  | Bitwise NAND, store in R1         |
-| NOR         | `000`    | `1000`      | (1 word)   | NOR R1, R2, R3   | Bitwise NOR, store in R1          |
-| XOR         | `000`    | `1001`      | (1 word)   | XOR R1, R2, R3   | Bitwise XOR, store in R1          |
-| NOT         | `001`    | `1011`      | (1 word)   | NOT R1, R2       | Bitwise NOT of R2 into R1         |
-| MOV         | `010`    | `0000`      | (2 words)  | MOV R1, 0x1234   | Move 16-bit immediate into R1     |
-| LOAD        | `011`    | `0000`      | (2 words)  | LOAD R1, 0x1000  | Load from memory to R1            |
-| LOADR       | `011`    | `0011`      | (1 word)   | LOADR R3, R1     | Load from memory[R1] to R3        |
-| STORE       | `011`    | `0001`      | (2 words)  | STORE R1, 0x1000 | Store R1 at memory[Immediate]     |
-| STORER      | `011`    | `0010`      | (1 word)   | STORER, R3, R1   | Store R3 at memory[R1]            |
-| JMP         | `100`    | `0000`      | (2 words)  | JMP 0x1000       | Unconditional jump                |
-| JE          | `100`    | `0001`      | (2 words)  | JE 0x1000        | Jump if equal                     |
-| JNE         | `100`    | `0010`      | (2 words)  | JNE 0x1000       | Jump if not equal                 |
-| JB          | `100`    | `0011`      | (2 words)  | JB 0x1000        | Jump if below (unsigned)          |
-| JBE         | `100`    | `0100`      | (2 words)  | JBE 0x1000       | Jump if below or equal (unsigned) |
-| JA          | `100`    | `0101`      | (2 words)  | JA 0x1000        | Jump if above (unsigned)          |
-| JAE         | `100`    | `0110`      | (2 words)  | JAE 0x1000       | Jump if above or equal (unsigned) |
-| JL          | `100`    | `0111`      | (2 words)  | JL 0x1000        | Jump if less (signed)             |
-| JLE         | `100`    | `1000`      | (2 words)  | JLE 0x1000       | Jump if less or equal (signed)    |
-| JG          | `100`    | `1001`      | (2 words)  | JG 0x1000        | Jump if greate(signed)          |
-| JGE         | `100`    | `1010`      | (2 words)  | JGE 0x1000       | Jump if greater or equal (signed) |
-| JSR         | `100`    | `1011`      | (2 words)  | JSR 0x1000       | Push PC, jump to subroutine       |
-| RTS         | `100`    | `1100`      | (2 words)  | RTS              | Pop return address, jump to it    |
-| HLT         | `111`    | `0000`      | (1 word)   | HLT              | Halt the CPU                      |
-| CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2                 |
-| PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack            |
-| POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1          |
+| Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description                         |
+|-------------|----------|-------------|------------|------------------|-------------------------------------|
+| ADD         | `000`    | `0000`      | (1 word)   | ADD R1, R2, R3   | Add R2 and R3, store in R1          |
+| SUB         | `000`    | `0001`      | (1 word)   | SUB R1, R2, R3   | Subtract R3 from R2, store in R1    |
+| MUL         | `000`    | `0010`      | (1 word)   | MUL R1, R2, R3   | Multiply R2 and R3, store in R1     |
+| DIV         | `000`    | `0011`      | (1 word)   | DIV R1, R2, R3   | Divide R2 by R3, store in R1        |
+| MOD         | `000`    | `0100`      | (1 word)   | MOD R1, R2, R3   | Modulo R2 % R3, store in R1         |
+| AND         | `000`    | `0101`      | (1 word)   | AND R1, R2, R3   | Bitwise AND, store in R1            |
+| OR          | `000`    | `0110`      | (1 word)   | OR R1, R2, R3    | Bitwise OR, store in R1             |
+| NAND        | `000`    | `0111`      | (1 word)   | NAND R1, R2, R3  | Bitwise NAND, store in R1           |
+| NOR         | `000`    | `1000`      | (1 word)   | NOR R1, R2, R3   | Bitwise NOR, store in R1            |
+| XOR         | `000`    | `1001`      | (1 word)   | XOR R1, R2, R3   | Bitwise XOR, store in R1            |
+| NOT         | `001`    | `1011`      | (1 word)   | NOT R1, R2       | Bitwise NOT of R2 into R1           |
+| MOV         | `010`    | `0000`      | (2 words)  | MOV R1, 0x1234   | Move 16-bit immediate into R1       |
+| LOAD        | `011`    | `0000`      | (2 words)  | LOAD R1, 0x1000  | Load from memory to R1              |
+| LOADR       | `011`    | `0011`      | (1 word)   | LOADR R3, R1     | Load from memory[R1] to R3          |
+| STORE       | `011`    | `0001`      | (2 words)  | STORE R1, 0x1000 | Store R1 at memory[Immediate]       |
+| STORER      | `011`    | `0010`      | (1 word)   | STORER, R3, R1   | Store R3 at memory[R1]              |
+| JMP         | `100`    | `0000`      | (2 words)  | JMP 0x1000       | Unconditional jump                  |
+| JE          | `100`    | `0001`      | (2 words)  | JE 0x1000        | Jump if equal                       |
+| JNE         | `100`    | `0010`      | (2 words)  | JNE 0x1000       | Jump if not equal                   |
+| JB          | `100`    | `0011`      | (2 words)  | JB 0x1000        | Jump if below (unsigned)            |
+| JBE         | `100`    | `0100`      | (2 words)  | JBE 0x1000       | Jump if below or equal (unsigned)   |
+| JA          | `100`    | `0101`      | (2 words)  | JA 0x1000        | Jump if above (unsigned)            |
+| JAE         | `100`    | `0110`      | (2 words)  | JAE 0x1000       | Jump if above or equal (unsigned)   |
+| JL          | `100`    | `0111`      | (2 words)  | JL 0x1000        | Jump if less (signed)               |
+| JLE         | `100`    | `1000`      | (2 words)  | JLE 0x1000       | Jump if less or equal (signed)      |
+| JG          | `100`    | `1001`      | (2 words)  | JG 0x1000        | Jump if greate(signed)              |
+| JGE         | `100`    | `1010`      | (2 words)  | JGE 0x1000       | Jump if greater or equal (signed)   |
+| JSR         | `100`    | `1011`      | (2 words)  | JSR 0x1000       | Push PC, jump to subroutine         |
+| RTS         | `100`    | `1100`      | (2 words)  | RTS              | Pop return address, jump to it      |
+| HLT         | `111`    | `0000`      | (1 word)   | HLT              | Halt the CPU                        |
+| CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2 (Not commutative) |
+| PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack              |
+| POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1            |
 
 
 ### Immediates : 

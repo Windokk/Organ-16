@@ -115,26 +115,25 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     ret.memToReg = (OpCode == 3 && (subOpCode == 0 || subOpCode == 3));
 
     // --- Flags Mux Logic ---
-    const bool XOR3_1 = (FlagsData & 0b1000) ^ (FlagsData & 0b0010);
 
-    const uint8_t bit0 = FlagsData & 0b0001;
-    const uint8_t bit1 = FlagsData & 0b0010;
-    const uint8_t bit2 = FlagsData & 0b0100;
-    const uint8_t bit3 = FlagsData & 0b1000;
+    uint8_t bit0 = (FlagsData >> 0) & 0x01;
+    uint8_t bit1 = (FlagsData >> 1) & 0x01;
+    uint8_t bit2 = (FlagsData >> 2) & 0x01;
+    uint8_t bit3 = (FlagsData >> 3) & 0x01;
 
     bool flagsMux = false;
     switch (subOpCode) {
         case 0:   flagsMux = true; break;
         case 1:   flagsMux = bit0; break;
         case 2:   flagsMux = !bit0; break;
-        case 3:   flagsMux = bit1; break;
-        case 4:   flagsMux = bit0 | bit1; break;
-        case 5:   flagsMux = ~(bit0 ^ bit2); break;
+        case 3:   flagsMux = bit2; break;
+        case 4:   flagsMux = bit0 | bit2; break;
+        case 5:   flagsMux = !(bit0 | bit2); break;
         case 6:   flagsMux = !bit2; break;
-        case 7:   flagsMux = XOR3_1; break;
-        case 8:   flagsMux = bit0 | XOR3_1; break;
-        case 9:   flagsMux = !bit0 & !XOR3_1; break;
-        case 10:  flagsMux = !XOR3_1; break;
+        case 7:   flagsMux = bit1 ^ bit3; break;
+        case 8:   flagsMux = bit0 | bit1 ^ bit3; break;
+        case 9:   flagsMux = ~(bit1 ^ bit3) & !bit0; break;
+        case 10:  flagsMux = (bit1 ^ bit3); break;
         case 11:  flagsMux = true; break;
         default:  flagsMux = false; break;
     }
