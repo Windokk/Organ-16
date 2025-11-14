@@ -92,6 +92,9 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     if(OpCode == 0){
         ret.regWrite = 1;
     }
+    if(OpCode == 7 && subOpCode == 1 || subOpCode == 2 || subOpCode == 3){
+        ret.regWrite = 1;
+    }
 
     // --- Register fields ---
     ret.dstR  = (OpData >> 6) & 0b111;
@@ -169,7 +172,37 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     ret.regIsAddress = (OpCode == 3 && (subOpCode == 2 || subOpCode == 3));
 
     // --- HLT ---
-    ret.HLT = (OpCode == 7);
+    ret.HLT = (OpCode == 7 & subOpCode == 0);
+
+    // --- Use In ---
+    ret.useIn = (OpCode == 7 & subOpCode > 0 & subOpCode < 4);
+
+    // --- Use Out ---
+    ret.useOut = (OpCode == 7 & subOpCode >= 4);
+
+    // --- IO Port ---
+    if(OpCode == 7){
+        switch(subOpCode){
+            case 1:
+                ret.ioPort = 0;
+                break;
+            case 2:
+                ret.ioPort = 1;
+                break;
+            case 3:
+                ret.ioPort = 2;
+                break;
+            case 4:
+                ret.ioPort = 0;
+                break;
+            case 5:
+                ret.ioPort = 1;
+                break;
+            case 6:
+                ret.ioPort = 2;
+                break;
+        }
+    }
 
     return ret;
 } 

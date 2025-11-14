@@ -102,6 +102,7 @@
         "memory_resource": "cpp",
         "random": "cpp",
         "source_location": "cpp",
-        "qcolor": "cpp"
+        "qcolor": "cpp",
+        "qpushbutton": "cpp"
     }
 }

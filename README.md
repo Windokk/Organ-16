@@ -108,15 +108,15 @@ It will place every source file at the memory address specified in the linker sc
 - [x] Emulator
 - [ ] Pong program
 - [ ] IRL breadboard implementation
+- [ ] Random number generation
 - [ ] More instructions :
+  - [x] OUT[A/B/C] (Output 1/0 to an I/O port)
+  - [x] IN[A/B/C] (Get input from an I/O port)
   - [ ] XNOR
-  - [ ] OUT[A/B/C] (Output 1/0 to an I/O port)
-  - [ ] IN[A/B/C] (Get input from an I/O port)
   - [ ] MOVI vs MOV (Being able to move a register's value into another register (without doing MOV R1, 0 then ADD, R1, R1, R2))
   - [ ] SHL/SHR (Shift left/right) (via a new Shifting Unit)
   - [ ] NOP (No operation = blank but not halt)
 - [ ] Support for operations and comparisons between memory-registers and registers-immediate (memory-immediate/memory-memory requires a big revision of the ISA (2 immediates per instruction), so not for now..)
-- [ ] Random number generation
 - [ ] Interrupts ???
 - [ ] Peripherals ???
 - [ ] PCB version (In a long long time 😄)

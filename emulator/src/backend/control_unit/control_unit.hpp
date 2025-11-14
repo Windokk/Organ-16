@@ -21,6 +21,9 @@ struct CU_Data {
     uint8_t rts = 0;
     uint8_t regIsAddress = 0;
     uint8_t HLT = 0;
+    uint8_t useIn = 0;
+    uint8_t useOut = 0;
+    uint8_t ioPort = 0;
 };
 
 class ControlUnit{

@@ -15,7 +15,7 @@
       "patterns": [
         {
           "name": "keyword.instruction.organ",
-          "match": "\\b(ADD|SUB|MUL|DIV|MOD|AND|OR|NAND|NOR|XOR|NOT|MOV|LOAD|LOADR|STORE|STORER|JMP|JE|JNE|JB|JBE|JA|JAE|JL|JLE|JG|JGE|JSR|RTS|HLT|CMP|PUSH|POP)\\b"
+          "match": "\\b(ADD|SUB|MUL|DIV|MOD|AND|OR|NAND|NOR|XOR|NOT|MOV|LOAD|LOADR|STORE|STORER|JMP|JE|JNE|JB|JBE|JA|JAE|JL|JLE|JG|JGE|JSR|RTS|HLT|CMP|PUSH|POP|INA|INB|INC|OUTA|OUTB|OUTC)\\b"
         }
       ]
     },

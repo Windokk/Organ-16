@@ -10,6 +10,9 @@
 #include <iostream>
 
 void UpdateVisualRAMCurrentAddress(uint16_t oldAddress, uint16_t newAddress);
+void ResetIOPortsVisual();
+uint16_t GetIN(int portIndex);
+void SetOUT(int portIndex, uint16_t data);
 
 class CPU{
     private:

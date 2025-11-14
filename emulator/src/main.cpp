@@ -15,6 +15,7 @@ Expect garbage code, bugs and crashes 😅.
 #include "layouts/regs/clck_btn.hpp"
 #include "layouts/regs/flow_layout.hpp"
 #include "layouts/ram_panel.hpp"
+#include "layouts/io_ports.hpp"
 
 #include "backend/cpu.hpp"
 
@@ -25,6 +26,7 @@ std::unordered_map<RegisterName, QLineEdit*> registersLineEdits;
 std::unordered_map<std::string, QWidget*> debugValuesLEDs;
 QLabel* clockLabel;
 CanvasWidget* canvas;
+IOPortsPanel* ioPanel;
 RamPanel* ramPanel;
 QTableView* ramView;
 FullSplitter* HSplitterBottom;
@@ -38,6 +40,18 @@ bool debugPanelShown = false;
 
 int savedClockFrequency;
 bool automaticClock = false;
+
+uint16_t GetIN(int portIndex){
+    return ioPanel->portValue(ioPanel->portNameFromIndex(portIndex));
+}
+
+void SetOUT(int portIndex, uint16_t data){
+    ioPanel->setPortValue(ioPanel->portNameFromIndex(portIndex), data);
+}
+
+void ResetIOPortsVisual(){
+    ioPanel->reset();
+}
 
 void ToggleManualClock(bool checked){
     automaticClock = false;
@@ -179,7 +193,7 @@ void UpdateVisualRAMCurrentAddress(uint16_t oldAddress, uint16_t newAddress){
     ramPanel->setCellBackground(oldRow, oldColumn, QColor("#5e5e5e"));
     int row = newAddress / 16;
     int column = newAddress % 16;
-    ramPanel->setCellBackground(row, column, Qt::darkGreen);
+    ramPanel->setCellBackground(row, column, QColor("#4477ff"));
 }
 
 void ResetVisualRAM()
@@ -510,7 +524,7 @@ void SetupGUI(){
     ramView->setMaximumWidth(870);
 
     
-    /* ============ Bottom panel ============== */
+    /* ============ Bottom panel : Regs ============== */
     QWidget* bottomPanel = new QWidget;
     bottomPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout* bottomLayout = new QVBoxLayout(bottomPanel);
@@ -576,7 +590,12 @@ void SetupGUI(){
     HSplitter->setStretchFactor(1, 1);
     HSplitter->setChildrenCollapsible(false);
 
+    /* ============ Bottom panel : IO Ports ============== */
+
+    ioPanel = new IOPortsPanel();
+
     HSplitterBottom->addWidget(bottomPanel);
+    HSplitterBottom->addWidget(ioPanel);
 
     VSplitter->setChildrenCollapsible(false);
 

@@ -73,7 +73,9 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "JAE":  ("100", "0110"), "JL":   ("100", "0111"), "JLE":  ("100", "1000"),
         "JG":   ("100", "1001"), "JGE":  ("100", "1010"), "JSR":  ("100", "1011"),
         "RTS":  ("100", "1100"), "HLT":  ("111", "0000"), "PUSH": ("101", "0000"),
-        "POP":  ("101", "0001"), "STORER": ("011", "0010"), "LOADR": ("011", "0011")
+        "POP":  ("101", "0001"), "STORER": ("011", "0010"), "LOADR": ("011", "0011"),
+        "INA":  ("111", "0001"), "INB":  ("111", "0010"), "INC":  ("111", "0011"),
+        "OUTA":  ("111", "0100"), "OUTB":  ("111", "0101"), "OUTC":  ("111", "0110"),
     }
     if instruction in opcode_map:
         op, sub = opcode_map[instruction]
@@ -147,7 +149,7 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
                 return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map, constants_map)
             else:
                 return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)
-        if op_bin == "1010001":
+        if op_bin == "1010001" or op_bin == "1110001" or op_bin == "1110010" or op_bin == "1110011":
             return op_bin + DataToBinData(regs) + "000000"
         else:
             return op_bin + "000" + DataToBinData(regs) + "000"

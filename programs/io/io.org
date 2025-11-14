@@ -1,0 +1,8 @@
+loop:
+    INA R0
+    INB R1
+    INC R2
+    OUTA R0
+    OUTB R1
+    OUTC R2
+    JMP loop

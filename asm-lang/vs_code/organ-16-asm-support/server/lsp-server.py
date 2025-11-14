@@ -57,6 +57,12 @@ VALID_OPCODES = {
     'CMP': ('RR', 2),
     'PUSH': ('R', 1),
     'POP': ('R', 1),
+    'INA': ('R', 1),
+    'INB': ('R', 1),
+    'INC': ('R', 1),
+    'OUTA': ('R', 1),
+    'OUTB': ('R', 1),
+    'OUTC': ('R', 1)
 }
 
 VALID_REGISTERS = {f"R{i}" for i in range(8)}

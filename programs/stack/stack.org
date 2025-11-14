@@ -1,9 +1,6 @@
-
-
 JSR my_func
 
 HLT
-
 
 my_func:
 

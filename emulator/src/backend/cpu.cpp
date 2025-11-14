@@ -18,7 +18,7 @@ void CPU::Tick(){
     //Current state
     Clock::GetInstance()->Increment();
     bool currentClockSignal = Clock::GetInstance()->GetClockSignal(previousControlUnitData.HLT);
-    bool regWrite = previousControlUnitData.regWrite & (previousTemp.isCurrExt | ((previousControlUnitData.ALU_DATA & 0b10000) >> 4) | previousTemp.regIsCurrAddr);
+    bool regWrite = previousControlUnitData.regWrite & (previousTemp.isCurrExt | ((previousControlUnitData.ALU_DATA & 0b10000) >> 4) | previousTemp.regIsCurrAddr | previousControlUnitData.useIn);
 
     //Clock Edge (Executed DURING edge (so we can only use old/previous values))
     TempOut newTempValues = UpdateTemporaryValuesOnClock(previousControlUnitData, previousTemp, currentClockSignal);
@@ -39,6 +39,9 @@ void CPU::Tick(){
 
     //Clock Idle (Executed AFTER edge (so we can use new values))
     RegsOutOnIdle regsOutOnClockIdle = UpdateRegistersOnIdle(newTempValues, newRAMValue, oldIR0Data, oldIR1Data, currentClockSignal);
+
+    if(newControlUnitData.useOut)
+        SetOUT(newControlUnitData.ioPort, newRAValue);
 
     //Finalize (update graphics)
     UpdateVisualRAMCurrentAddress(oldRAMAddress, miData.RAM_ADDRESS);
@@ -109,7 +112,10 @@ RegsOutOnChange CPU::UpdateRegistersOnClock(CU_Data oldControlUnitData, const Te
     regsInOnClockChange.flagsClock = currentClockSignal;
     regsInOnClockChange.flagsWrite = oldControlUnitData.flagsWrite;
     regsInOnClockChange.gpClock = oldTemporaryValues.isCurrAddr ? !currentClockSignal : currentClockSignal;
-    regsInOnClockChange.gpData = (oldTemporaryValues.isCurrSpChange | oldTemporaryValues.regIsCurrAddr) ? oldRAM_OUT : (oldTemporaryValues.isCurrExt ? oldRegsOut.IR1 : oldAluData.result);    
+
+    uint16_t ioDataIn = GetIN(oldControlUnitData.ioPort);
+
+    regsInOnClockChange.gpData = oldControlUnitData.useIn ? ioDataIn : (oldTemporaryValues.isCurrSpChange | oldTemporaryValues.regIsCurrAddr) ? oldRAM_OUT : (oldTemporaryValues.isCurrExt ? oldRegsOut.IR1 : oldAluData.result);    
     regsInOnClockChange.gpRegToWrite = oldControlUnitData.dstR;
     regsInOnClockChange.gpRegWrite = regWrite;
     regsInOnClockChange.negative = oldAluData.negative;
@@ -216,6 +222,7 @@ void CPU::Init(){
     RegisterFile::GetInstance()->SetRegValue(SP, 0xFFFF);
     
     UpdateVisualRAMCurrentAddress(oldRAMAddress, 0);
+    ResetIOPortsVisual();
     oldRAMAddress = 0;
 }
 
