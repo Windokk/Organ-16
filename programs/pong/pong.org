@@ -35,6 +35,9 @@
 
 @define ROUND_COUNTER   0xc009
 
+@define OLD_PADDLE1_Y 0xc010
+@define OLD_PADDLE2_Y 0xc011
+
 @define FIRST_ROUND_START_DX 0xc020
 @define FIRST_ROUND_START_DY 0xc034
 
@@ -102,8 +105,6 @@ main:
         STORE R0, OLD_BALL_X
         STORE R1, OLD_BALL_Y
 
-#       MOV R6, 0
-
         ### Walls collision ###
         LOAD R6, BALL_DX
         LOAD R7, BALL_DY
@@ -139,7 +140,7 @@ main:
             MOV R2, (PADDLE2_X - 1)
 
             CMP R0, R2
-            JE paddle_right_collision
+            JE paddle2_collision
 
             CMP R0, R1
             JNE ball_pos
@@ -169,8 +170,8 @@ main:
             
             MOV R4, 0
             CMP R2, R4
-            JL x_minus_1
-            JG x_plus_1
+            #JL x_minus_1
+            #JG x_plus_1
 
         comparisonY:
             LOAD R1, BALL_Y
@@ -178,15 +179,15 @@ main:
 
             MOV R4, 0
             CMP R3, R4
-            JL y_minus_1
-            JG y_plus_1
+            #JL y_minus_1
+            #JG y_plus_1
         
         paddle_pos:
 
             INA R0
             INB R1
 
-            MOV R2, 0b0000000000000001
+            MOV R2, 1
             MOV R3, 0b0000000100000000
 
             CMP R0, R2
@@ -206,15 +207,18 @@ main:
 
         draw:
 
-            MOV R0, ZERO
-
-            OUTA R0
-            OUTB R0
-
             LOAD R0, OLD_BALL_X
             LOAD R1, OLD_BALL_Y
             
             MOV R2, BLACK
+            JSR draw_pixel ; Erase old ball
+
+            MOV R0, PADDLE1_X
+            LOAD R1, OLD_PADDLE1_Y
+            JSR draw_pixel
+
+            MOV R0, PADDLE2_X
+            LOAD R1, OLD_PADDLE2_Y
             JSR draw_pixel
 
             LOAD R0, BALL_X
@@ -240,26 +244,38 @@ end:
     HLT
 
 paddle1_up:
-    LOAD R4, PADDLE1_Y
-    ADD R4, R4, R2
+    LOAD R4, PADDLE1_Y        ; current top
+    MOV R2, 1
+    SUB R4, R4, R2            ; move up
     STORE R4, PADDLE1_Y
-    JMP check_paddle1_down
+    MOV R5, (PADDLE_HEIGHT + 1)
+    ADD R5, R5, R4            ; Move current bottom pos into R5
+    STORE R5, OLD_PADDLE1_Y   ; old paddle pos
+    JMP check_paddle2_up
 
 paddle1_down:
-    LOAD R4, PADDLE1_Y
-    SUB R4, R4, R2
+    LOAD R4, PADDLE1_Y        ; current top
+    STORE R4, OLD_PADDLE1_Y   ; old paddle pos
+    MOV R2, 1
+    ADD R4, R4, R2            ; move down
     STORE R4, PADDLE1_Y
     JMP check_paddle2_up
 
 paddle2_up:
-    LOAD R4, PADDLE2_Y
-    ADD R4, R4, R2
+    LOAD R4, PADDLE2_Y        ; current top
+    MOV R2, 1
+    SUB R4, R4, R2            ; move up
     STORE R4, PADDLE2_Y
-    JMP check_paddle2_down
+    MOV R5, (PADDLE_HEIGHT + 1)
+    ADD R5, R5, R4            ; Move current bottom pos into R5
+    STORE R5, OLD_PADDLE2_Y   ; old paddle pos
+    JMP draw
 
 paddle2_down:
-    LOAD R4, PADDLE2_Y
-    SUB R4, R4, R2
+    LOAD R4, PADDLE2_Y        ; current top
+    STORE R4, OLD_PADDLE2_Y   ; old paddle pos
+    MOV R2, 1
+    ADD R4, R4, R2            ; move down
     STORE R4, PADDLE2_Y
     JMP draw
 
@@ -368,26 +384,26 @@ draw_paddle:
     ; Parameters: R0 = X, R1 = Y, R2 = Color
 
     MOV R3, PADDLE_HEIGHT
-    ADD R3, R1, R3
-    STORE R3, PADDLE_MAX         ; R3 = bottom Y of paddle
+    ADD R3, R1, R3         ; R3 = bottom Y of paddle
     MOV R6, 0
-    ADD R6, R6, R0               ; Save original X in R6
+    ADD R6, R6, R0
 
     draw_paddle_loop:
-        MOV R4, 1
-        ADD R1, R1, R4
 
-        MOV  R0, 0
-        ADD  R0, R0, R6
+        MOV R0, 0
+        ADD R0, R0, R6
+
         JSR draw_pixel
         
-        LOAD R3, PADDLE_MAX
+        MOV R4, ONE
+        ADD R1, R1, R4
+    
         CMP R1, R3
-        JNE draw_paddle_loop  # Continue if padde max is not yet reached by R1
+        JNE draw_paddle_loop  # Continue if paddle max is not yet reached by R1
 
     RTS
 
-paddle_right_collision:
+paddle2_collision:
     LOAD R0, BALL_Y
     LOAD R1, PADDLE2_Y      ; R1 = PADDLE TOP
     MOV R2, PADDLE_HEIGHT
