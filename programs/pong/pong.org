@@ -6,7 +6,7 @@
 @define N_MAX_SCORE 10
 @define N_MAX_ROUNDS 19
 
-@define PADDLE_HEIGHT 8
+@define PADDLE_HEIGHT 10
 
 @define FRAMEBUFFER 0x8000
 
@@ -170,8 +170,8 @@ main:
             
             MOV R4, 0
             CMP R2, R4
-            #JL x_minus_1
-            #JG x_plus_1
+            JL x_minus_1
+            JG x_plus_1
 
         comparisonY:
             LOAD R1, BALL_Y
@@ -179,8 +179,8 @@ main:
 
             MOV R4, 0
             CMP R3, R4
-            #JL y_minus_1
-            #JG y_plus_1
+            JL y_minus_1
+            JG y_plus_1
         
         paddle_pos:
 
