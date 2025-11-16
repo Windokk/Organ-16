@@ -142,7 +142,7 @@ main:
             JE paddle_right_collision
 
             CMP R0, R1
-            JNE ball_pos_subr
+            JNE ball_pos
 
             LOAD R0, BALL_Y
             LOAD R1, PADDLE1_Y      ; R1 = PADDLE TOP
@@ -150,31 +150,23 @@ main:
             ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
 
             CMP R0, R1
-            JB ball_pos_subr
+            JB ball_pos
 
             CMP R0, R2
-            JA ball_pos_subr
+            JA ball_pos
 
             MOV R0, 1
             STORE R0, BALL_DX
 
-            JMP ball_pos_subr
+            JMP ball_pos
         
 
         ### Update ball position ###
-        ball_pos_subr:
+        ball_pos:
 
             LOAD R0, BALL_X
             LOAD R2, BALL_DX
             
-            
-
-            MOV R7, 0
-
-            OUTA R7
-            OUTB R7
-            OUTC R7
-
             MOV R4, 0
             CMP R2, R4
             JL x_minus_1
@@ -189,7 +181,35 @@ main:
             JL y_minus_1
             JG y_plus_1
         
-        draw_subr:
+        paddle_pos:
+
+            INA R0
+            INB R1
+
+            MOV R2, 0b0000000000000001
+            MOV R3, 0b0000000100000000
+
+            CMP R0, R2
+            JE paddle1_up
+
+        check_paddle1_down:
+            CMP R0, R3
+            JE paddle1_down
+
+        check_paddle2_up:
+            CMP R1, R2
+            JE paddle2_up
+
+        check_paddle2_down:
+            CMP R1, R3
+            JE paddle2_down
+
+        draw:
+
+            MOV R0, ZERO
+
+            OUTA R0
+            OUTB R0
 
             LOAD R0, OLD_BALL_X
             LOAD R1, OLD_BALL_Y
@@ -219,9 +239,33 @@ main:
 end:
     HLT
 
+paddle1_up:
+    LOAD R4, PADDLE1_Y
+    ADD R4, R4, R2
+    STORE R4, PADDLE1_Y
+    JMP check_paddle1_down
+
+paddle1_down:
+    LOAD R4, PADDLE1_Y
+    SUB R4, R4, R2
+    STORE R4, PADDLE1_Y
+    JMP check_paddle2_up
+
+paddle2_up:
+    LOAD R4, PADDLE2_Y
+    ADD R4, R4, R2
+    STORE R4, PADDLE2_Y
+    JMP check_paddle2_down
+
+paddle2_down:
+    LOAD R4, PADDLE2_Y
+    SUB R4, R4, R2
+    STORE R4, PADDLE2_Y
+    JMP draw
+
 start_round:
 
-    JSR clear_everything
+    JSR clear_everything_subr
 
     ; Initialize ball in center
     MOV R0, (SCREEN_WIDTH / 2)
@@ -254,7 +298,7 @@ start_round:
 
     JMP gameLoop
 
-clear_everything:
+clear_everything_subr:
 
     LOAD R0, OLD_BALL_X
     LOAD R1, OLD_BALL_Y
@@ -296,7 +340,7 @@ y_minus_1:
     MOV R7, 1
     SUB R1, R1, R7
     STORE R1, BALL_Y
-    JMP draw_subr
+    JMP paddle_pos
 
 y_plus_1:
     ; Parameters
@@ -304,7 +348,7 @@ y_plus_1:
     MOV R7, 1
     ADD R1, R1, R7
     STORE R1, BALL_Y
-    JMP draw_subr
+    JMP paddle_pos
 
 draw_pixel:
     ; Parameters: 
@@ -350,12 +394,12 @@ paddle_right_collision:
     ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
 
     CMP R0, R1
-    JB ball_pos_subr
+    JB ball_pos
 
     CMP R0, R2
-    JA ball_pos_subr
+    JA ball_pos
 
     MOV R0, -1
     STORE R0, BALL_DX
     
-    JMP ball_pos_subr
+    JMP ball_pos
