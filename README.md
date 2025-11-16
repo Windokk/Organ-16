@@ -102,6 +102,7 @@ It will place every source file at the memory address specified in the linker sc
 ### Known issues/Missing features:
 
 - Support for signed operations is not enforced; it is up to the program to choose whether to work with signed or unsigned numbers.
+- You currently can't move a register's value into another register : you have to do an ALU operation to do so : MOV R1, 0 then ADD, R1, R1, R2  to move R2's value into R1 😕
 
 ### Future plans (v2.0.0):
 

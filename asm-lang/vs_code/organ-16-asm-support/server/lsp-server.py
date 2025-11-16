@@ -24,45 +24,62 @@ server = LanguageServer("Organ 16 Language", "v0.1")
 # === Constants & Helpers ===
 
 VALID_OPCODES = {
-    'ADD': ('RRR', 3),
-    'SUB': ('RRR', 3),
-    'MUL': ('RRR', 3),
-    'DIV': ('RRR', 3),
-    'MOD': ('RRR', 3),
-    'AND': ('RRR', 3),
-    'OR': ('RRR', 3),
-    'NAND': ('RRR', 3),
-    'NOR': ('RRR', 3),
-    'XOR': ('RRR', 3),
-    'NOT': ('RR', 2),
-    'MOV': ('RI', 2),
-    'LOAD': ('MEM', 2),
-    'LOADR': ('RR', 2),
-    'STORE': ('MEM', 2),
-    'STORER': ('RR', 2),
-    'JMP': ('JMP', 1),
-    'JE': ('JMP', 1),
-    'JNE': ('JMP', 1),
-    'JB': ('JMP', 1),
-    'JBE': ('JMP', 1),
-    'JA': ('JMP', 1),
-    'JAE': ('JMP', 1),
-    'JL': ('JMP', 1),
-    'JLE': ('JMP', 1),
-    'JG': ('JMP', 1),
-    'JGE': ('JMP', 1),
-    'JSR': ('JMP', 1),
-    'RTS': ('JMP', 0),
-    'HLT': ('HLT', 0),
-    'CMP': ('RR', 2),
-    'PUSH': ('R', 1),
-    'POP': ('R', 1),
-    'INA': ('R', 1),
-    'INB': ('R', 1),
-    'INC': ('R', 1),
-    'OUTA': ('R', 1),
-    'OUTB': ('R', 1),
-    'OUTC': ('R', 1)
+    # name: { "operands": [allowed types...] }
+
+    # R = register only
+    # I = immediate or constant only
+    # M = memory (register + immediate)
+    # J = jump target (label or immediate)
+
+    "ADD":   ["R", "R", "R"],
+    "SUB":   ["R", "R", "R"],
+    "MUL":   ["R", "R", "R"],
+    "DIV":   ["R", "R", "R"],
+    "MOD":   ["R", "R", "R"],
+    "AND":   ["R", "R", "R"],
+    "OR":    ["R", "R", "R"],
+    "NAND":  ["R", "R", "R"],
+    "NOR":   ["R", "R", "R"],
+    "XOR":   ["R", "R", "R"],
+
+    "NOT":   ["R", "R"],
+    "CMP":   ["R", "R"],
+
+    # register + immediate only
+    "MOV":   ["R", "I"],
+
+    # memory instructions
+    "LOAD":  ["R", "M"],
+    "STORE": ["R", "M"],
+    "LOADR": ["R", "R"],
+    "STORER":["R", "R"],
+
+    # jumps accept label, immediate, constant
+    "JMP":   ["J"],
+    "JE":    ["J"],
+    "JNE":   ["J"],
+    "JB":    ["J"],
+    "JBE":   ["J"],
+    "JA":    ["J"],
+    "JAE":   ["J"],
+    "JL":    ["J"],
+    "JLE":   ["J"],
+    "JG":    ["J"],
+    "JGE":   ["J"],
+    "JSR":   ["J"],
+
+    "RTS":   [],
+    "HLT":   [],
+
+    # Register-only instructions
+    "PUSH":  ["R"],
+    "POP":   ["R"],
+    "INA":   ["R"],
+    "INB":   ["R"],
+    "INC":   ["R"],
+    "OUTA":  ["R"],
+    "OUTB":  ["R"],
+    "OUTC":  ["R"],
 }
 
 VALID_REGISTERS = {f"R{i}" for i in range(8)}
@@ -221,52 +238,59 @@ def validate_org_source(lines):
             diagnostics.append(make_error(lineno, line.find(instr), len(line), f"Unknown instruction '{instr}'"))
             continue
 
-        fmt, expected_operands = VALID_OPCODES[instr]
+        allowed_types = VALID_OPCODES[instr]
 
         operands = []
         if len(parts) > 1:
             operands = split_operands(parts[1])
 
-        if len(operands) != expected_operands:
+        if len(operands) != len(allowed_types):
             diagnostics.append(make_error(
                 lineno,
                 line.find(instr),
                 len(line),
-                f"Instruction '{instr}' expects {expected_operands} operands, got {len(operands)}"
+                f"Instruction '{instr}' expects {len(allowed_types)} operands, got {len(operands)}"
             ))
             continue
+
+        for idx, (operand, expected_type) in enumerate(zip(operands, allowed_types)):
+            op_start = line.find(operand)
+            op_end = op_start + len(operand)
+
+            if expected_type == "R":
+                if operand.upper() not in VALID_REGISTERS:
+                    diagnostics.append(make_error(
+                        lineno, op_start, op_end,
+                        f"Operand {idx+1} must be a register; found '{operand}'"
+                    ))
+
+            elif expected_type == "I":
+                if not is_immediate(operand, defined_constants):
+                    diagnostics.append(make_error(
+                        lineno, op_start, op_end,
+                        f"Operand {idx+1} must be an immediate or constant; found '{operand}'"
+                    ))
+
+            elif expected_type == "M":
+                if (operand.upper() not in VALID_REGISTERS
+                    and not is_immediate(operand, defined_constants)):
+                    diagnostics.append(make_error(
+                        lineno, op_start, op_end,
+                        f"Operand {idx+1} must be memory (register or immediate); found '{operand}'"
+                    ))
+
+            elif expected_type == "J":
+                if (operand not in labels_defined
+                    and not is_immediate(operand, defined_constants)
+                    and operand not in defined_constants):
+                    diagnostics.append(make_error(
+                        lineno, op_start, op_end,
+                        f"Invalid jump target '{operand}'"
+                    ))
 
 
         def is_invalid_register(token):
             return token.upper().startswith('R') and token.upper() not in VALID_REGISTERS
-
-        def is_valid_operand_immediate_or_constant(token):
-            return is_immediate(token, defined_constants) or token in defined_constants
-
-        # === Validation spécifique selon format ===
-
-        if fmt in ('RRR', 'RR'):
-            for op in operands:
-                if is_invalid_register(op):
-                    diagnostics.append(make_error(lineno, line.find(op), line.find(op) + len(op), f"Invalid register '{op}'"))
-        elif fmt == 'RI':
-            if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]), f"Invalid register '{operands[0]}'"))
-            if not is_valid_operand_immediate_or_constant(operands[1]):
-                diagnostics.append(make_error(lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]), f"Invalid immediate or constant '{operands[1]}'"))
-        elif fmt == 'MEM':
-            if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]), f"Invalid register '{operands[0]}'"))
-            if not is_valid_operand_immediate_or_constant(operands[1]):
-                diagnostics.append(make_error(lineno, line.find(operands[1]), line.find(operands[1]) + len(operands[1]), f"Invalid memory address or constant '{operands[1]}'"))
-        elif fmt == 'JMP':
-            if expected_operands == 1:
-                op = operands[0]
-                if not is_immediate(op, defined_constants) and op not in labels_defined and op not in defined_constants:
-                    labels_used.add((op, lineno, line.find(op), line.find(op) + len(op)))
-        elif fmt == 'R':
-            if is_invalid_register(operands[0]):
-                diagnostics.append(make_error(lineno, line.find(operands[0]), line.find(operands[0]) + len(operands[0]), f"Invalid register '{operands[0]}'"))
 
         # === Enregistrement des labels/constants utilisés
         for op in operands:

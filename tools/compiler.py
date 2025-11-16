@@ -8,6 +8,63 @@ STACK_START = 0xF000
 STACK_END = 0xFFFF
 MAX_MEMORY = 0x10000
 
+INSTR_FORMAT = {
+    # ALU operations (3 regs, no immediates)
+    "ADD":  {"regs": 3, "imm": False},
+    "SUB":  {"regs": 3, "imm": False},
+    "MUL":  {"regs": 3, "imm": False},
+    "DIV":  {"regs": 3, "imm": False},
+    "MOD":  {"regs": 3, "imm": False},
+    "AND":  {"regs": 3, "imm": False},
+    "OR":   {"regs": 3, "imm": False},
+    "NAND": {"regs": 3, "imm": False},
+    "NOR":  {"regs": 3, "imm": False},
+    "XOR":  {"regs": 3, "imm": False},
+
+    # Unary ALU (2 regs, no immediates)
+    "NOT":  {"regs": 2, "imm": False},
+    "CMP":  {"regs": 2, "imm": False},
+
+    # MOV (1 reg, no immediates)
+    "MOV":   {"regs": 1, "imm": True},
+
+    # Memory operations
+    "LOAD":  {"regs": 1, "imm": True},
+    "STORE": {"regs": 1, "imm": True},
+    "LOADR": {"regs": 2, "imm": False},
+    "STORER":{"regs": 2, "imm": False},
+
+    # Jumps
+    "JMP":  {"regs": 0, "imm": True},
+    "JE":   {"regs": 0, "imm": True},
+    "JNE":  {"regs": 0, "imm": True},
+    "JB":   {"regs": 0, "imm": True},
+    "JBE":  {"regs": 0, "imm": True},
+    "JA":   {"regs": 0, "imm": True},
+    "JAE":  {"regs": 0, "imm": True},
+    "JL":   {"regs": 0, "imm": True},
+    "JLE":  {"regs": 0, "imm": True},
+    "JG":   {"regs": 0, "imm": True},
+    "JGE":  {"regs": 0, "imm": True},
+    "JSR":  {"regs": 0, "imm": True},
+    "RTS":  {"regs": 0, "imm": False},
+
+    # Stack ops — NO immediates
+    "PUSH": {"regs": 1, "imm": False},
+    "POP":  {"regs": 1, "imm": False},
+
+    # IO ops — NO immediates
+    "INA":  {"regs": 1, "imm": False},
+    "INB":  {"regs": 1, "imm": False},
+    "INC":  {"regs": 1, "imm": False},
+    "OUTA": {"regs": 1, "imm": False},
+    "OUTB": {"regs": 1, "imm": False},
+    "OUTC": {"regs": 1, "imm": False},
+
+    # Halt
+    "HLT":  {"regs": 0, "imm": False},
+}
+
 def is_stack_overlap(start_addr: int, instr_count: int) -> bool:
     return start_addr < STACK_END and (start_addr + instr_count) > STACK_START
 
@@ -136,8 +193,31 @@ def ReplaceLabels(line: str, label_map: dict) -> str:
 
 def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
     instr, regs, imm = ParseLine(line)
+
     if not instr:
         return None
+
+    if instr not in INSTR_FORMAT:
+        raise ValueError(f"Unknown instruction '{instr}' in line: {line}")
+
+    fmt = INSTR_FORMAT[instr]
+
+    # === UNIVERSAL VALIDATION ===
+    if len(regs) != fmt["regs"]:
+        raise ValueError(
+            f"{instr} expects {fmt['regs']} register(s), got {len(regs)} in line: '{line}'"
+        )
+
+    if imm and not fmt["imm"]:
+        raise ValueError(
+            f"{instr} does not accept an immediate value. Invalid line: '{line}'"
+        )
+
+    if not imm and fmt["imm"]:
+        pass
+
+    # Here we are sure that the instruction is valid, the number of registers is correct, immediates are only allowed where expected
+
     op_bin = OpCodeToBinOpCode(instr)
     if len(regs) == 0:
         if imm:
