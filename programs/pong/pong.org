@@ -54,16 +54,16 @@ pre_init:
     STORE R0, (FIRST_ROUND_START_DX + 16)
     STORE R0, (FIRST_ROUND_START_DX + 18)
 
-    STORE R0, (FIRST_ROUND_START_DY + 1)
-    STORE R0, (FIRST_ROUND_START_DY + 3)
-    STORE R0, (FIRST_ROUND_START_DY + 5)
-    STORE R0, (FIRST_ROUND_START_DY + 7)
-    STORE R0, (FIRST_ROUND_START_DY + 9)
-    STORE R0, (FIRST_ROUND_START_DY + 11)
-    STORE R0, (FIRST_ROUND_START_DY + 13)
-    STORE R0, (FIRST_ROUND_START_DY + 15)
-    STORE R0, (FIRST_ROUND_START_DY + 17)
-    STORE R0, (FIRST_ROUND_START_DY + 19)
+    #STORE R0, (FIRST_ROUND_START_DY + 1)
+    #STORE R0, (FIRST_ROUND_START_DY + 3)
+    #STORE R0, (FIRST_ROUND_START_DY + 5)
+    #STORE R0, (FIRST_ROUND_START_DY + 7)
+    #STORE R0, (FIRST_ROUND_START_DY + 9)
+    #STORE R0, (FIRST_ROUND_START_DY + 11)
+    #STORE R0, (FIRST_ROUND_START_DY + 13)
+    #STORE R0, (FIRST_ROUND_START_DY + 15)
+    #STORE R0, (FIRST_ROUND_START_DY + 17)
+    #STORE R0, (FIRST_ROUND_START_DY + 19)
 
     MOV R0, 1
     STORE R0, (FIRST_ROUND_START_DX + 1)
@@ -77,16 +77,16 @@ pre_init:
     STORE R0, (FIRST_ROUND_START_DX + 17)
     STORE R0, (FIRST_ROUND_START_DX + 19)
 
-    STORE R0, FIRST_ROUND_START_DY
-    STORE R0, (FIRST_ROUND_START_DY + 2)
-    STORE R0, (FIRST_ROUND_START_DY + 4)
-    STORE R0, (FIRST_ROUND_START_DY + 6)
-    STORE R0, (FIRST_ROUND_START_DY + 8)
-    STORE R0, (FIRST_ROUND_START_DY + 10)
-    STORE R0, (FIRST_ROUND_START_DY + 12)
-    STORE R0, (FIRST_ROUND_START_DY + 14)
-    STORE R0, (FIRST_ROUND_START_DY + 16)
-    STORE R0, (FIRST_ROUND_START_DY + 18)
+    #STORE R0, FIRST_ROUND_START_DY
+    #STORE R0, (FIRST_ROUND_START_DY + 2)
+    #STORE R0, (FIRST_ROUND_START_DY + 4)
+    #STORE R0, (FIRST_ROUND_START_DY + 6)
+    #STORE R0, (FIRST_ROUND_START_DY + 8)
+    #STORE R0, (FIRST_ROUND_START_DY + 10)
+    #STORE R0, (FIRST_ROUND_START_DY + 12)
+    #STORE R0, (FIRST_ROUND_START_DY + 14)
+    #STORE R0, (FIRST_ROUND_START_DY + 16)
+    #STORE R0, (FIRST_ROUND_START_DY + 18)
 
 
 main:
@@ -125,12 +125,10 @@ main:
             ; Check Y collision (top/bottom)
             MOV R5, ZERO ; Top
             CMP R1, R5
-            JE start_round
+            JE y_collision_top
 
             CMP R1, R4   ; Bottom
-            JE start_round
-
-            JMP paddle_collision
+            JE y_collision_bottom
 
         ### Paddle collision ###
         paddle_collision:
@@ -365,6 +363,22 @@ y_plus_1:
     ADD R1, R1, R7
     STORE R1, BALL_Y
     JMP paddle_pos
+
+y_collision_bottom:
+    ; Parameters
+    ; R1 = Y
+    MOV R7, 1
+    SUB R1, R1, R7
+    STORE R1, BALL_Y
+    JMP paddle_collision
+
+y_collision_top:
+    ; Parameters
+    ; R1 = Y
+    MOV R7, 1
+    ADD R1, R1, R7
+    STORE R1, BALL_Y
+    JMP paddle_collision
 
 draw_pixel:
     ; Parameters: 
