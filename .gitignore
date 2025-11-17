@@ -1,2 +1,3 @@
-.vscode/
+emulator/.vscode/
 emulator/build/Emulator.exe
+emulator/build/
