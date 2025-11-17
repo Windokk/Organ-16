@@ -1,4 +1,0 @@
-MOV R0, 0x0040
-MOV R2, 1
-SUB R0, R0, R2
-HLT

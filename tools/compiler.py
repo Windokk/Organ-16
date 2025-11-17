@@ -277,6 +277,25 @@ def ParseConstants(lines: List[str]) -> dict:
                 print(f"Warning: Invalid @define syntax: '{line}'")
     return constants
 
+def LoadHexBinWords(path: str) -> list:
+    """
+    Load a .bin file containing ASCII hex words (one per line or space-separated).
+    Returns a list of 4-digit hex strings.
+    """
+    words = []
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            # split by spaces if multiple words per line
+            for part in line.split():
+                part = part.strip()
+                if part:
+                    # ensure 4 hex digits
+                    words.append(part.zfill(4).lower())
+    return words
+
 def ReplaceLabelsAndConstants(line: str, label_map: dict, constants_map: dict) -> str:
     """
     Replace label or constant names in immediate fields with their numeric values.
@@ -298,6 +317,21 @@ def CompileMultiple(segments: List[Tuple[str, int]], output_file: str):
     all_constants = {}
 
     for filepath, base_addr in segments:
+
+        # --- Raw binary support -----------------------------------------
+        if filepath.lower().endswith(".bin"):
+            words = LoadHexBinWords(filepath)
+
+            max_instr = STACK_START - base_addr
+            if len(words) > max_instr:
+                print(f"Cropping binary segment '{filepath}' to avoid stack memory overlap.")
+                words = words[:max_instr]
+
+            # store into memory later
+            file_lines.append((words, base_addr, "BINARY"))
+            continue
+        # ----------------------------------------------------------------------
+
         lines = ReadFileLines(filepath)
 
         # Extract constants first
@@ -333,8 +367,18 @@ def CompileMultiple(segments: List[Tuple[str, int]], output_file: str):
         global_labels.update(label_map)
         file_lines.append((lines, base_addr, constants))  # pass constants too
 
-    for lines, base_addr, constants in file_lines:
+    for segment, base_addr, segtype in file_lines:
         addr = base_addr
+
+        # --- Direct binary copy ---------------------------------------
+        if segtype == "BINARY":
+            for w in segment:
+                memory[addr] = w
+                addr += 1
+            continue
+        # --------------------------------------------------------------------
+
+        lines = segment
         for line in lines:
             if IsLabel(line):
                 continue

@@ -1,4 +1,8 @@
 ; Pong for Organ16 Assembly v1.0.0
+; 
+; How to play :
+; Left paddle : bit 0, 8 of port A
+; Right paddle : bit 0, 8 of port B
 
 @define SCREEN_WIDTH   128
 @define SCREEN_HEIGHT  128
@@ -6,7 +10,7 @@
 @define N_MAX_SCORE 10
 @define N_MAX_ROUNDS 19
 
-@define PADDLE_HEIGHT 10
+@define PADDLE_HEIGHT 8
 
 @define FRAMEBUFFER 0x8000
 
@@ -123,7 +127,7 @@ main:
 
         y_collision:
             ; Check Y collision (top/bottom)
-            MOV R5, ZERO ; Top
+            # Redundant : MOV R5, ZERO ; Top
             CMP R1, R5
             JE y_collision_top
 
@@ -144,7 +148,7 @@ main:
             JNE ball_pos
 
             LOAD R0, BALL_Y
-            LOAD R1, PADDLE1_Y      ; R1 = PADDLE TOP
+            LOAD R1, PADDLE1_Y      ; R1 = PADDLE TOP 
             MOV R2, PADDLE_HEIGHT
             ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
 
@@ -243,7 +247,6 @@ end:
 
 paddle1_up:
     LOAD R4, PADDLE1_Y        ; current top
-    MOV R2, 1
     SUB R4, R4, R2            ; move up
     STORE R4, PADDLE1_Y
     MOV R5, (PADDLE_HEIGHT + 1)
@@ -425,7 +428,7 @@ paddle2_collision:
 
     CMP R0, R1
     JB ball_pos
-
+    
     CMP R0, R2
     JA ball_pos
 
