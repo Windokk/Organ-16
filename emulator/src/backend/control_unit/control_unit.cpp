@@ -92,7 +92,7 @@ CU_Data ControlUnit::GetCU_Data(uint16_t IR_0, uint8_t FlagsData)
     if(OpCode == 0){
         ret.regWrite = 1;
     }
-    if(OpCode == 7 && subOpCode == 1 || subOpCode == 2 || subOpCode == 3){
+    if(OpCode == 7 && (subOpCode == 1 || subOpCode == 2 || subOpCode == 3)){
         ret.regWrite = 1;
     }
 

@@ -77,7 +77,15 @@ void ToggleAutomaticClock(bool checked){
 void UpdateDebugValues(std::unordered_map<std::string, bool> debugValues){
     for(auto& pair : debugValues){
         if(debugValuesLEDs.find(pair.first) != debugValuesLEDs.end()){
-            debugValuesLEDs.at(pair.first)->setStyleSheet(pair.second ? "background-color: rgba(40, 197, 26, 1);" : "background-color: rgba(143, 143, 143, 1);");
+            QWidget* led = debugValuesLEDs.at(pair.first);
+
+            QMetaObject::invokeMethod(led, [led, pair]() {
+                led->setStyleSheet(
+                    pair.second
+                        ? "background-color: rgba(40, 197, 26, 1);"
+                        : "background-color: rgba(143, 143, 143, 1);"
+                );
+            }, Qt::QueuedConnection);
         }
     }
 }

@@ -19,7 +19,7 @@ void CPU::Tick(){
     Clock::GetInstance()->Increment();
     bool currentClockSignal = Clock::GetInstance()->GetClockSignal(previousControlUnitData.HLT);
     bool regWrite = previousControlUnitData.regWrite & (previousTemp.isCurrExt | ((previousControlUnitData.ALU_DATA & 0b10000) >> 4) | previousTemp.regIsCurrAddr | previousControlUnitData.useIn);
-
+     
     //Clock Edge (Executed DURING edge (so we can only use old/previous values))
     TempOut newTempValues = UpdateTemporaryValuesOnClock(previousControlUnitData, previousTemp, currentClockSignal);
     RegsOutOnChange newRegsValues = UpdateRegistersOnClock(previousControlUnitData, previousTemp, previousRegs, 
