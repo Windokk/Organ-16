@@ -11,20 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui Concurrent)
 
-set(PROJECT_SOURCES
-        src/main.cpp
-        src/layouts/io_ports.cpp
-        src/layouts/screen/canvas.cpp
-        src/layouts/regs/flow_layout.cpp
-        src/layouts/ram_panel.cpp
-        src/backend/cpu.cpp
-        src/backend/clock.cpp
-        src/backend/control_unit/control_unit.cpp
-        src/backend/alu/alu.cpp
-        src/backend/memory/memory_interface.cpp
-        src/backend/memory/ram.cpp
-        src/backend/registers/registers.cpp
-        src/backend/temp_values/temp_values.cpp
+file(GLOB_RECURSE PROJECT_SOURCES
+    CONFIGURE_DEPENDS
+    src/*.cpp
 )
 
 qt_add_executable(Emulator
@@ -32,6 +21,8 @@ qt_add_executable(Emulator
     ${PROJECT_SOURCES}
     src/resources.qrc
 )
+
+target_include_directories(Emulator PUBLIC src)
 
 target_link_libraries(Emulator PRIVATE Qt6::Core Qt6::Widgets Qt6::Gui Qt6::Concurrent)
 

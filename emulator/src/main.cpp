@@ -11,11 +11,11 @@ Expect garbage code, bugs and crashes 😅.
 #include <iomanip>
 #include <sstream>
 
-#include "layouts/screen/canvas.hpp"
-#include "layouts/regs/clck_btn.hpp"
-#include "layouts/regs/flow_layout.hpp"
-#include "layouts/ram_panel.hpp"
-#include "layouts/io_ports.hpp"
+#include "gui/display/qtdisplay.hpp"
+#include "gui/regs/clck_btn.hpp"
+#include "gui/regs/flow_layout.hpp"
+#include "gui/memory/ram_panel.hpp"
+#include "gui/io/io_ports.hpp"
 
 #include "backend/cpu.hpp"
 
@@ -26,6 +26,7 @@ std::unordered_map<RegisterName, QLineEdit*> registersLineEdits;
 std::unordered_map<std::string, QWidget*> debugValuesLEDs;
 QLabel* clockLabel;
 CanvasWidget* canvas;
+QtDisplay* screen;
 IOPortsPanel* ioPanel;
 RamPanel* ramPanel;
 QTableView* ramView;
@@ -69,6 +70,10 @@ void ToggleAutomaticClock(bool checked){
     if (Clock::GetInstance()->GetFrequency() > 0) {
         QObject::connect(&timer, &QTimer::timeout, []() {
             CPU::GetInstance()->RunFrame();
+
+            QMetaObject::invokeMethod(canvas, []() {
+                screen->Present(RAM::GetInstance()->framebuffer);
+            }, Qt::QueuedConnection);
         });
         timer.start(1000 / Clock::GetInstance()->GetFrequency());
     }
@@ -222,6 +227,10 @@ void SetScreenPixel(int x, int y, QColor color)
 void OnClockClick() {
     QtConcurrent::run([]() {
         CPU::GetInstance()->RunFrame();
+
+        QMetaObject::invokeMethod(canvas, []() {
+            screen->Present(RAM::GetInstance()->framebuffer);
+        }, Qt::QueuedConnection);
     });
 }
 
@@ -415,7 +424,7 @@ void SetupGUI(){
     QVBoxLayout* frequencyVLayout = new QVBoxLayout(mainFrequencyWidget);
 
     QLabel* frequencyTitle = new QLabel(
-        QString("Frequency: %1 MHz").arg(savedClockFrequency)
+        QString("Frequency: %1 Hz").arg(savedClockFrequency)
     );
     frequencyTitle->setAlignment(Qt::AlignHCenter);
 
@@ -507,6 +516,7 @@ void SetupGUI(){
     canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     rightLayout->addWidget(canvas);
 
+    screen = new QtDisplay(canvas);
     
     /* ============ Left panel ============== */
     QWidget* leftPanel = new QWidget;

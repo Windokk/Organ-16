@@ -4,11 +4,12 @@
             "name": "Win32",
             "includePath": [
                 "${default}",
-                "C:/Qt/6.9.2/mingw_64/include/QtWidgets",
-                "C:/Qt/6.9.2/mingw_64/include/QtGui",
-                "C:/Qt/6.9.2/mingw_64/include/QtCore",
-                "C:/Qt/6.9.2/mingw_64/include/QtConcurrent",
-                "C:/Qt/6.9.2/mingw_64/include"
+                "${workspaceFolder}/src/",
+                "C:/Qt/6.10.1/mingw_64/include/QtWidgets",
+                "C:/Qt/6.10.1/mingw_64/include/QtGui",
+                "C:/Qt/6.10.1/mingw_64/include/QtCore",
+                "C:/Qt/6.10.1/mingw_64/include/QtConcurrent",
+                "C:/Qt/6.10.1/mingw_64/include"
             ],
             "defines": [
                 "_DEBUG",
