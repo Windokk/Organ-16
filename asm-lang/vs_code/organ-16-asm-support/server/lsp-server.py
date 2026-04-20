@@ -74,12 +74,12 @@ VALID_OPCODES = {
     # Register-only instructions
     "PUSH":  ["R"],
     "POP":   ["R"],
-    "INA":   ["R"],
-    "INB":   ["R"],
-    "INC":   ["R"],
-    "OUTA":  ["R"],
-    "OUTB":  ["R"],
-    "OUTC":  ["R"],
+    "IN0":   ["R"],
+    "IN1":   ["R"],
+    "IN2":   ["R"],
+    "OUT0":  ["R"],
+    "OUT1":  ["R"],
+    "OUT2":  ["R"],
 }
 
 VALID_REGISTERS = {f"R{i}" for i in range(8)}

@@ -12,8 +12,10 @@ class ClockButton : public QPushButton {
     QPixmap tintedPixmap;
 
 public:
-    ClockButton(const QString &imagePath, std::function<void()> onClick, QWidget *parent = nullptr) : QPushButton(parent) {
+    ClockButton(const QString &imagePath, std::function<void()> onClick, std::function<void()> onUp, std::function<void()> onDown, QWidget *parent = nullptr) : QPushButton(parent) {
         this->onClick = onClick;
+        this->onMouseUp = onUp;
+        this->onMouseDown = onDown;
         setFlat(true);
         setCursor(Qt::PointingHandCursor);
         setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -40,7 +42,18 @@ protected:
             setIconSize(size());
         } else if (event->type() == QEvent::MouseButtonPress){
             onClick();
+        } else if (event->type() == QEvent::Wheel) {
+            QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);
+
+            if (wheelEvent->angleDelta().y() > 0 && onMouseUp) {
+                // Scroll up
+                onMouseUp();
+            } else if(onMouseDown){
+                // Scroll down
+                onMouseDown();
+            }
         }
+
         return QPushButton::eventFilter(obj, event);
     }
 
@@ -56,4 +69,6 @@ private:
     }
 
     std::function<void()> onClick;
+    std::function<void()> onMouseUp;
+    std::function<void()> onMouseDown;
 };
