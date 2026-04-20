@@ -10,6 +10,7 @@ Expect garbage code, bugs and crashes 😅.
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <cstdint>
 
 #include "gui/display/qtdisplay.hpp"
 #include "gui/regs/clck_btn.hpp"
@@ -25,6 +26,7 @@ QMainWindow* window;
 std::unordered_map<RegisterName, QLineEdit*> registersLineEdits;
 std::unordered_map<std::string, QWidget*> debugValuesLEDs;
 QLabel* clockLabel;
+QLabel* clockTicks;
 CanvasWidget* canvas;
 QtDisplay* screen;
 IOPortsPanel* ioPanel;
@@ -34,13 +36,12 @@ FullSplitter* HSplitterBottom;
 QAction *toggleAutomatic;
 QAction *toggleManual;
 QTimer timer;
-QFuture<void> runLoop;
-std::atomic<bool> running = false;
 
 bool debugPanelShown = false;
 
 int savedClockFrequency;
 bool automaticClock = false;
+uint32_t halfTicksOnClockClick = 1;
 
 uint16_t GetIN(int portIndex){
     return ioPanel->portValue(ioPanel->portNameFromIndex(portIndex));
@@ -74,6 +75,7 @@ void ToggleAutomaticClock(bool checked){
             QMetaObject::invokeMethod(canvas, []() {
                 screen->Present(RAM::GetInstance()->framebuffer);
             }, Qt::QueuedConnection);
+            CPU::GetInstance()->RunFrame(-1);
         });
         timer.start(1000 / Clock::GetInstance()->GetFrequency());
     }
@@ -95,7 +97,7 @@ void UpdateDebugValues(std::unordered_map<std::string, bool> debugValues){
     }
 }
 
-void Import_RAM() {
+void ImportRAM() {
     CPU::GetInstance()->Reset();
 
     QString fileName = QFileDialog::getOpenFileName(
@@ -231,7 +233,20 @@ void OnClockClick() {
         QMetaObject::invokeMethod(canvas, []() {
             screen->Present(RAM::GetInstance()->framebuffer);
         }, Qt::QueuedConnection);
+        CPU::GetInstance()->RunFrame(halfTicksOnClockClick);
     });
+}
+
+void OnClockUp(){
+    halfTicksOnClockClick++;
+    clockTicks->setText(QString::number(halfTicksOnClockClick));
+}
+
+void OnClockDown(){
+    if(halfTicksOnClockClick == 0)
+        return;
+    halfTicksOnClockClick--;
+    clockTicks->setText(QString::number(halfTicksOnClockClick));
 }
 
 void OnResetClick(){
@@ -342,7 +357,7 @@ QWidget* MakeResetWidget(){
     ));
     layout->addWidget(label);
 
-    ClockButton* btn = new ClockButton(":/images/imgs/RESET.png", OnResetClick);
+    ClockButton* btn = new ClockButton(":/images/imgs/RESET.png", OnResetClick, nullptr, nullptr);
     btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     btn->setMinimumSize(40, 40);
@@ -379,13 +394,32 @@ QWidget* MakeClockWidget() {
 
     clockLabel = label;
 
-    ClockButton* btn = new ClockButton(":/images/imgs/CLOCK.png", OnClockClick);
+    ClockButton* btn = new ClockButton(":/images/imgs/CLOCK.png", OnClockClick, OnClockUp, OnClockDown);
     btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     btn->setMinimumSize(40, 40);
     btn->setMaximumSize(80, 80);
 
     layout->addWidget(btn, 0, Qt::AlignHCenter);
+
+    
+    QLabel* ticksLabel = new QLabel(QString::number(halfTicksOnClockClick));
+    ticksLabel->setAlignment(Qt::AlignCenter);
+    ticksLabel->setFixedWidth(113);
+    ticksLabel->setFixedHeight(20);
+    ticksLabel->setStyleSheet(QString(
+        "QLabel {"
+        "   border: none;"
+        "   background: transparent;"
+        "   color: #a7a7a7;"
+        "   font-weight: 600;"
+        "   font-size: 14px;"
+        "   padding: 2px 4px;"
+        "}"
+    ));
+    layout->addWidget(ticksLabel);
+
+    clockTicks = ticksLabel;
 
     w->setMinimumSize(60, 60);
     return w;
@@ -404,7 +438,7 @@ void SetupGUI(){
     QAction* importAction = new QAction();
     importAction->setText("Import program...");
     importAction->setToolTip("Load a compiled program file to RAM");
-    QObject::connect(importAction, &QAction::triggered, &Import_RAM);
+    QObject::connect(importAction, &QAction::triggered, &ImportRAM);
     file_menu->addAction(importAction);
 
     QMenu *debug_menu = new QMenu("Debug", menubar);
@@ -542,7 +576,7 @@ void SetupGUI(){
     ramView->setMaximumWidth(870);
 
     
-    /* ============ Bottom panel : Regs ============== */
+    // ---------------- Bottom panel : Regs --------------
     QWidget* bottomPanel = new QWidget;
     bottomPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout* bottomLayout = new QVBoxLayout(bottomPanel);
@@ -608,7 +642,7 @@ void SetupGUI(){
     HSplitter->setStretchFactor(1, 1);
     HSplitter->setChildrenCollapsible(false);
 
-    /* ============ Bottom panel : IO Ports ============== */
+    // ---------- Bottom panel : IO Ports --------------
 
     ioPanel = new IOPortsPanel();
 

@@ -111,8 +111,8 @@ It will place every source file at the memory address specified in the linker sc
 - [ ] IRL breadboard implementation
 - [ ] Random number generation
 - [ ] More instructions :
-  - [x] OUT[A/B/C] (Output 1/0 to an I/O port)
-  - [x] IN[A/B/C] (Get input from an I/O port)
+  - [x] OUT[0/1/2] (Output a 16 bit number to an I/O port)
+  - [x] IN[0/1/2] (Get input from an I/O port)
   - [ ] XNOR
   - [ ] MOVI vs MOV (Being able to move a register's value into another register (without doing MOV R1, 0 then ADD, R1, R1, R2))
   - [ ] SHL/SHR (Shift left/right) (via a new Shifting Unit)

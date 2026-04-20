@@ -176,8 +176,15 @@ RegsOutOnIdle CPU::UpdateRegistersOnIdle(const TempOut& newtempValues, uint16_t 
     return RegisterFile::GetInstance()->OnClockIdle(regInOnClockIdle);
 }
 
-void CPU::RunFrame()
+void CPU::RunFrame(uint32_t nbHalfTicks)
 {
+    if(Clock::GetInstance()->GetFrequency() < 2 && nbHalfTicks >= 0){
+        for (int i = 0; i < nbHalfTicks; ++i) {
+            Tick();
+        }
+        return;
+    }
+
     const int ticks_per_frame = Clock::GetInstance()->GetFrequency() * 10;
     if(ticks_per_frame > 0){
         for (int i = 0; i < ticks_per_frame; ++i) {

@@ -41,12 +41,12 @@ Here are the 39 currently usable instructions :
 | CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2 (Not commutative)   |
 | PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack                |
 | POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1              |
-| INA         | `111`    | `0001`      | (1 word)   | INA R0           | Place input data from port A into R0  |
-| INB         | `111`    | `0010`      | (1 word)   | INB R0           | Place input data from port B into R0  |
-| INC         | `111`    | `0011`      | (1 word)   | INC R0           | Place input data from port C into R0  |
-| OUTA        | `111`    | `0100`      | (1 word)   | OUTA R0          | Outputs R0 to output port A           |
-| OUTB        | `111`    | `0101`      | (1 word)   | OUTB R0          | Outputs R0 to output port B           |
-| OUTC        | `111`    | `0110`      | (1 word)   | OUTC R0          | Outputs R0 to output port C           |
+| IN0         | `111`    | `0001`      | (1 word)   | IN0 R0           | Place input data from port A into R0  |
+| IN1         | `111`    | `0010`      | (1 word)   | IN1 R0           | Place input data from port B into R0  |
+| IN2         | `111`    | `0011`      | (1 word)   | IN2 R0           | Place input data from port C into R0  |
+| OUT0        | `111`    | `0100`      | (1 word)   | OUT0 R0          | Outputs R0 to output port A           |
+| OUT1        | `111`    | `0101`      | (1 word)   | OUT1 R0          | Outputs R0 to output port B           |
+| OUT2        | `111`    | `0110`      | (1 word)   | OUT2 R0          | Outputs R0 to output port C           |
 
 ### Instruction decompisition : 
 

@@ -46,7 +46,7 @@
 @define FIRST_ROUND_START_DY 0xc034
 
 pre_init:
-    MOV R0, -1
+    MOV R0, 0
     STORE R0, FIRST_ROUND_START_DX
     STORE R0, (FIRST_ROUND_START_DX + 2)
     STORE R0, (FIRST_ROUND_START_DX + 4)
@@ -186,8 +186,8 @@ main:
         
         paddle_pos:
 
-            INA R0
-            INB R1
+            IN0 R0
+            IN1 R1
 
             MOV R2, 1
             MOV R3, 0b0000000100000000
@@ -247,6 +247,7 @@ end:
 
 paddle1_up:
     LOAD R4, PADDLE1_Y        ; current top
+    MOV R2, 1
     SUB R4, R4, R2            ; move up
     STORE R4, PADDLE1_Y
     MOV R5, (PADDLE_HEIGHT + 1)

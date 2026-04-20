@@ -56,7 +56,7 @@ class CPU{
             return instancePtr;
         }
 
-        void RunFrame();
+        void RunFrame(uint32_t nbHalfTicks);
 
         void Init();
 

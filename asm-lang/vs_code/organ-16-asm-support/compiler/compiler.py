@@ -54,12 +54,12 @@ INSTR_FORMAT = {
     "POP":  {"regs": 1, "imm": False},
 
     # IO ops — NO immediates
-    "INA":  {"regs": 1, "imm": False},
-    "INB":  {"regs": 1, "imm": False},
-    "INC":  {"regs": 1, "imm": False},
-    "OUTA": {"regs": 1, "imm": False},
-    "OUTB": {"regs": 1, "imm": False},
-    "OUTC": {"regs": 1, "imm": False},
+    "IN0":  {"regs": 1, "imm": False},
+    "IN1":  {"regs": 1, "imm": False},
+    "IN2":  {"regs": 1, "imm": False},
+    "OUT0": {"regs": 1, "imm": False},
+    "OUT1": {"regs": 1, "imm": False},
+    "OUT2": {"regs": 1, "imm": False},
 
     # Halt
     "HLT":  {"regs": 0, "imm": False},
@@ -131,8 +131,8 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "JG":   ("100", "1001"), "JGE":  ("100", "1010"), "JSR":  ("100", "1011"),
         "RTS":  ("100", "1100"), "HLT":  ("111", "0000"), "PUSH": ("101", "0000"),
         "POP":  ("101", "0001"), "STORER": ("011", "0010"), "LOADR": ("011", "0011"),
-        "INA":  ("111", "0001"), "INB":  ("111", "0010"), "INC":  ("111", "0011"),
-        "OUTA":  ("111", "0100"), "OUTB":  ("111", "0101"), "OUTC":  ("111", "0110"),
+        "IN0":  ("111", "0001"), "IN1":  ("111", "0010"), "IN2":  ("111", "0011"),
+        "OUT0":  ("111", "0100"), "OUT1":  ("111", "0101"), "OUT2":  ("111", "0110"),
     }
     if instruction in opcode_map:
         op, sub = opcode_map[instruction]
