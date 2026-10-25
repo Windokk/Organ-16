@@ -1,6 +1,6 @@
 # Organ 16 assembly v1.0.0 - Documentation
 
-## Synthax :
+## Syntax :
 
 ### Instructions :
 
@@ -23,7 +23,7 @@ Here are the 39 currently usable instructions :
 | LOAD        | `011`    | `0000`      | (2 words)  | LOAD R1, 0x1000  | Load from memory to R1                |
 | LOADR       | `011`    | `0011`      | (1 word)   | LOADR R3, R1     | Load from memory[R1] to R3            |
 | STORE       | `011`    | `0001`      | (2 words)  | STORE R1, 0x1000 | Store R1 at memory[Immediate]         |
-| STORER      | `011`    | `0010`      | (1 word)   | STORER, R3, R1   | Store R3 at memory[R1]                |
+| STORER      | `011`    | `0010`      | (1 word)   | STORER R3, R1    | Store R3 at memory[R1]                |
 | JMP         | `100`    | `0000`      | (2 words)  | JMP 0x1000       | Unconditional jump                    |
 | JE          | `100`    | `0001`      | (2 words)  | JE 0x1000        | Jump if equal                         |
 | JNE         | `100`    | `0010`      | (2 words)  | JNE 0x1000       | Jump if not equal                     |
@@ -33,10 +33,10 @@ Here are the 39 currently usable instructions :
 | JAE         | `100`    | `0110`      | (2 words)  | JAE 0x1000       | Jump if above or equal (unsigned)     |
 | JL          | `100`    | `0111`      | (2 words)  | JL 0x1000        | Jump if less (signed)                 |
 | JLE         | `100`    | `1000`      | (2 words)  | JLE 0x1000       | Jump if less or equal (signed)        |
-| JG          | `100`    | `1001`      | (2 words)  | JG 0x1000        | Jump if greate(signed)                |
+| JG          | `100`    | `1001`      | (2 words)  | JG 0x1000        | Jump if greater (signed)              |
 | JGE         | `100`    | `1010`      | (2 words)  | JGE 0x1000       | Jump if greater or equal (signed)     |
 | JSR         | `100`    | `1011`      | (2 words)  | JSR 0x1000       | Push PC, jump to subroutine           |
-| RTS         | `100`    | `1100`      | (2 words)  | RTS              | Pop return address, jump to it        |
+| RTS         | `100`    | `1100`      | (1 word)   | RTS              | Pop return address, jump to it        |
 | HLT         | `111`    | `0000`      | (1 word)   | HLT              | Halt the CPU                          |
 | CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2 (Not commutative)   |
 | PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack                |
@@ -48,7 +48,7 @@ Here are the 39 currently usable instructions :
 | OUT1        | `111`    | `0101`      | (1 word)   | OUT1 R0          | Outputs R0 to output port B           |
 | OUT2        | `111`    | `0110`      | (1 word)   | OUT2 R0          | Outputs R0 to output port C           |
 
-### Instruction decompisition : 
+### Instruction decomposition : 
 
 <img src="schema.png" width="50%">
 

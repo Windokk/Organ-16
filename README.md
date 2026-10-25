@@ -12,13 +12,16 @@
 </br>
 </br>
 
-A simple 16-bit CPU architecture and its assembly-to-machine-code compiler
+A simple 16-bit CPU architecture and its assembly-to-machine-code compiler + emulator
 
 Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 </div>
 
 </br>
+
+<img src="Screenshot.png"/>
+<center><i>Emulator playing pong.bin program</i></center>
 
 ## Repository Guide
 
@@ -62,7 +65,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 ## ISA:
 
-(Currently there's only 32 instructions, but by design the CPU could support 128 instructions)
+(Currently there are 39 instructions, but by design the CPU could support 128 instructions)
 Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
 
 - The first 3 bits of the first word represent the Opcode.
@@ -107,8 +110,8 @@ It will place every source file at the memory address specified in the linker sc
 ### Future plans (v2.0.0):
 
 - [x] Emulator
-- [ ] Pong program
-- [ ] IRL breadboard implementation
+- [x] Pong program
+- [ ] IRL breadboard implementation ?
 - [ ] Random number generation
 - [ ] More instructions :
   - [x] OUT[0/1/2] (Output a 16 bit number to an I/O port)

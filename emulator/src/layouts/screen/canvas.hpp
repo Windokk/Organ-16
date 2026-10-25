@@ -4,16 +4,19 @@
 #include <QPainter>
 #include <QColor>
 #include <QMouseEvent>
+#include <QImage>
+
+#include <array>
+
+#include "core/core.hpp"
 
 class CanvasWidget : public QWidget {
 public:
     CanvasWidget(QWidget *parent = nullptr);
 
-    void setPixel(int x, int y, QColor color);
+    void present(const std::array<uint16_t, SCREEN_PIXELS>& pixels);
 
     void clear();
-
-    void updateFrame(const QImage &newImage);
 
     QSize sizeHint() const override {
         return QSize(128, 128);

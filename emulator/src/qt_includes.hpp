@@ -10,7 +10,9 @@
 #include <QTimer>
 #include <QString>
 #include <QStringLiteral>
-#include <QtConcurrent>
+#include <QElapsedTimer>
+#include <QSignalBlocker>
+#include <QRegularExpression>
 #include <QStandardItem>
 #include <QObject>
 #include <QFileDialog>

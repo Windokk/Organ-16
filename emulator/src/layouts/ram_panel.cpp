@@ -1,14 +1,13 @@
 #include "ram_panel.hpp"
 
+#include <QBrush>
 #include <QString>
 
-#include "../backend/cpu.hpp"
-
-RamPanel::RamPanel(QObject *parent)
-    : QAbstractTableModel(parent), ram(RAM::GetInstance()) {}
+RamPanel::RamPanel(Core& core, QObject *parent)
+    : QAbstractTableModel(parent), core(core) {}
 
 int RamPanel::rowCount(const QModelIndex &) const {
-    return 4096; // 65536 / 16
+    return ADDRESS_SPACE / 16;
 }
 
 int RamPanel::columnCount(const QModelIndex &) const {
@@ -17,54 +16,66 @@ int RamPanel::columnCount(const QModelIndex &) const {
 
 void RamPanel::updateRAM() {
     beginResetModel();
+    shownTouched = core.touched;
+    shownAddress = core.lastAddress;
+    core.clearRamDirty();
     endResetModel();
+}
+
+void RamPanel::notifyCell(uint16_t address) {
+    const QModelIndex idx = index(address / 16, address % 16);
+    emit dataChanged(idx, idx, {Qt::DisplayRole, Qt::BackgroundRole});
+}
+
+void RamPanel::refresh() {
+    if (core.ramDirty) {
+        emit dataChanged(index(core.ramDirtyLo / 16, 0), index(core.ramDirtyHi / 16, 15), {Qt::DisplayRole});
+        core.clearRamDirty();
+    }
+
+    if (shownAddress != core.lastAddress) {
+        const uint16_t previous = shownAddress;
+        shownAddress = core.lastAddress;
+        notifyCell(previous);
+        notifyCell(shownAddress);
+    }
+
+    for (size_t word = 0; word < core.touched.size(); ++word) {
+        if (core.touched[word] == shownTouched[word])
+            continue;
+        shownTouched[word] = core.touched[word];
+        emit dataChanged(index(static_cast<int>(word * 4), 0), index(static_cast<int>(word * 4 + 3), 15), {Qt::BackgroundRole});
+    }
 }
 
 QVariant RamPanel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return QVariant();
 
-    int address = index.row() * 16 + index.column();
-    if (address >= 65536)
-        return QVariant();
+    const uint16_t address = static_cast<uint16_t>(index.row() * 16 + index.column());
 
-    if (role == Qt::DisplayRole) {
-        try {
-            uint16_t word = ram->Read(static_cast<uint16_t>(address));
-            return QString("%1").arg(word, 4, 16, QChar('0')).toUpper();
-        } catch (...) {
-            return "ERR";
-        }
-    }
+    if (role == Qt::DisplayRole)
+        return QString("%1").arg(core.ram[address], 4, 16, QChar('0')).toUpper();
+
     if (role == Qt::BackgroundRole) {
-        QPair<int, int> cell(index.row(), index.column());
-        if (bgColors.contains(cell)) {
-            return QBrush(bgColors[cell]);
-        }
+        if (address == shownAddress)
+            return QBrush(QColor("#4477ff"));
+        if ((core.touched[address >> 6] >> (address & 63)) & 1)
+            return QBrush(QColor("#5e5e5e"));
     }
 
     return QVariant();
-}
-
-void RamPanel::setCellBackground(int row, int col, const QColor &color) {
-    QPair<int, int> cell(row, col);
-    bgColors[cell] = color;
-
-    QModelIndex idx = index(row, col);
-    emit dataChanged(idx, idx, {Qt::BackgroundRole});
 }
 
 QVariant RamPanel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Vertical) {
+    if (orientation == Qt::Vertical)
         return QString("0x%1").arg(section * 0x10, 4, 16, QChar('0'));
-    }
 
-    if (orientation == Qt::Horizontal) {
+    if (orientation == Qt::Horizontal)
         return QString("%1").arg(section, 1, 16).toUpper();
-    }
 
     return QVariant();
 }
@@ -79,19 +90,15 @@ bool RamPanel::setData(const QModelIndex &index, const QVariant &value, int role
     if (role != Qt::EditRole || !index.isValid())
         return false;
 
-    int address = index.row() * 16 + index.column();
     bool ok;
-    uint16_t newVal = value.toString().toUShort(&ok, 16);
-
-    if (!ok || address >= 65536)
+    const uint16_t newVal = value.toString().toUShort(&ok, 16);
+    if (!ok)
         return false;
 
-    try {
-        ram->Write(static_cast<uint16_t>(address), newVal, true);
-        CPU::GetInstance()->Init();
-        emit dataChanged(index, index);
-        return true;
-    } catch (...) {
-        return false;
-    }
+    const uint16_t address = static_cast<uint16_t>(index.row() * 16 + index.column());
+    core.poke(address, newVal);
+    if (core.tickCount == 0)
+        core.init();
+    emit dataChanged(index, index);
+    return true;
 }

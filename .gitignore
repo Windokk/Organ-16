@@ -1,3 +1,6 @@
 emulator/.vscode/
 emulator/build/Emulator.exe
-emulator/build/
+emulator/build
+.vscode/
+*.bak
+*.autosave

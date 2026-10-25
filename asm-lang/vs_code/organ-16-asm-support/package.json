@@ -86,6 +86,10 @@
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
   },
+  "overrides": {
+    "diff": "^9.0.0",
+    "serialize-javascript": "^7.1.4"
+  },
   "publisher": "windokk",
   "repository": {
     "url": "https://github.com/Windokk/Organ-16/tree/main/asm-lang/vs_code/organ-16-asm-support"

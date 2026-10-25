@@ -1,7 +1,7 @@
 /*
 This is "main.cpp", the main file for the Organ16 emulator.
 This whole project is work in progress and needs optimization and fixing.
-Expect garbage code, bugs and crashes 😅.
+Expect garbage code, bugs and crashes.
 */
 
 #include "qt_includes.hpp"
@@ -12,94 +12,199 @@ Expect garbage code, bugs and crashes 😅.
 #include <sstream>
 #include <cstdint>
 
-#include "gui/display/qtdisplay.hpp"
-#include "gui/regs/clck_btn.hpp"
-#include "gui/regs/flow_layout.hpp"
-#include "gui/memory/ram_panel.hpp"
-#include "gui/io/io_ports.hpp"
+#include "layouts/screen/canvas.hpp"
+#include "layouts/regs/clck_btn.hpp"
+#include "layouts/regs/flow_layout.hpp"
+#include "layouts/ram_panel.hpp"
+#include "layouts/io_ports.hpp"
 
-#include "backend/cpu.hpp"
+#include "core/core.hpp"
 
 #include "splitter.hpp"
 
+#include <array>
+#include <cmath>
+
+Core core;
 QMainWindow* window;
 std::unordered_map<RegisterName, QLineEdit*> registersLineEdits;
 std::unordered_map<std::string, QWidget*> debugValuesLEDs;
+std::unordered_map<std::string, int> shownDebugValues;
+std::array<int32_t, 14> shownRegisters;
 QLabel* clockLabel;
 QLabel* clockTicks;
 CanvasWidget* canvas;
-QtDisplay* screen;
 IOPortsPanel* ioPanel;
 RamPanel* ramPanel;
 QTableView* ramView;
 FullSplitter* HSplitterBottom;
 QAction *toggleAutomatic;
 QAction *toggleManual;
-QTimer timer;
+QTimer frameTimer;
+QElapsedTimer frameClock;
 
 bool debugPanelShown = false;
+int shownClockValue = -1;
 
-int savedClockFrequency;
+int savedClockFrequency = 50;
+double clockFrequency = 0;
+double halfTickDebt = 0;
 bool automaticClock = false;
 uint32_t halfTicksOnClockClick = 1;
 
-uint16_t GetIN(int portIndex){
-    return ioPanel->portValue(ioPanel->portNameFromIndex(portIndex));
+constexpr qint64 FRAME_BUDGET_NS = 10'000'000;
+constexpr uint64_t RUN_CHUNK = 8192;
+
+double FrequencyFromSlider(int value)
+{
+    return value <= 0 ? 0.0 : std::pow(10.0, value * 0.07);
 }
 
-void SetOUT(int portIndex, uint16_t data){
-    ioPanel->setPortValue(ioPanel->portNameFromIndex(portIndex), data);
+QString FormatFrequency(double hz)
+{
+    if (hz >= 1e6) return QString("%1 MHz").arg(hz / 1e6, 0, 'g', 3);
+    if (hz >= 1e3) return QString("%1 kHz").arg(hz / 1e3, 0, 'g', 3);
+    return QString("%1 Hz").arg(hz, 0, 'g', 3);
 }
 
-void ResetIOPortsVisual(){
-    ioPanel->reset();
+QString FormatRegister(RegisterName name, uint16_t value)
+{
+    if (name == FLAGS)
+        return "0b" + QString::number(value & 0xF, 2).rightJustified(4, '0');
+    return "0x" + QString::number(value, 16).rightJustified(4, '0').toUpper();
 }
 
-void ToggleManualClock(bool checked){
-    automaticClock = false;
-    Clock::GetInstance()->SetFrequency(0);
-    timer.stop();
-}
-
-void ToggleAutomaticClock(bool checked){
-    automaticClock = true;
-    timer.stop();
-    QObject::disconnect(&timer, nullptr, nullptr, nullptr);
-
-    Clock::GetInstance()->SetFrequency(savedClockFrequency);
-
-    if (Clock::GetInstance()->GetFrequency() > 0) {
-        QObject::connect(&timer, &QTimer::timeout, []() {
-            CPU::GetInstance()->RunFrame();
-
-            QMetaObject::invokeMethod(canvas, []() {
-                screen->Present(RAM::GetInstance()->framebuffer);
-            }, Qt::QueuedConnection);
-            CPU::GetInstance()->RunFrame(-1);
-        });
-        timer.start(1000 / Clock::GetInstance()->GetFrequency());
+void RefreshRegisters()
+{
+    for (auto& entry : registersLineEdits) {
+        const RegisterName name = entry.first;
+        const int32_t value = core.getReg(name);
+        if (shownRegisters[name] == value)
+            continue;
+        shownRegisters[name] = value;
+        const QSignalBlocker blocker(entry.second);
+        entry.second->setText(FormatRegister(name, static_cast<uint16_t>(value)));
     }
 }
 
-void UpdateDebugValues(std::unordered_map<std::string, bool> debugValues){
-    for(auto& pair : debugValues){
-        if(debugValuesLEDs.find(pair.first) != debugValuesLEDs.end()){
-            QWidget* led = debugValuesLEDs.at(pair.first);
+void RefreshClockLabel()
+{
+    const int value = core.clockValue;
+    if (shownClockValue == value)
+        return;
+    shownClockValue = value;
 
-            QMetaObject::invokeMethod(led, [led, pair]() {
-                led->setStyleSheet(
-                    pair.second
-                        ? "background-color: rgba(40, 197, 26, 1);"
-                        : "background-color: rgba(143, 143, 143, 1);"
-                );
-            }, Qt::QueuedConnection);
+    clockLabel->setText(value ? "HIGH" : "LOW");
+    QString color = value ? "9, 202, 25, 255" : "167, 167, 167, 255";
+    QString baseStyle = R"(
+        QLabel {
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 2px 4px;
+            color: rgba(%1);
+        }
+    )";
+    clockLabel->setStyleSheet(baseStyle.arg(color));
+}
+
+void RefreshDebugValues()
+{
+    if (!debugPanelShown)
+        return;
+
+    const std::pair<const char*, bool> values[] = {
+        {"IsCurrExt", core.ffExt},
+        {"IsCurrAddrBase", core.ffAddrBase},
+        {"IsCurrAddr", core.ffAddrBase || core.ffAddrJsr},
+        {"IsCurrAddrJsr", core.ffAddrJsr},
+        {"IsCurrSpChange", core.ffSpChange},
+        {"IsCurrJsr", core.ffJsr},
+        {"IsCurrRts", core.ffRts},
+        {"RegIsCurrAddr", core.ffRegAddr},
+    };
+
+    for (const auto& value : values) {
+        auto led = debugValuesLEDs.find(value.first);
+        if (led == debugValuesLEDs.end())
+            continue;
+        int& shown = shownDebugValues[value.first];
+        if (shown == static_cast<int>(value.second) + 1)
+            continue;
+        shown = static_cast<int>(value.second) + 1;
+        led->second->setStyleSheet(
+            value.second
+                ? "background-color: rgba(40, 197, 26, 1);"
+                : "background-color: rgba(143, 143, 143, 1);"
+        );
+    }
+}
+
+void RefreshIo()
+{
+    if (!core.ioDirty)
+        return;
+    core.ioDirty = false;
+    for (int port = 0; port < 3; ++port)
+        ioPanel->setPortValue(ioPanel->portNameFromIndex(port), core.io[port]);
+}
+
+void RefreshUi()
+{
+    RefreshRegisters();
+    RefreshClockLabel();
+    RefreshDebugValues();
+    RefreshIo();
+
+    if (core.screenDirty) {
+        core.screenDirty = false;
+        canvas->present(core.screen);
+    }
+
+    ramPanel->refresh();
+}
+
+void RunAutomatic()
+{
+    const double elapsed = std::min(frameClock.restart() / 1000.0, 0.05);
+    if (!automaticClock || clockFrequency <= 0)
+        return;
+
+    halfTickDebt += 2.0 * clockFrequency * elapsed;
+
+    QElapsedTimer budget;
+    budget.start();
+    while (halfTickDebt >= 1.0) {
+        const uint64_t chunk = std::min<uint64_t>(static_cast<uint64_t>(halfTickDebt), RUN_CHUNK);
+        core.run(chunk);
+        halfTickDebt -= static_cast<double>(chunk);
+        if (budget.nsecsElapsed() > FRAME_BUDGET_NS) {
+            halfTickDebt = 0;
+            break;
         }
     }
 }
 
-void ImportRAM() {
-    CPU::GetInstance()->Reset();
+void OnFrame()
+{
+    RunAutomatic();
+    RefreshUi();
+}
 
+void ToggleManualClock(bool checked){
+    automaticClock = false;
+    halfTickDebt = 0;
+}
+
+void ToggleAutomaticClock(bool checked){
+    automaticClock = true;
+    halfTickDebt = 0;
+    frameClock.restart();
+    clockFrequency = FrequencyFromSlider(savedClockFrequency);
+}
+
+void ImportRAM() {
     QString fileName = QFileDialog::getOpenFileName(
         window,
         "Open Program File",
@@ -107,36 +212,38 @@ void ImportRAM() {
         "Program Files (*.bin)"
     );
 
-    if (!fileName.isEmpty()) {
-        QFile file(fileName);
-        if (file.open(QIODevice::ReadOnly)) {
-            QString fileContent = QString::fromUtf8(file.readAll());
-            file.close();
-            QStringList wordList = fileContent.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-            std::vector<uint16_t> wordValues;
-            for (const QString& wordStr : wordList) {
-                bool ok;
-                uint16_t value = wordStr.toUShort(&ok, 16);  // Base 16 (hex)
-                if (ok) {
-                    wordValues.push_back(value);
-                } 
-                else {
-                    QMessageBox::warning(window, "File Error", "Invalid word in file : " + wordStr);
-                }
-            }
-            if(wordValues.size() == ADDRESS_SPACE){
-                RAM::GetInstance()->Load(wordValues);
-            }
-            else{
-                QMessageBox::warning(window, "File Error", "Invalid file size : " + QString::number(wordValues.size()));
-            }
-        }
-        else {
-            QMessageBox::warning(window, "File Error", "Could not open the selected file.");
-        }
+    if (fileName.isEmpty())
+        return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(window, "File Error", "Could not open the selected file.");
+        return;
     }
-    
-    CPU::GetInstance()->Init();
+
+    QString fileContent = QString::fromUtf8(file.readAll());
+    file.close();
+    QStringList wordList = fileContent.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    std::vector<uint16_t> wordValues;
+    wordValues.reserve(wordList.size());
+    for (const QString& wordStr : wordList) {
+        bool ok;
+        uint16_t value = wordStr.toUShort(&ok, 16);
+        if (!ok) {
+            QMessageBox::warning(window, "File Error", "Invalid word in file : " + wordStr);
+            return;
+        }
+        wordValues.push_back(value);
+    }
+
+    if (!core.loadRam(wordValues)) {
+        QMessageBox::warning(window, "File Error", "Invalid file size : " + QString::number(wordValues.size()));
+        return;
+    }
+
+    core.reset();
+    ramPanel->updateRAM();
+    RefreshUi();
 }
 
 QWidget* MakeDebugWidget(const std::string& tempValueName) {
@@ -202,39 +309,9 @@ void ShowDebug(){
     debugPanel->show();
 }
 
-void UpdateVisualRAMCurrentAddress(uint16_t oldAddress, uint16_t newAddress){
-    int oldRow = oldAddress / 16;
-    int oldColumn = oldAddress % 16;
-    ramPanel->setCellBackground(oldRow, oldColumn, QColor("#5e5e5e"));
-    int row = newAddress / 16;
-    int column = newAddress % 16;
-    ramPanel->setCellBackground(row, column, QColor("#4477ff"));
-}
-
-void ResetVisualRAM()
-{
-    ramPanel->updateRAM();
-}
-
-std::pair<int, int> GetScreenDim()
-{
-    return std::pair<int, int>(128, 128);
-}
-
-void SetScreenPixel(int x, int y, QColor color)
-{
-    canvas->setPixel(x, y, color);
-}
-
 void OnClockClick() {
-    QtConcurrent::run([]() {
-        CPU::GetInstance()->RunFrame();
-
-        QMetaObject::invokeMethod(canvas, []() {
-            screen->Present(RAM::GetInstance()->framebuffer);
-        }, Qt::QueuedConnection);
-        CPU::GetInstance()->RunFrame(halfTicksOnClockClick);
-    });
+    core.run(halfTicksOnClockClick);
+    RefreshUi();
 }
 
 void OnClockUp(){
@@ -250,43 +327,9 @@ void OnClockDown(){
 }
 
 void OnResetClick(){
-    CPU::GetInstance()->Reset();
+    core.reset();
     canvas->clear();
-}
-
-void UpdateRegValue(RegisterName name, uint16_t value)
-{
-    if(name == FLAGS){
-        std::bitset<4> bits(value & 0xF); 
-        QString binaryString = "0b" + QString::fromStdString(bits.to_string());
-        registersLineEdits[FLAGS]->setText(binaryString);
-    }
-    else{
-        std::stringstream ss;
-        ss << "0x" << std::uppercase << std::setfill('0') << std::setw(4) << std::hex << value;
-        QString hexString = QString::fromStdString(ss.str());
-
-        registersLineEdits.at(name)->setText(hexString);
-    }
-}
-
-void UpdateClockLabel(bool newValue) {
-    QMetaObject::invokeMethod(clockLabel, [newValue]() {
-        clockLabel->setText(newValue ? "HIGH" : "LOW");
-
-        QString color = newValue ? "9, 202, 25, 255" : "167, 167, 167, 255";
-        QString baseStyle = R"(
-            QLabel {
-                border: none;
-                background: transparent;
-                font-weight: 600;
-                font-size: 14px;
-                padding: 2px 4px;
-                color: rgba(%1);
-            }
-        )";
-        clockLabel->setStyleSheet(baseStyle.arg(color));
-    });
+    RefreshUi();
 }
 
 QWidget* MakeRegisterWidget(const QString& regName) {
@@ -309,7 +352,9 @@ QWidget* MakeRegisterWidget(const QString& regName) {
         uint16_t result = static_cast<uint16_t>(value.toUShort(&ok, 16));
 
         if (ok) {
-            RegisterFile::GetInstance()->SetRegValue(RegisterFromString(regName.toStdString()), result);
+            const RegisterName name = RegisterFromString(regName.toStdString());
+            core.setReg(name, result);
+            shownRegisters[name] = core.getReg(name);
         }
     });
 
@@ -458,22 +503,20 @@ void SetupGUI(){
     QVBoxLayout* frequencyVLayout = new QVBoxLayout(mainFrequencyWidget);
 
     QLabel* frequencyTitle = new QLabel(
-        QString("Frequency: %1 Hz").arg(savedClockFrequency)
+        QString("Frequency: %1").arg(FormatFrequency(FrequencyFromSlider(savedClockFrequency)))
     );
     frequencyTitle->setAlignment(Qt::AlignHCenter);
 
     QSlider* slider = new QSlider(Qt::Horizontal);
     slider->setMinimumSize(200, 50);
     slider->setRange(0, 100);
-    slider->setValue(Clock::GetInstance()->GetFrequency());
+    slider->setValue(savedClockFrequency);
     QObject::connect(slider, &QSlider::valueChanged, [frequencyTitle](int value){
         savedClockFrequency = value;
-        if(automaticClock)
-            ToggleAutomaticClock(true);
-
-        if(value = 0)
-            ToggleManualClock(true);
-        frequencyTitle->setText(QString("Frequency: %1 MHz").arg(savedClockFrequency));
+        clockFrequency = FrequencyFromSlider(value);
+        if (value == 0 && automaticClock)
+            toggleManual->setChecked(true);
+        frequencyTitle->setText(QString("Frequency: %1").arg(FormatFrequency(clockFrequency)));
     });
     QFile sliderQss(":/style/stylesheets/slider.qss");
     sliderQss.open(QFile::ReadOnly);
@@ -550,15 +593,13 @@ void SetupGUI(){
     canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     rightLayout->addWidget(canvas);
 
-    screen = new QtDisplay(canvas);
-    
     /* ============ Left panel ============== */
     QWidget* leftPanel = new QWidget;
     leftPanel->setMinimumWidth(200);
     leftPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout* leftLayout = new QVBoxLayout(leftPanel);
 
-    ramPanel = new RamPanel();
+    ramPanel = new RamPanel(core);
     ramView = new QTableView;
     ramView->setModel(ramPanel);
     ramView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -645,6 +686,12 @@ void SetupGUI(){
     // ---------- Bottom panel : IO Ports --------------
 
     ioPanel = new IOPortsPanel();
+    QObject::connect(ioPanel, &IOPortsPanel::squareClicked, [](char portName, int){
+        for (int port = 0; port < 3; ++port) {
+            if (ioPanel->portNameFromIndex(port) == portName)
+                core.io[port] = ioPanel->portValue(portName);
+        }
+    });
 
     HSplitterBottom->addWidget(bottomPanel);
     HSplitterBottom->addWidget(ioPanel);
@@ -662,11 +709,19 @@ void SetupGUI(){
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
+    shownRegisters.fill(-1);
+    clockFrequency = FrequencyFromSlider(savedClockFrequency);
+
     SetupGUI();
 
-    CPU* cpu = CPU::GetInstance();
+    core.init();
+    ramPanel->updateRAM();
+    RefreshUi();
 
-    cpu->Init();
+    frameClock.start();
+    frameTimer.setTimerType(Qt::PreciseTimer);
+    QObject::connect(&frameTimer, &QTimer::timeout, &OnFrame);
+    frameTimer.start(16);
 
     return app.exec();
 }

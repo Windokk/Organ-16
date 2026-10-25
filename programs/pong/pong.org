@@ -13,12 +13,20 @@
 @define PADDLE_HEIGHT 8
 
 @define FRAMEBUFFER 0x8000
+@define FRAMEBUFFER_END 0xC000
 
 @define ZERO   0
 @define ONE    1
  
 @define BLACK ZERO
 @define WHITE 0xFFFF
+@define YELLOW 0xFFE0
+@define BLUE 0x551F
+@define RED 0xFAEA
+
+@define BALL_COLOR YELLOW
+@define PADDLE1_COLOR BLUE
+@define PADDLE2_COLOR RED
 
 ; Memory locations
 @define BALL_X          0xc000
@@ -42,55 +50,111 @@
 @define OLD_PADDLE1_Y 0xc010
 @define OLD_PADDLE2_Y 0xc011
 
+@define BALL_TICK 0xc012
+@define BALL_DELAY 3
+
+@define SCORE1 0xc013
+@define SCORE2 0xc014
+@define DIGIT_X0 0xc015
+@define DIGIT_Y0 0xc016
+
 @define FIRST_ROUND_START_DX 0xc020
 @define FIRST_ROUND_START_DY 0xc034
 
-pre_init:
-    MOV R0, 0
-    STORE R0, FIRST_ROUND_START_DX
-    STORE R0, (FIRST_ROUND_START_DX + 2)
-    STORE R0, (FIRST_ROUND_START_DX + 4)
-    STORE R0, (FIRST_ROUND_START_DX + 6)
-    STORE R0, (FIRST_ROUND_START_DX + 8)
-    STORE R0, (FIRST_ROUND_START_DX + 10)
-    STORE R0, (FIRST_ROUND_START_DX + 12)
-    STORE R0, (FIRST_ROUND_START_DX + 14)
-    STORE R0, (FIRST_ROUND_START_DX + 16)
-    STORE R0, (FIRST_ROUND_START_DX + 18)
+@define DIGIT_FONT 0xc050
+@define PADDLE_ANGLES 0xc060
 
-    #STORE R0, (FIRST_ROUND_START_DY + 1)
-    #STORE R0, (FIRST_ROUND_START_DY + 3)
-    #STORE R0, (FIRST_ROUND_START_DY + 5)
-    #STORE R0, (FIRST_ROUND_START_DY + 7)
-    #STORE R0, (FIRST_ROUND_START_DY + 9)
-    #STORE R0, (FIRST_ROUND_START_DY + 11)
-    #STORE R0, (FIRST_ROUND_START_DY + 13)
-    #STORE R0, (FIRST_ROUND_START_DY + 15)
-    #STORE R0, (FIRST_ROUND_START_DY + 17)
-    #STORE R0, (FIRST_ROUND_START_DY + 19)
+@define SCORE_Y 2
+@define SCORE1_X 28
+@define SCORE2_X 94
+@define CELL_SIZE 2
+@define DIGIT_WIDTH 6
+@define DIGIT_HEIGHT 10
+
+pre_init:
+    MOV R0, 1
+    STORE R0, FIRST_ROUND_START_DX
+    STORE R0, FIRST_ROUND_START_DY
+    STORE R0, (FIRST_ROUND_START_DX + 2)
+    STORE R0, (FIRST_ROUND_START_DY + 2)
+    STORE R0, (FIRST_ROUND_START_DX + 4)
+    STORE R0, (FIRST_ROUND_START_DY + 4)
+    STORE R0, (FIRST_ROUND_START_DX + 6)
+    STORE R0, (FIRST_ROUND_START_DY + 6)
+    STORE R0, (FIRST_ROUND_START_DX + 8)
+    STORE R0, (FIRST_ROUND_START_DY + 8)
+    STORE R0, (FIRST_ROUND_START_DX + 10)
+    STORE R0, (FIRST_ROUND_START_DY + 10)
+    STORE R0, (FIRST_ROUND_START_DX + 12)
+    STORE R0, (FIRST_ROUND_START_DY + 12)
+    STORE R0, (FIRST_ROUND_START_DX + 14)
+    STORE R0, (FIRST_ROUND_START_DY + 14)
+    STORE R0, (FIRST_ROUND_START_DX + 16)
+    STORE R0, (FIRST_ROUND_START_DY + 16)
+    STORE R0, (FIRST_ROUND_START_DX + 18)
+    STORE R0, (FIRST_ROUND_START_DY + 18)
+
+    MOV R0, -1
+    STORE R0, (FIRST_ROUND_START_DX + 1)
+    STORE R0, (FIRST_ROUND_START_DY + 1)
+    STORE R0, (FIRST_ROUND_START_DX + 3)
+    STORE R0, (FIRST_ROUND_START_DY + 3)
+    STORE R0, (FIRST_ROUND_START_DX + 5)
+    STORE R0, (FIRST_ROUND_START_DY + 5)
+    STORE R0, (FIRST_ROUND_START_DX + 7)
+    STORE R0, (FIRST_ROUND_START_DY + 7)
+    STORE R0, (FIRST_ROUND_START_DX + 9)
+    STORE R0, (FIRST_ROUND_START_DY + 9)
+    STORE R0, (FIRST_ROUND_START_DX + 11)
+    STORE R0, (FIRST_ROUND_START_DY + 11)
+    STORE R0, (FIRST_ROUND_START_DX + 13)
+    STORE R0, (FIRST_ROUND_START_DY + 13)
+    STORE R0, (FIRST_ROUND_START_DX + 15)
+    STORE R0, (FIRST_ROUND_START_DY + 15)
+    STORE R0, (FIRST_ROUND_START_DX + 17)
+    STORE R0, (FIRST_ROUND_START_DY + 17)
+    STORE R0, (FIRST_ROUND_START_DX + 19)
+    STORE R0, (FIRST_ROUND_START_DY + 19)
+
+    MOV R0, 0x7b6f
+    STORE R0, (DIGIT_FONT + 0)
+    MOV R0, 0x749a
+    STORE R0, (DIGIT_FONT + 1)
+    MOV R0, 0x73e7
+    STORE R0, (DIGIT_FONT + 2)
+    MOV R0, 0x79e7
+    STORE R0, (DIGIT_FONT + 3)
+    MOV R0, 0x49ed
+    STORE R0, (DIGIT_FONT + 4)
+    MOV R0, 0x79cf
+    STORE R0, (DIGIT_FONT + 5)
+    MOV R0, 0x7bcf
+    STORE R0, (DIGIT_FONT + 6)
+    MOV R0, 0x4927
+    STORE R0, (DIGIT_FONT + 7)
+    MOV R0, 0x7bef
+    STORE R0, (DIGIT_FONT + 8)
+    MOV R0, 0x79ef
+    STORE R0, (DIGIT_FONT + 9)
+
+    MOV R0, -2
+    STORE R0, (PADDLE_ANGLES + 0)
+    STORE R0, (PADDLE_ANGLES + 1)
+
+    MOV R0, -1
+    STORE R0, (PADDLE_ANGLES + 2)
+    STORE R0, (PADDLE_ANGLES + 3)
+
+    MOV R0, 0
+    STORE R0, (PADDLE_ANGLES + 4)
 
     MOV R0, 1
-    STORE R0, (FIRST_ROUND_START_DX + 1)
-    STORE R0, (FIRST_ROUND_START_DX + 3)
-    STORE R0, (FIRST_ROUND_START_DX + 5)
-    STORE R0, (FIRST_ROUND_START_DX + 7)
-    STORE R0, (FIRST_ROUND_START_DX + 9)
-    STORE R0, (FIRST_ROUND_START_DX + 11)
-    STORE R0, (FIRST_ROUND_START_DX + 13)
-    STORE R0, (FIRST_ROUND_START_DX + 15)
-    STORE R0, (FIRST_ROUND_START_DX + 17)
-    STORE R0, (FIRST_ROUND_START_DX + 19)
+    STORE R0, (PADDLE_ANGLES + 5)
+    STORE R0, (PADDLE_ANGLES + 6)
 
-    #STORE R0, FIRST_ROUND_START_DY
-    #STORE R0, (FIRST_ROUND_START_DY + 2)
-    #STORE R0, (FIRST_ROUND_START_DY + 4)
-    #STORE R0, (FIRST_ROUND_START_DY + 6)
-    #STORE R0, (FIRST_ROUND_START_DY + 8)
-    #STORE R0, (FIRST_ROUND_START_DY + 10)
-    #STORE R0, (FIRST_ROUND_START_DY + 12)
-    #STORE R0, (FIRST_ROUND_START_DY + 14)
-    #STORE R0, (FIRST_ROUND_START_DY + 16)
-    #STORE R0, (FIRST_ROUND_START_DY + 18)
+    MOV R0, 2
+    STORE R0, (PADDLE_ANGLES + 7)
+    STORE R0, (PADDLE_ANGLES + 8)
 
 
 main:
@@ -98,11 +162,25 @@ main:
     ; Initialize round counter at 0
     MOV R0, ZERO
     STORE R0, ROUND_COUNTER
+    STORE R0, BALL_TICK
+    STORE R0, SCORE1
+    STORE R0, SCORE2
 
     JMP start_round
 
     gameLoop:
-        
+
+        LOAD R0, BALL_TICK
+        MOV R1, ONE
+        ADD R0, R0, R1
+        STORE R0, BALL_TICK
+        MOV R1, BALL_DELAY
+        CMP R0, R1
+        JNE paddle_pos
+
+        MOV R0, ZERO
+        STORE R0, BALL_TICK
+
         ### Store old ball ###
         LOAD R0, BALL_X
         LOAD R1, BALL_Y
@@ -115,24 +193,14 @@ main:
 
         ; Screen boundaries
         MOV R3, (SCREEN_WIDTH - 1)
-        MOV R4, (SCREEN_HEIGHT - 1)
 
         ; Check X collision (left/right)
         MOV R5, ZERO
         CMP R0, R5  ; left
-        JE start_round
+        JE score_player2
 
         CMP R0, R3 ; right
-        JE start_round
-
-        y_collision:
-            ; Check Y collision (top/bottom)
-            # Redundant : MOV R5, ZERO ; Top
-            CMP R1, R5
-            JE y_collision_top
-
-            CMP R1, R4   ; Bottom
-            JE y_collision_bottom
+        JE score_player1
 
         ### Paddle collision ###
         paddle_collision:
@@ -158,6 +226,8 @@ main:
             CMP R0, R2
             JA ball_pos
 
+            JSR set_ball_angle
+
             MOV R0, 1
             STORE R0, BALL_DX
 
@@ -179,11 +249,18 @@ main:
             LOAD R1, BALL_Y
             LOAD R3, BALL_DY
 
-            MOV R4, 0
-            CMP R3, R4
-            JL y_minus_1
-            JG y_plus_1
-        
+            ADD R1, R1, R3
+
+            MOV R4, ZERO
+            CMP R1, R4
+            JL y_bounce_top
+
+            MOV R4, (SCREEN_HEIGHT - 1)
+            CMP R1, R4
+            JG y_bounce_bottom
+
+            STORE R1, BALL_Y
+
         paddle_pos:
 
             IN0 R0
@@ -226,24 +303,64 @@ main:
             LOAD R0, BALL_X
             LOAD R1, BALL_Y
 
-            MOV R2, WHITE
+            MOV R2, BALL_COLOR
             JSR draw_pixel ; Draw the ball
 
             MOV R0, PADDLE1_X
             LOAD R1, PADDLE1_Y
-            MOV R2, WHITE
+            MOV R2, PADDLE1_COLOR
             JSR draw_paddle ; Draw the left paddle
 
             MOV R0, PADDLE2_X
             LOAD R1, PADDLE2_Y
-            MOV R2, WHITE
+            MOV R2, PADDLE2_COLOR
             JSR draw_paddle ; Draw the right paddle
 
-            JMP gameLoop
+            LOAD R0, BALL_TICK
+            MOV R1, ZERO
+            CMP R0, R1
+            JNE end_frame
+
+            LOAD R0, OLD_BALL_X
+            LOAD R1, OLD_BALL_Y
+            MOV R2, SCORE_Y
+            SUB R1, R1, R2
+            MOV R2, DIGIT_HEIGHT
+            CMP R1, R2
+            JAE end_frame
+
+            MOV R2, SCORE1_X
+            SUB R3, R0, R2
+            MOV R2, DIGIT_WIDTH
+            CMP R3, R2
+            JB redraw_score1
+
+            MOV R2, SCORE2_X
+            SUB R3, R0, R2
+            MOV R2, DIGIT_WIDTH
+            CMP R3, R2
+            JB redraw_score2
+
+            JMP end_frame
 
 
 end:
     HLT
+
+end_frame:
+    LOAD R0, BALL_X
+    LOAD R1, BALL_Y
+    STORE R0, OLD_BALL_X
+    STORE R1, OLD_BALL_Y
+    JMP gameLoop
+
+redraw_score1:
+    JSR draw_score1
+    JMP end_frame
+
+redraw_score2:
+    JSR draw_score2
+    JMP end_frame
 
 paddle1_up:
     LOAD R4, PADDLE1_Y        ; current top
@@ -284,6 +401,7 @@ paddle2_down:
 start_round:
 
     JSR clear_everything_subr
+    JSR draw_scores
 
     ; Initialize ball in center
     MOV R0, (SCREEN_WIDTH / 2)
@@ -318,21 +436,16 @@ start_round:
 
 clear_everything_subr:
 
-    LOAD R0, OLD_BALL_X
-    LOAD R1, OLD_BALL_Y
-    
+    MOV R0, FRAMEBUFFER
+    MOV R1, FRAMEBUFFER_END
     MOV R2, BLACK
-    JSR draw_pixel
+    MOV R3, ONE
 
-    MOV R0, PADDLE1_X
-    LOAD R1, PADDLE1_Y
-    MOV R2, BLACK
-    JSR draw_paddle ; Draw the left paddle
-
-    MOV R0, PADDLE2_X
-    LOAD R1, PADDLE2_Y
-    MOV R2, BLACK
-    JSR draw_paddle ; Draw the right paddle
+    clear_framebuffer_loop:
+        STORER R2, R0
+        ADD R0, R0, R3
+        CMP R0, R1
+        JNE clear_framebuffer_loop
 
     RTS
 
@@ -352,37 +465,33 @@ x_plus_1:
     STORE R0, BALL_X
     JMP comparisonY
 
-y_minus_1:
-    ; Parameters
-    ; R1 = Y
-    MOV R7, 1
-    SUB R1, R1, R7
+y_bounce_top:
+    MOV R4, ZERO
+    SUB R1, R4, R1
+    SUB R3, R4, R3
     STORE R1, BALL_Y
+    STORE R3, BALL_DY
     JMP paddle_pos
 
-y_plus_1:
-    ; Parameters
-    ; R1 = Y
-    MOV R7, 1
-    ADD R1, R1, R7
+y_bounce_bottom:
+    MOV R4, (SCREEN_HEIGHT - 1)
+    SUB R5, R4, R1
+    ADD R1, R4, R5
+    MOV R4, ZERO
+    SUB R3, R4, R3
     STORE R1, BALL_Y
+    STORE R3, BALL_DY
     JMP paddle_pos
 
-y_collision_bottom:
-    ; Parameters
-    ; R1 = Y
-    MOV R7, 1
-    SUB R1, R1, R7
-    STORE R1, BALL_Y
-    JMP paddle_collision
+set_ball_angle:
+    ; Parameters: R0 = ball Y, R1 = paddle top
 
-y_collision_top:
-    ; Parameters
-    ; R1 = Y
-    MOV R7, 1
-    ADD R1, R1, R7
-    STORE R1, BALL_Y
-    JMP paddle_collision
+    SUB R3, R0, R1
+    MOV R4, PADDLE_ANGLES
+    ADD R4, R4, R3
+    LOADR R3, R4
+    STORE R3, BALL_DY
+    RTS
 
 draw_pixel:
     ; Parameters: 
@@ -433,7 +542,110 @@ paddle2_collision:
     CMP R0, R2
     JA ball_pos
 
+    JSR set_ball_angle
+
     MOV R0, -1
     STORE R0, BALL_DX
     
     JMP ball_pos
+
+score_player1:
+    LOAD R0, SCORE1
+    MOV R1, ONE
+    ADD R0, R0, R1
+    STORE R0, SCORE1
+    MOV R1, N_MAX_SCORE
+    CMP R0, R1
+    JE end
+    JMP start_round
+
+score_player2:
+    LOAD R0, SCORE2
+    MOV R1, ONE
+    ADD R0, R0, R1
+    STORE R0, SCORE2
+    MOV R1, N_MAX_SCORE
+    CMP R0, R1
+    JE end
+    JMP start_round
+
+draw_scores:
+    JSR draw_score1
+    JSR draw_score2
+    RTS
+
+draw_score1:
+    MOV R0, SCORE1_X
+    MOV R1, SCORE_Y
+    MOV R2, PADDLE1_COLOR
+    LOAD R3, SCORE1
+    JSR draw_digit
+    RTS
+
+draw_score2:
+    MOV R0, SCORE2_X
+    MOV R1, SCORE_Y
+    MOV R2, PADDLE2_COLOR
+    LOAD R3, SCORE2
+    JSR draw_digit
+    RTS
+
+draw_digit:
+    ; Parameters: R0 = X, R1 = Y, R2 = Color, R3 = Digit
+
+    STORE R0, DIGIT_X0
+    STORE R1, DIGIT_Y0
+
+    MOV R4, DIGIT_FONT
+    ADD R4, R4, R3
+    LOADR R6, R4            ; glyph bitmask, bit = row * 3 + col
+    MOV R3, ONE
+
+    draw_digit_loop:
+        AND R4, R6, R3
+        MOV R5, ZERO
+        CMP R4, R5
+        JE draw_digit_next
+        JSR draw_cell
+
+        draw_digit_next:
+            MOV R4, CELL_SIZE
+            ADD R3, R3, R3
+            ADD R0, R0, R4
+            LOAD R4, DIGIT_X0
+            MOV R5, DIGIT_WIDTH
+            ADD R4, R4, R5
+            CMP R0, R4
+            JNE draw_digit_loop
+
+            LOAD R0, DIGIT_X0
+            MOV R4, CELL_SIZE
+            ADD R1, R1, R4
+            LOAD R4, DIGIT_Y0
+            MOV R5, DIGIT_HEIGHT
+            ADD R4, R4, R5
+            CMP R1, R4
+            JNE draw_digit_loop
+
+    RTS
+
+draw_cell:
+    ; Parameters: R0 = X, R1 = Y, R2 = Color
+
+    PUSH R0
+    PUSH R1
+    PUSH R3
+
+    MOV R3, ONE
+    JSR draw_pixel
+    ADD R0, R0, R3
+    JSR draw_pixel
+    ADD R1, R1, R3
+    JSR draw_pixel
+    SUB R0, R0, R3
+    JSR draw_pixel
+
+    POP R3
+    POP R1
+    POP R0
+    RTS

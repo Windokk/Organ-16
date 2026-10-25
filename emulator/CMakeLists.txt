@@ -8,8 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 
 file(GLOB_RECURSE PROJECT_SOURCES
     CONFIGURE_DEPENDS
@@ -24,7 +23,7 @@ qt_add_executable(Emulator
 
 target_include_directories(Emulator PUBLIC src)
 
-target_link_libraries(Emulator PRIVATE Qt6::Core Qt6::Widgets Qt6::Gui Qt6::Concurrent)
+target_link_libraries(Emulator PRIVATE Qt6::Core Qt6::Widgets Qt6::Gui)
 
 set_target_properties(Emulator PROPERTIES
     ${BUNDLE_ID_OPTION}
@@ -32,4 +31,3 @@ set_target_properties(Emulator PROPERTIES
 )
 
 qt_finalize_executable(Emulator)
-
