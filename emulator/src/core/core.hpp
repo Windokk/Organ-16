@@ -1,7 +1,9 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <cstdint>
+#include <mutex>
 #include <vector>
 
 #include "decode.hpp"
@@ -29,6 +31,14 @@ class Core {
         void poke(uint16_t address, uint16_t value);
 
         void clearRamDirty() { ramDirtyLo = 0xFFFF; ramDirtyHi = 0; ramDirty = false; }
+
+        std::unique_lock<std::mutex> lock() const {
+            waiters.fetch_add(1, std::memory_order_relaxed);
+            std::unique_lock<std::mutex> guard(mutex);
+            waiters.fetch_sub(1, std::memory_order_relaxed);
+            return guard;
+        }
+        bool hasWaiters() const { return waiters.load(std::memory_order_relaxed) > 0; }
 
         std::vector<uint16_t> ram;
         std::array<uint16_t, SCREEN_PIXELS> screen{};
@@ -64,6 +74,9 @@ class Core {
         uint64_t ramWrites = 0;
 
     private:
+        mutable std::mutex mutex;
+        mutable std::atomic<int> waiters{0};
+
         using StateKey = std::array<uint16_t, 16>;
         StateKey stateKey() const;
         void writeRam(uint16_t address, uint16_t data);

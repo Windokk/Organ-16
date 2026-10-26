@@ -19,6 +19,7 @@ Expect garbage code, bugs and crashes.
 #include "layouts/io_ports.hpp"
 
 #include "core/core.hpp"
+#include "core/sim_thread.hpp"
 
 #include "splitter.hpp"
 
@@ -26,6 +27,7 @@ Expect garbage code, bugs and crashes.
 #include <cmath>
 
 Core core;
+SimThread sim(core);
 QMainWindow* window;
 std::unordered_map<RegisterName, QLineEdit*> registersLineEdits;
 std::unordered_map<std::string, QWidget*> debugValuesLEDs;
@@ -41,19 +43,50 @@ FullSplitter* HSplitterBottom;
 QAction *toggleAutomatic;
 QAction *toggleManual;
 QTimer frameTimer;
-QElapsedTimer frameClock;
 
 bool debugPanelShown = false;
 int shownClockValue = -1;
 
 int savedClockFrequency = 50;
 double clockFrequency = 0;
-double halfTickDebt = 0;
 bool automaticClock = false;
 uint32_t halfTicksOnClockClick = 1;
 
-constexpr qint64 FRAME_BUDGET_NS = 10'000'000;
-constexpr uint64_t RUN_CHUNK = 8192;
+struct UiSnapshot {
+    std::array<uint16_t, 14> regs{};
+    bool clockValue = false;
+    std::array<bool, 8> debug{};
+    std::array<uint16_t, 3> io{};
+    bool ioDirty = false;
+    bool screenDirty = false;
+    std::array<uint16_t, SCREEN_PIXELS> screen{};
+};
+
+UiSnapshot TakeSnapshot()
+{
+    UiSnapshot snap;
+    auto guard = core.lock();
+
+    for (const auto& entry : registersLineEdits)
+        snap.regs[entry.first] = core.getReg(entry.first);
+
+    snap.clockValue = core.clockValue;
+    snap.debug = {core.ffExt, core.ffAddrBase, core.ffAddrBase || core.ffAddrJsr, core.ffAddrJsr,
+                  core.ffSpChange, core.ffJsr, core.ffRts, core.ffRegAddr};
+
+    snap.ioDirty = core.ioDirty;
+    if (snap.ioDirty) {
+        core.ioDirty = false;
+        snap.io = core.io;
+    }
+
+    snap.screenDirty = core.screenDirty;
+    if (snap.screenDirty) {
+        core.screenDirty = false;
+        snap.screen = core.screen;
+    }
+    return snap;
+}
 
 double FrequencyFromSlider(int value)
 {
@@ -74,11 +107,11 @@ QString FormatRegister(RegisterName name, uint16_t value)
     return "0x" + QString::number(value, 16).rightJustified(4, '0').toUpper();
 }
 
-void RefreshRegisters()
+void RefreshRegisters(const UiSnapshot& snap)
 {
     for (auto& entry : registersLineEdits) {
         const RegisterName name = entry.first;
-        const int32_t value = core.getReg(name);
+        const int32_t value = snap.regs[name];
         if (shownRegisters[name] == value)
             continue;
         shownRegisters[name] = value;
@@ -87,9 +120,9 @@ void RefreshRegisters()
     }
 }
 
-void RefreshClockLabel()
+void RefreshClockLabel(const UiSnapshot& snap)
 {
-    const int value = core.clockValue;
+    const int value = snap.clockValue;
     if (shownClockValue == value)
         return;
     shownClockValue = value;
@@ -109,20 +142,20 @@ void RefreshClockLabel()
     clockLabel->setStyleSheet(baseStyle.arg(color));
 }
 
-void RefreshDebugValues()
+void RefreshDebugValues(const UiSnapshot& snap)
 {
     if (!debugPanelShown)
         return;
 
     const std::pair<const char*, bool> values[] = {
-        {"IsCurrExt", core.ffExt},
-        {"IsCurrAddrBase", core.ffAddrBase},
-        {"IsCurrAddr", core.ffAddrBase || core.ffAddrJsr},
-        {"IsCurrAddrJsr", core.ffAddrJsr},
-        {"IsCurrSpChange", core.ffSpChange},
-        {"IsCurrJsr", core.ffJsr},
-        {"IsCurrRts", core.ffRts},
-        {"RegIsCurrAddr", core.ffRegAddr},
+        {"IsCurrExt", snap.debug[0]},
+        {"IsCurrAddrBase", snap.debug[1]},
+        {"IsCurrAddr", snap.debug[2]},
+        {"IsCurrAddrJsr", snap.debug[3]},
+        {"IsCurrSpChange", snap.debug[4]},
+        {"IsCurrJsr", snap.debug[5]},
+        {"IsCurrRts", snap.debug[6]},
+        {"RegIsCurrAddr", snap.debug[7]},
     };
 
     for (const auto& value : values) {
@@ -141,67 +174,44 @@ void RefreshDebugValues()
     }
 }
 
-void RefreshIo()
+void RefreshIo(const UiSnapshot& snap)
 {
-    if (!core.ioDirty)
+    if (!snap.ioDirty)
         return;
-    core.ioDirty = false;
     for (int port = 0; port < 3; ++port)
-        ioPanel->setPortValue(ioPanel->portNameFromIndex(port), core.io[port]);
+        ioPanel->setPortValue(ioPanel->portNameFromIndex(port), snap.io[port]);
 }
 
 void RefreshUi()
 {
-    RefreshRegisters();
-    RefreshClockLabel();
-    RefreshDebugValues();
-    RefreshIo();
+    const UiSnapshot snap = TakeSnapshot();
 
-    if (core.screenDirty) {
-        core.screenDirty = false;
-        canvas->present(core.screen);
-    }
+    RefreshRegisters(snap);
+    RefreshClockLabel(snap);
+    RefreshDebugValues(snap);
+    RefreshIo(snap);
+
+    if (snap.screenDirty)
+        canvas->present(snap.screen);
 
     ramPanel->refresh();
 }
 
-void RunAutomatic()
-{
-    const double elapsed = std::min(frameClock.restart() / 1000.0, 0.05);
-    if (!automaticClock || clockFrequency <= 0)
-        return;
-
-    halfTickDebt += 2.0 * clockFrequency * elapsed;
-
-    QElapsedTimer budget;
-    budget.start();
-    while (halfTickDebt >= 1.0) {
-        const uint64_t chunk = std::min<uint64_t>(static_cast<uint64_t>(halfTickDebt), RUN_CHUNK);
-        core.run(chunk);
-        halfTickDebt -= static_cast<double>(chunk);
-        if (budget.nsecsElapsed() > FRAME_BUDGET_NS) {
-            halfTickDebt = 0;
-            break;
-        }
-    }
-}
-
 void OnFrame()
 {
-    RunAutomatic();
     RefreshUi();
 }
 
 void ToggleManualClock(bool checked){
     automaticClock = false;
-    halfTickDebt = 0;
+    sim.setAutomatic(false);
 }
 
 void ToggleAutomaticClock(bool checked){
     automaticClock = true;
-    halfTickDebt = 0;
-    frameClock.restart();
     clockFrequency = FrequencyFromSlider(savedClockFrequency);
+    sim.setFrequency(clockFrequency);
+    sim.setAutomatic(true);
 }
 
 void ImportRAM() {
@@ -236,12 +246,16 @@ void ImportRAM() {
         wordValues.push_back(value);
     }
 
-    if (!core.loadRam(wordValues)) {
-        QMessageBox::warning(window, "File Error", "Invalid file size : " + QString::number(wordValues.size()));
-        return;
-    }
+    {
+        auto guard = core.lock();
+        if (!core.loadRam(wordValues)) {
+            guard.unlock();
+            QMessageBox::warning(window, "File Error", "Invalid file size : " + QString::number(wordValues.size()));
+            return;
+        }
 
-    core.reset();
+        core.reset();
+    }
     ramPanel->updateRAM();
     RefreshUi();
 }
@@ -310,7 +324,10 @@ void ShowDebug(){
 }
 
 void OnClockClick() {
-    core.run(halfTicksOnClockClick);
+    {
+        auto guard = core.lock();
+        core.run(halfTicksOnClockClick);
+    }
     RefreshUi();
 }
 
@@ -327,7 +344,10 @@ void OnClockDown(){
 }
 
 void OnResetClick(){
-    core.reset();
+    {
+        auto guard = core.lock();
+        core.reset();
+    }
     canvas->clear();
     RefreshUi();
 }
@@ -353,6 +373,7 @@ QWidget* MakeRegisterWidget(const QString& regName) {
 
         if (ok) {
             const RegisterName name = RegisterFromString(regName.toStdString());
+            auto guard = core.lock();
             core.setReg(name, result);
             shownRegisters[name] = core.getReg(name);
         }
@@ -514,6 +535,7 @@ void SetupGUI(){
     QObject::connect(slider, &QSlider::valueChanged, [frequencyTitle](int value){
         savedClockFrequency = value;
         clockFrequency = FrequencyFromSlider(value);
+        sim.setFrequency(clockFrequency);
         if (value == 0 && automaticClock)
             toggleManual->setChecked(true);
         frequencyTitle->setText(QString("Frequency: %1").arg(FormatFrequency(clockFrequency)));
@@ -688,8 +710,10 @@ void SetupGUI(){
     ioPanel = new IOPortsPanel();
     QObject::connect(ioPanel, &IOPortsPanel::squareClicked, [](char portName, int){
         for (int port = 0; port < 3; ++port) {
-            if (ioPanel->portNameFromIndex(port) == portName)
+            if (ioPanel->portNameFromIndex(port) == portName) {
+                auto guard = core.lock();
                 core.io[port] = ioPanel->portValue(portName);
+            }
         }
     });
 
@@ -711,17 +735,24 @@ int main(int argc, char *argv[]) {
 
     shownRegisters.fill(-1);
     clockFrequency = FrequencyFromSlider(savedClockFrequency);
+    sim.setFrequency(clockFrequency);
 
     SetupGUI();
 
-    core.init();
+    {
+        auto guard = core.lock();
+        core.init();
+    }
     ramPanel->updateRAM();
     RefreshUi();
 
-    frameClock.start();
+    sim.start();
+
     frameTimer.setTimerType(Qt::PreciseTimer);
     QObject::connect(&frameTimer, &QTimer::timeout, &OnFrame);
     frameTimer.start(16);
 
-    return app.exec();
+    const int result = app.exec();
+    sim.stop();
+    return result;
 }
