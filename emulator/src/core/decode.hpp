@@ -3,8 +3,15 @@
 #include <array>
 #include <cstdint>
 
+enum AluOp : uint8_t {
+    ALU_ADD, ALU_SUB, ALU_MUL, ALU_DIV, ALU_MOD, ALU_AND, ALU_OR, ALU_NAND, ALU_NOR, ALU_XOR,
+    ALU_XNOR, ALU_SHL, ALU_SHR, ALU_MIN, ALU_MAX, ALU_NOT, ALU_CMP,
+    ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS
+};
+
 struct Decoded {
-    uint8_t aluData = 0;
+    uint8_t aluOp = 0;
+    bool aluEnabled = false;
     uint8_t ioPort = 0;
     uint8_t addressMode = 0;
     bool regWrite = false;
@@ -21,6 +28,8 @@ struct Decoded {
     bool useIn = false;
     bool useOut = false;
 };
+
+constexpr uint8_t RANDOM_PORT = 3;
 
 enum AddressMode : uint8_t { ADDR_NEVER = 0, ADDR_ALWAYS = 1, ADDR_IF_JUMP_TAKEN = 2 };
 

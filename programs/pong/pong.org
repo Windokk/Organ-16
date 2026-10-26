@@ -1,4 +1,4 @@
-; Pong for Organ16 Assembly v1.0.0
+; Pong for Organ16 Assembly v1.5.0
 ; 
 ; How to play :
 ; Left paddle : bit 0, 8 of port A

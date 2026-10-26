@@ -80,4 +80,6 @@ class Core {
         using StateKey = std::array<uint16_t, 16>;
         StateKey stateKey() const;
         void writeRam(uint16_t address, uint16_t data);
+        uint16_t nextRandom();
+        uint32_t rngState = 1;
 };

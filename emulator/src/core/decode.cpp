@@ -24,27 +24,40 @@ bool jumpCondition(unsigned subOpCode, unsigned flags) {
     }
 }
 
+constexpr std::array<int8_t, 16> aluOpsByThreeRegSub = {
+    -1, ALU_SUB, ALU_MUL, ALU_DIV, ALU_MOD, ALU_AND, ALU_OR, ALU_NAND,
+    ALU_NOR, ALU_XOR, ALU_ADD, ALU_SHL, ALU_SHR, ALU_XNOR, ALU_MIN, ALU_MAX
+};
+
+constexpr std::array<int8_t, 16> aluOpsByTwoRegSub = {
+    ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS, -1, -1,
+    -1, -1, ALU_CMP, ALU_NOT, -1, -1, -1, -1
+};
+
 Decoded decode(unsigned opCode, unsigned sub) {
     Decoded d;
 
-    if (opCode == 0 && sub <= 9)
-        d.aluData = 16 + sub;
-    else if (opCode == 1 && sub == 10)
-        d.aluData = 26;
-    else if (opCode == 1 && sub == 11)
-        d.aluData = 27;
+    int aluOp = -1;
+    if (opCode == 0)
+        aluOp = aluOpsByThreeRegSub[sub];
+    else if (opCode == 1)
+        aluOp = aluOpsByTwoRegSub[sub];
 
-    d.regWrite = (opCode == 0) || (opCode == 2) ||
-                 (opCode == 1 && sub == 11) ||
+    if (aluOp >= 0) {
+        d.aluEnabled = true;
+        d.aluOp = static_cast<uint8_t>(aluOp);
+    }
+
+    d.regWrite = (d.aluEnabled && d.aluOp != ALU_CMP) || (opCode == 2) ||
                  (opCode == 3 && (sub == 0 || sub == 3)) ||
                  (opCode == 5 && sub == 1) ||
-                 (opCode == 7 && sub >= 1 && sub <= 3);
+                 (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
 
     d.nextExt = (opCode == 2) || (opCode == 4) ||
                 (opCode == 3 && sub < 2) ||
                 (opCode == 5 && sub == 1);
 
-    d.flagsWrite = (opCode == 1 && sub == 10);
+    d.flagsWrite = d.aluEnabled && d.aluOp == ALU_CMP;
     d.memWrite = (opCode == 3 && (sub == 1 || sub == 2));
     d.loadPC = (opCode == 4);
     d.spPop = (opCode == 4 && sub == 12) || (opCode == 5 && sub == 1);
@@ -53,7 +66,7 @@ Decoded decode(unsigned opCode, unsigned sub) {
     d.rts = (opCode == 4 && sub == 12);
     d.regIsAddress = (opCode == 3 && (sub == 2 || sub == 3));
     d.hlt = (opCode == 7 && sub == 0);
-    d.useIn = (opCode == 7 && sub >= 1 && sub <= 3);
+    d.useIn = (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
     d.useOut = (opCode == 7 && sub >= 4);
 
     if (opCode == 3 || (opCode == 5 && sub == 1))
@@ -63,6 +76,8 @@ Decoded decode(unsigned opCode, unsigned sub) {
 
     if (opCode == 7 && sub >= 1 && sub <= 6)
         d.ioPort = (sub - 1) % 3;
+    else if (opCode == 7 && sub == 7)
+        d.ioPort = RANDOM_PORT;
 
     return d;
 }

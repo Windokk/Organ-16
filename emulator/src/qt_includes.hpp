@@ -19,3 +19,5 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QWidgetAction>
+#include <QFileInfo>
+#include <QDateTime>

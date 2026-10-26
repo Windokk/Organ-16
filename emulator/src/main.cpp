@@ -21,6 +21,9 @@ Expect garbage code, bugs and crashes.
 #include "core/core.hpp"
 #include "core/sim_thread.hpp"
 
+#include "export/gif_recorder.hpp"
+#include "export/screenshot.hpp"
+
 #include "splitter.hpp"
 
 #include <array>
@@ -43,6 +46,11 @@ FullSplitter* HSplitterBottom;
 QAction *toggleAutomatic;
 QAction *toggleManual;
 QTimer frameTimer;
+QTimer gifTimer;
+GifRecorder gifRecorder;
+QAction* recordGifAction;
+
+constexpr int GIF_CAPTURE_INTERVAL_MS = 40;
 
 bool debugPanelShown = false;
 int shownClockValue = -1;
@@ -200,6 +208,89 @@ void RefreshUi()
 void OnFrame()
 {
     RefreshUi();
+}
+
+ScreenPixels CopyScreen()
+{
+    auto guard = core.lock();
+    return core.screen;
+}
+
+QString WithSuffix(QString path, const QString& suffix)
+{
+    if (QFileInfo(path).suffix().isEmpty())
+        path += "." + suffix;
+    return path;
+}
+
+QString DefaultExportName(const QString& suffix)
+{
+    return "organ16_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "." + suffix;
+}
+
+void SaveScreenshot()
+{
+    const ScreenPixels pixels = CopyScreen();
+
+    QString path = QFileDialog::getSaveFileName(
+        window,
+        "Save screenshot",
+        DefaultExportName("jpg"),
+        "JPEG image (*.jpg *.jpeg)"
+    );
+    if (path.isEmpty())
+        return;
+
+    path = WithSuffix(path, "jpg");
+    if (!SaveScreenshotJpeg(pixels, path))
+        QMessageBox::warning(window, "File Error", "Could not save the screenshot to " + path);
+}
+
+void StopGifRecording()
+{
+    gifTimer.stop();
+    const bool ok = gifRecorder.stop();
+    recordGifAction->setText("Start GIF recording...");
+    window->setWindowTitle("Organ 16 Emulator");
+    if (!ok)
+        QMessageBox::warning(window, "File Error", "The GIF file could not be written completely.");
+}
+
+void StartGifRecording()
+{
+    QString path = QFileDialog::getSaveFileName(
+        window,
+        "Record GIF",
+        DefaultExportName("gif"),
+        "GIF image (*.gif)"
+    );
+    if (path.isEmpty())
+        return;
+
+    path = WithSuffix(path, "gif");
+    if (!gifRecorder.start(path.toStdString())) {
+        QMessageBox::warning(window, "File Error", "Could not create " + path);
+        return;
+    }
+
+    gifRecorder.addFrame(CopyScreen());
+    gifTimer.start(GIF_CAPTURE_INTERVAL_MS);
+    recordGifAction->setText("Stop GIF recording");
+    window->setWindowTitle("Organ 16 Emulator - recording GIF");
+}
+
+void ToggleGifRecording()
+{
+    if (gifRecorder.recording())
+        StopGifRecording();
+    else
+        StartGifRecording();
+}
+
+void OnGifCapture()
+{
+    if (!gifRecorder.addFrame(CopyScreen()))
+        StopGifRecording();
 }
 
 void ToggleManualClock(bool checked){
@@ -506,6 +597,21 @@ void SetupGUI(){
     importAction->setToolTip("Load a compiled program file to RAM");
     QObject::connect(importAction, &QAction::triggered, &ImportRAM);
     file_menu->addAction(importAction);
+    file_menu->addSeparator();
+
+    QAction* screenshotAction = new QAction();
+    screenshotAction->setText("Save screenshot (JPEG 800x800)...");
+    screenshotAction->setToolTip("Save the screen as an upscaled 800x800 JPEG (nearest neighbour)");
+    screenshotAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_P));
+    QObject::connect(screenshotAction, &QAction::triggered, &SaveScreenshot);
+    file_menu->addAction(screenshotAction);
+
+    recordGifAction = new QAction();
+    recordGifAction->setText("Start GIF recording...");
+    recordGifAction->setToolTip("Record the screen as an upscaled 800x800 GIF (nearest neighbour)");
+    recordGifAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+    QObject::connect(recordGifAction, &QAction::triggered, &ToggleGifRecording);
+    file_menu->addAction(recordGifAction);
 
     QMenu *debug_menu = new QMenu("Debug", menubar);
     QAction* showSignals = new QAction();
@@ -751,6 +857,13 @@ int main(int argc, char *argv[]) {
     frameTimer.setTimerType(Qt::PreciseTimer);
     QObject::connect(&frameTimer, &QTimer::timeout, &OnFrame);
     frameTimer.start(16);
+
+    QObject::connect(&gifTimer, &QTimer::timeout, &OnGifCapture);
+    gifTimer.setTimerType(Qt::PreciseTimer);
+    QObject::connect(&app, &QApplication::aboutToQuit, [] {
+        if (gifRecorder.recording())
+            StopGifRecording();
+    });
 
     const int result = app.exec();
     sim.stop();

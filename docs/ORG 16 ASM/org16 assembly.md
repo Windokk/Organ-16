@@ -1,14 +1,14 @@
-# Organ 16 assembly v1.0.0 - Documentation
+# Organ 16 assembly v1.5.0 - Documentation
 
 ## Syntax :
 
 ### Instructions :
 
-Here are the 39 currently usable instructions :
+Here are the 52 currently usable instructions :
 
-| Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description                           |
+| Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description of the example            |
 |-------------|----------|-------------|------------|------------------|---------------------------------------|
-| ADD         | `000`    | `0000`      | (1 word)   | ADD R1, R2, R3   | Add R2 and R3, store in R1            |
+| ADD         | `000`    | `1010`      | (1 word)   | ADD R1, R2, R3   | Add R2 and R3, store in R1            |
 | SUB         | `000`    | `0001`      | (1 word)   | SUB R1, R2, R3   | Subtract R3 from R2, store in R1      |
 | MUL         | `000`    | `0010`      | (1 word)   | MUL R1, R2, R3   | Multiply R2 and R3, store in R1       |
 | DIV         | `000`    | `0011`      | (1 word)   | DIV R1, R2, R3   | Divide R2 by R3, store in R1          |
@@ -31,22 +31,48 @@ Here are the 39 currently usable instructions :
 | JBE         | `100`    | `0100`      | (2 words)  | JBE 0x1000       | Jump if below or equal (unsigned)     |
 | JA          | `100`    | `0101`      | (2 words)  | JA 0x1000        | Jump if above (unsigned)              |
 | JAE         | `100`    | `0110`      | (2 words)  | JAE 0x1000       | Jump if above or equal (unsigned)     |
-| JL          | `100`    | `0111`      | (2 words)  | JL 0x1000        | Jump if less (signed)                 |
-| JLE         | `100`    | `1000`      | (2 words)  | JLE 0x1000       | Jump if less or equal (signed)        |
-| JG          | `100`    | `1001`      | (2 words)  | JG 0x1000        | Jump if greater (signed)              |
-| JGE         | `100`    | `1010`      | (2 words)  | JGE 0x1000       | Jump if greater or equal (signed)     |
-| JSR         | `100`    | `1011`      | (2 words)  | JSR 0x1000       | Push PC, jump to subroutine           |
-| RTS         | `100`    | `1100`      | (1 word)   | RTS              | Pop return address, jump to it        |
-| HLT         | `111`    | `0000`      | (1 word)   | HLT              | Halt the CPU                          |
-| CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2 (Not commutative)   |
-| PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack                |
-| POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1              |
-| IN0         | `111`    | `0001`      | (1 word)   | IN0 R0           | Place input data from port A into R0  |
-| IN1         | `111`    | `0010`      | (1 word)   | IN1 R0           | Place input data from port B into R0  |
-| IN2         | `111`    | `0011`      | (1 word)   | IN2 R0           | Place input data from port C into R0  |
-| OUT0        | `111`    | `0100`      | (1 word)   | OUT0 R0          | Outputs R0 to output port A           |
-| OUT1        | `111`    | `0101`      | (1 word)   | OUT1 R0          | Outputs R0 to output port B           |
-| OUT2        | `111`    | `0110`      | (1 word)   | OUT2 R0          | Outputs R0 to output port C           |
+| JL          | `100`    | `0111`      | (2 words)  | JL 0x1000        | Jump if less (signed)                           |
+| JLE         | `100`    | `1000`      | (2 words)  | JLE 0x1000       | Jump if less or equal (signed)                  |
+| JG          | `100`    | `1001`      | (2 words)  | JG 0x1000        | Jump if greater (signed)                        |
+| JGE         | `100`    | `1010`      | (2 words)  | JGE 0x1000       | Jump if greater or equal (signed)               |
+| JSR         | `100`    | `1011`      | (2 words)  | JSR 0x1000       | Push PC, jump to subroutine                     |
+| RTS         | `100`    | `1100`      | (1 word)   | RTS              | Pop return address, jump to it                  |
+| HLT         | `111`    | `0000`      | (1 word)   | HLT              | Halt the CPU                                    |
+| CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2 (Not commutative)             |
+| PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack                          |
+| POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1                        |
+| IN0         | `111`    | `0001`      | (1 word)   | IN0 R0           | Place input data from port A into R0            |
+| IN1         | `111`    | `0010`      | (1 word)   | IN1 R0           | Place input data from port B into R0            |
+| IN2         | `111`    | `0011`      | (1 word)   | IN2 R0           | Place input data from port C into R0            |
+| OUT0        | `111`    | `0100`      | (1 word)   | OUT0 R0          | Outputs R0 to output port A                     |
+| OUT1        | `111`    | `0101`      | (1 word)   | OUT1 R0          | Outputs R0 to output port B                     |
+| OUT2        | `111`    | `0110`      | (1 word)   | OUT2 R0          | Outputs R0 to output port C                     |
+| RAND        | `111`    | `0111`      | (1 word)   | RAND R0          | Reads a 16 bit random number into R0            |
+| SHL         | `000`    | `1011`      | (1 word)   | SHL R0, R1, R2   | Shifts R1 left by "R2 bits", places the result in R0 (logical)  |
+| SHR         | `000`    | `1100`      | (1 word)   | SHR R1, R0, R2   | Shifts R0 right by "R2 bits", places the result in R1 (logical) |
+| XNOR        | `000`    | `1101`      | (1 word)   | XNOR R1, R2, R3  | Bitwise XNOR, store in R1                             | 
+| MIN         | `000`    | `1110`      | (1 word)   | MIN R0, R1, R2   | Stores the smallest (unsigned) of R1 and R2 into R0   |
+| MAX         | `000`    | `1111`      | (1 word)   | MAX R0, R1, R2   | Stores the biggest (unsigned) of R1 and R2 into R0    |
+| SIN         | `001`    | `0000`      | (1 word)   | SIN R0, R1       | Stores sin(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
+| COS         | `001`    | `0001`      | (1 word)   | COS R0, R1       | Stores cos(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
+| TAN         | `001`    | `0010`      | (1 word)   | TAN R0, R1       | Stores tan(R1) into R0 (R1 = angle in turns, signed Q8.8 result, saturated) |
+| SQRT        | `001`    | `0011`      | (1 word)   | SQRT R0, R1      | Stores the integer square root of R1 (unsigned) into R0 |
+| POW         | `001`    | `0100`      | (1 word)   | POW R0, R1, R2   | Stores R1 raised to the power R2 (low 16 bits) into R0 |
+| ABS         | `001`    | `0101`      | (1 word)   | ABS R0, R1       | Stores the absolute value of R1 (signed) into R0      |
+| NOP         | `000`    | `0000`      | (1 word)   | NOP              | No operation, but not halt either, just do nothing for one tick |
+
+#### Notes : 
+
+- DIV and MOD by 0 give 0.
+- MIN and MAX compare their operands as unsigned values.
+- SIN, COS and TAN take an angle expressed in turns : 0x0000 = 0°, 0x4000 = 90°, 0x8000 = 180°, 0xC000 = 270°.
+- SIN and COS return a signed Q1.15 value (-1.0 to 1.0 mapped to -32767 to 32767).
+- TAN returns a signed Q8.8 value (1.0 = 0x0100), saturated to -32767 / 32767.
+- Qm.n notation : m includes the sign bit (Q8.8 = 1 sign + 7 integer + 8 fractional bits).
+- SQRT returns floor(sqrt(R1)) with R1 unsigned.
+- POW returns R1 raised to the power R2 (both unsigned), truncated to 16 bits. 0 raised to 0 gives 1. It takes three registers like the 3-register ALU instructions, even though its opcode sits in the `001` group.
+- ABS interprets R1 as signed; ABS of 0x8000 stays 0x8000.
+- RAND returns a new pseudo-random 16-bit value on each execution. In hardware it behaves like an IN instruction reading IO port 3, which is wired to a random generator.
 
 ### Instruction decomposition : 
 
@@ -54,10 +80,10 @@ Here are the 39 currently usable instructions :
 
 ### Immediates : 
 
-Immediates are hard-coded literal values used directly in instructions—for operations, jumps, or memory manipulation.
+Immediates are hard-coded literal values used directly in instructions for operations, jumps, or memory manipulation.
 They are not loaded from memory but embedded directly into the instruction at compile time.
 
-As of Organ 16 Assembly v1.0.0, immediates can be written in the following formats:
+As of Organ 16 Assembly v1.5.0, immediates can be written in the following formats:
 
 Binary: Prefix with 0b (e.g., 0b10101)
 
@@ -118,8 +144,8 @@ Source files should be in the same directory as the linker script
 
 The linker file (.l) (format = json) is responsible for combining multiple source files into a single executable program (.bin).
 When the compiler opens the linker file, it searches for a segments list that specifies every source file to be combined along with their respective memory start addresses. This allows the compiler to properly map each module in memory.
-If a file is mapped inside the stack space (0xF000 - 0xFFFF) it will be truncated or even fully removed as this memory region must remain blank to preserve runtime stack operations.
-As of Organ 16 Assembly v1.0.0, users can freely map data into the framebuffer region (0x8000 – 0xBFFF) during compilation.
+If a file is overlapping the stack space (0xF000 - 0xFFFF) it will be truncated or even fully removed as this memory region must remain blank to preserve runtime stack operations.
+As of Organ 16 Assembly v1.5.0, users can freely map data into the framebuffer region (0x8000 – 0xBFFF) during compilation.
 Note: This data will not be automatically displayed on-screen; screen output only occurs during runtime via the STORE or STORER instructions.
 
 ### Python compiler

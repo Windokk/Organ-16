@@ -1,0 +1,570 @@
+; Organ cube for Organ16 Assembly v1.5.0
+;
+; Rotating flat-shaded cube, one color per face.
+; Every jump/JSR target starts with an idempotent instruction on purpose :
+; the core executes the register write of that first instruction twice.
+
+@define CUBE_HALF 120
+@define STEP_A 0x0120
+@define STEP_B 0x00A0
+@define START_A 0x1000
+@define START_B 0x0600
+
+@define COLOR_XP 0xF800
+@define COLOR_XN 0x07FF
+@define COLOR_YP 0x07E0
+@define COLOR_YN 0xF81F
+@define COLOR_ZP 0x001F
+@define COLOR_ZN 0xFFE0
+
+@define FRAMEBUFFER 0x8000
+
+@define SA8 0xC000
+@define CA8 0xC001
+@define SB8 0xC002
+@define CB8 0xC003
+@define ANGLE_A 0xC004
+@define ANGLE_B 0xC005
+
+@define ROT_VX 0xC006
+@define ROT_VY 0xC007
+@define ROT_VZ 0xC008
+@define ROT_OX 0xC009
+@define ROT_OY 0xC00A
+@define ROT_OZ 0xC00B
+
+@define BASIS 0xC010
+
+@define F_K 0xC020
+@define F_U 0xC021
+@define F_V 0xC022
+@define F_SIGN 0xC023
+@define F_COLOR 0xC024
+@define F_YMIN 0xC025
+@define F_YMAX 0xC026
+@define F_CX 0xC027
+@define F_CY 0xC028
+@define CORNER_PTR 0xC029
+@define ROW_BASE 0xC02A
+
+@define E_X0 0xC02B
+@define E_Y0 0xC02C
+@define E_X1 0xC02D
+@define E_Y1 0xC02E
+@define E_SGN 0xC02F
+
+@define CORNERS 0xC030
+
+@define XL 0xC100
+@define XR 0xC180
+@define NEWL 0xC200
+@define NEWR 0xC280
+@define OLDL 0xC300
+@define OLDR 0xC380
+
+main:
+    MOV R1, 0
+    MOV R2, 128
+
+init_tables:
+    MOV R3, NEWL
+    ADD R3, R3, R1
+    MOV R4, 0xFFFF
+    STORER R4, R3
+    MOV R5, 0x80
+    ADD R3, R3, R5
+    MOV R4, 0
+    STORER R4, R3
+    ADD R3, R3, R5
+    MOV R4, 0xFFFF
+    STORER R4, R3
+    ADD R3, R3, R5
+    MOV R4, 0
+    STORER R4, R3
+    MOV R3, 1
+    ADD R1, R1, R3
+    CMP R1, R2
+    JNE init_tables
+
+    MOV R0, START_A
+    STORE R0, ANGLE_A
+    MOV R0, START_B
+    STORE R0, ANGLE_B
+
+frame:
+    LOAD R0, ANGLE_A
+    MOV R1, STEP_A
+    ADD R0, R0, R1
+    STORE R0, ANGLE_A
+    LOAD R0, ANGLE_B
+    MOV R1, STEP_B
+    ADD R0, R0, R1
+    STORE R0, ANGLE_B
+
+    LOAD R1, ANGLE_A
+    SIN R0, R1
+    JSR to_q8
+    STORE R0, SA8
+    COS R0, R1
+    JSR to_q8
+    STORE R0, CA8
+    LOAD R1, ANGLE_B
+    SIN R0, R1
+    JSR to_q8
+    STORE R0, SB8
+    COS R0, R1
+    JSR to_q8
+    STORE R0, CB8
+
+    MOV R0, CUBE_HALF
+    STORE R0, ROT_VX
+    MOV R0, 0
+    STORE R0, ROT_VY
+    STORE R0, ROT_VZ
+    JSR rotate
+    LOAD R0, ROT_OX
+    STORE R0, BASIS
+    LOAD R0, ROT_OY
+    STORE R0, (BASIS + 1)
+    LOAD R0, ROT_OZ
+    STORE R0, (BASIS + 2)
+
+    MOV R0, 0
+    STORE R0, ROT_VX
+    MOV R0, CUBE_HALF
+    STORE R0, ROT_VY
+    JSR rotate
+    LOAD R0, ROT_OX
+    STORE R0, (BASIS + 3)
+    LOAD R0, ROT_OY
+    STORE R0, (BASIS + 4)
+    LOAD R0, ROT_OZ
+    STORE R0, (BASIS + 5)
+
+    MOV R0, 0
+    STORE R0, ROT_VY
+    MOV R0, CUBE_HALF
+    STORE R0, ROT_VZ
+    JSR rotate
+    LOAD R0, ROT_OX
+    STORE R0, (BASIS + 6)
+    LOAD R0, ROT_OY
+    STORE R0, (BASIS + 7)
+    LOAD R0, ROT_OZ
+    STORE R0, (BASIS + 8)
+
+    MOV R1, BASIS
+    MOV R2, (BASIS + 3)
+    MOV R3, (BASIS + 6)
+    MOV R4, COLOR_XP
+    MOV R5, COLOR_XN
+    JSR try_face
+
+    MOV R1, (BASIS + 3)
+    MOV R2, (BASIS + 6)
+    MOV R3, BASIS
+    MOV R4, COLOR_YP
+    MOV R5, COLOR_YN
+    JSR try_face
+
+    MOV R1, (BASIS + 6)
+    MOV R2, BASIS
+    MOV R3, (BASIS + 3)
+    MOV R4, COLOR_ZP
+    MOV R5, COLOR_ZN
+    JSR try_face
+
+    JSR erase_pass
+    JMP frame
+
+to_q8:
+    MOV R7, 0x8000
+    ADD R0, R0, R7
+    MOV R6, 7
+    SHR R0, R0, R6
+    MOV R5, 0x100
+    SUB R0, R0, R5
+    RTS
+
+sar8:
+    MOV R7, 0x8080
+    ADD R0, R0, R7
+    MOV R6, 8
+    SHR R0, R0, R6
+    MOV R5, 0x80
+    SUB R0, R0, R5
+    RTS
+
+rotate:
+    LOAD R1, ROT_VX
+    LOAD R2, ROT_VZ
+    LOAD R3, CA8
+    LOAD R4, SA8
+    MUL R5, R1, R3
+    MUL R6, R2, R4
+    ADD R0, R5, R6
+    JSR sar8
+    STORE R0, ROT_OX
+    MUL R5, R2, R3
+    MUL R6, R1, R4
+    SUB R0, R5, R6
+    JSR sar8
+    OR R2, R0, R0
+    LOAD R1, ROT_VY
+    LOAD R3, CB8
+    LOAD R4, SB8
+    MUL R5, R1, R3
+    MUL R6, R2, R4
+    SUB R0, R5, R6
+    JSR sar8
+    STORE R0, ROT_OY
+    MUL R5, R1, R4
+    MUL R6, R2, R3
+    ADD R0, R5, R6
+    JSR sar8
+    STORE R0, ROT_OZ
+    RTS
+
+try_face:
+    STORE R2, F_U
+    STORE R3, F_V
+    MOV R7, 2
+    ADD R7, R1, R7
+    LOADR R6, R7
+    MOV R7, 0
+    CMP R6, R7
+    JE try_face_done
+    JG try_face_front
+    STORE R5, F_COLOR
+    MOV R7, -1
+    STORE R7, F_SIGN
+    JMP try_face_draw
+
+try_face_front:
+    STORE R4, F_COLOR
+    MOV R7, 1
+    STORE R7, F_SIGN
+
+try_face_draw:
+    STORE R1, F_K
+    JSR draw_face
+
+try_face_done:
+    RTS
+
+draw_face:
+    LOAD R1, F_K
+    LOAD R3, F_SIGN
+    LOADR R2, R1
+    MUL R2, R2, R3
+    STORE R2, F_CX
+    MOV R4, 1
+    ADD R1, R1, R4
+    LOADR R2, R1
+    MUL R2, R2, R3
+    STORE R2, F_CY
+
+    MOV R0, CORNERS
+    STORE R0, CORNER_PTR
+    MOV R1, 1
+    MOV R2, 1
+    JSR corner
+    MOV R1, -1
+    MOV R2, 1
+    JSR corner
+    MOV R1, -1
+    MOV R2, -1
+    JSR corner
+    MOV R1, 1
+    MOV R2, -1
+    JSR corner
+
+    LOAD R1, (CORNERS + 1)
+    LOAD R2, (CORNERS + 3)
+    MIN R3, R1, R2
+    MAX R4, R1, R2
+    LOAD R1, (CORNERS + 5)
+    MIN R5, R3, R1
+    MAX R6, R4, R1
+    LOAD R1, (CORNERS + 7)
+    MIN R3, R5, R1
+    MAX R4, R6, R1
+    STORE R3, F_YMIN
+    STORE R4, F_YMAX
+
+    OR R1, R3, R3
+    OR R2, R4, R4
+
+init_rows:
+    MOV R3, XL
+    ADD R3, R3, R1
+    MOV R4, 0x7FFF
+    STORER R4, R3
+    MOV R5, 0x80
+    ADD R3, R3, R5
+    MOV R4, 0
+    STORER R4, R3
+    MOV R3, 1
+    ADD R1, R1, R3
+    CMP R1, R2
+    JBE init_rows
+
+    LOAD R0, CORNERS
+    STORE R0, E_X0
+    LOAD R0, (CORNERS + 1)
+    STORE R0, E_Y0
+    LOAD R0, (CORNERS + 2)
+    STORE R0, E_X1
+    LOAD R0, (CORNERS + 3)
+    STORE R0, E_Y1
+    JSR edge
+
+    LOAD R0, (CORNERS + 2)
+    STORE R0, E_X0
+    LOAD R0, (CORNERS + 3)
+    STORE R0, E_Y0
+    LOAD R0, (CORNERS + 4)
+    STORE R0, E_X1
+    LOAD R0, (CORNERS + 5)
+    STORE R0, E_Y1
+    JSR edge
+
+    LOAD R0, (CORNERS + 4)
+    STORE R0, E_X0
+    LOAD R0, (CORNERS + 5)
+    STORE R0, E_Y0
+    LOAD R0, (CORNERS + 6)
+    STORE R0, E_X1
+    LOAD R0, (CORNERS + 7)
+    STORE R0, E_Y1
+    JSR edge
+
+    LOAD R0, (CORNERS + 6)
+    STORE R0, E_X0
+    LOAD R0, (CORNERS + 7)
+    STORE R0, E_Y0
+    LOAD R0, CORNERS
+    STORE R0, E_X1
+    LOAD R0, (CORNERS + 1)
+    STORE R0, E_Y1
+    JSR edge
+
+    LOAD R1, F_YMIN
+    LOAD R2, F_YMAX
+    LOAD R6, F_COLOR
+
+fill_row:
+    MOV R0, XL
+    ADD R0, R0, R1
+    LOADR R3, R0
+    MOV R0, XR
+    ADD R0, R0, R1
+    LOADR R4, R0
+    MOV R0, NEWL
+    ADD R0, R0, R1
+    LOADR R7, R0
+    MIN R7, R7, R3
+    STORER R7, R0
+    MOV R0, NEWR
+    ADD R0, R0, R1
+    LOADR R7, R0
+    MAX R7, R7, R4
+    STORER R7, R0
+    MOV R0, 7
+    SHL R5, R1, R0
+    MOV R0, FRAMEBUFFER
+    ADD R5, R5, R0
+    ADD R5, R5, R3
+    SUB R0, R4, R3
+    ADD R7, R5, R0
+    MOV R0, 1
+
+fill_px:
+    STORER R6, R5
+    ADD R5, R5, R0
+    CMP R5, R7
+    JBE fill_px
+    ADD R1, R1, R0
+    CMP R1, R2
+    JBE fill_row
+    RTS
+
+corner:
+    LOAD R3, F_U
+    LOADR R4, R3
+    MUL R4, R4, R1
+    LOAD R3, F_V
+    LOADR R5, R3
+    MUL R5, R5, R2
+    ADD R4, R4, R5
+    LOAD R5, F_CX
+    MOV R6, 258
+    ADD R4, R4, R5
+    ADD R4, R4, R6
+    MOV R5, 2
+    SHR R4, R4, R5
+    LOAD R3, F_U
+    MOV R5, 1
+    ADD R3, R3, R5
+    LOADR R6, R3
+    MUL R6, R6, R1
+    LOAD R7, F_V
+    ADD R3, R7, R5
+    LOADR R7, R3
+    MUL R7, R7, R2
+    ADD R6, R6, R7
+    LOAD R7, F_CY
+    MOV R3, 258
+    ADD R6, R6, R7
+    SUB R6, R3, R6
+    MOV R7, 2
+    SHR R6, R6, R7
+    LOAD R3, CORNER_PTR
+    STORER R4, R3
+    ADD R3, R3, R5
+    STORER R6, R3
+    ADD R3, R3, R5
+    STORE R3, CORNER_PTR
+    RTS
+
+edge:
+    LOAD R1, E_X0
+    LOAD R2, E_Y0
+    LOAD R3, E_X1
+    LOAD R4, E_Y1
+    CMP R2, R4
+    JBE edge_ordered
+    XOR R1, R1, R3
+    XOR R3, R1, R3
+    XOR R1, R1, R3
+    XOR R2, R2, R4
+    XOR R4, R2, R4
+    XOR R2, R2, R4
+    STORE R2, E_Y0
+
+edge_ordered:
+    CMP R2, R4
+    JE edge_flat
+    SUB R5, R4, R2
+    CMP R1, R3
+    JBE edge_right
+    SUB R6, R1, R3
+    MOV R0, -1
+    STORE R0, E_SGN
+    JMP edge_rows
+
+edge_right:
+    SUB R6, R3, R1
+    MOV R0, 1
+    STORE R0, E_SGN
+
+edge_rows:
+    LOAD R7, E_Y0
+    SUB R3, R2, R7
+    LOAD R7, E_SGN
+    ADD R0, R5, R5
+    MUL R3, R3, R6
+    ADD R3, R3, R3
+    ADD R3, R3, R5
+    DIV R3, R3, R0
+    MUL R3, R3, R7
+    ADD R3, R3, R1
+    JSR update_row
+    MOV R0, 1
+    ADD R2, R2, R0
+    CMP R2, R4
+    JBE edge_rows
+    RTS
+
+edge_flat:
+    MOV R0, 0
+    JSR update_row
+    OR R3, R1, R1
+    JSR update_row
+    RTS
+
+update_row:
+    MOV R0, XL
+    ADD R0, R0, R2
+    LOADR R7, R0
+    MIN R7, R7, R3
+    STORER R7, R0
+    MOV R7, 0x80
+    ADD R0, R0, R7
+    LOADR R7, R0
+    MAX R7, R7, R3
+    STORER R7, R0
+    RTS
+
+erase_pass:
+    MOV R1, 0
+
+erase_row:
+    MOV R0, NEWL
+    ADD R0, R0, R1
+    LOADR R4, R0
+    MOV R6, 0x80
+    ADD R0, R0, R6
+    LOADR R5, R0
+    ADD R0, R0, R6
+    LOADR R2, R0
+    ADD R0, R0, R6
+    LOADR R3, R0
+    MOV R7, 7
+    SHL R6, R1, R7
+    MOV R7, FRAMEBUFFER
+    ADD R6, R6, R7
+    STORE R6, ROW_BASE
+    CMP R2, R4
+    JAE erase_right
+    OR R6, R2, R2
+    MOV R7, 1
+    SUB R7, R4, R7
+    MIN R7, R7, R3
+    JSR erase_span
+
+erase_right:
+    CMP R3, R5
+    JBE erase_store
+    MOV R6, 1
+    ADD R6, R5, R6
+    MAX R6, R6, R2
+    OR R7, R3, R3
+    JSR erase_span
+
+erase_store:
+    MOV R0, OLDL
+    ADD R0, R0, R1
+    STORER R4, R0
+    MOV R6, 0x80
+    ADD R0, R0, R6
+    STORER R5, R0
+    MOV R0, NEWL
+    ADD R0, R0, R1
+    MOV R7, 0xFFFF
+    STORER R7, R0
+    ADD R0, R0, R6
+    MOV R7, 0
+    STORER R7, R0
+    MOV R0, 1
+    ADD R1, R1, R0
+    MOV R7, 128
+    CMP R1, R7
+    JNE erase_row
+    RTS
+
+erase_span:
+    LOAD R0, ROW_BASE
+    PUSH R3
+    ADD R6, R6, R0
+    ADD R7, R7, R0
+    MOV R3, 1
+    MOV R0, 0
+
+erase_px:
+    STORER R0, R6
+    ADD R6, R6, R3
+    CMP R6, R7
+    JBE erase_px
+    POP R3
+    RTS

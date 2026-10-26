@@ -41,9 +41,20 @@ VALID_OPCODES = {
     "NAND":  ["R", "R", "R"],
     "NOR":   ["R", "R", "R"],
     "XOR":   ["R", "R", "R"],
+    "XNOR":  ["R", "R", "R"],
+    "SHL":   ["R", "R", "R"],
+    "SHR":   ["R", "R", "R"],
+    "MIN":   ["R", "R", "R"],
+    "MAX":   ["R", "R", "R"],
+    "POW":   ["R", "R", "R"],
 
     "NOT":   ["R", "R"],
     "CMP":   ["R", "R"],
+    "SIN":   ["R", "R"],
+    "COS":   ["R", "R"],
+    "TAN":   ["R", "R"],
+    "SQRT":  ["R", "R"],
+    "ABS":   ["R", "R"],
 
     # register + immediate only
     "MOV":   ["R", "I"],
@@ -70,6 +81,7 @@ VALID_OPCODES = {
 
     "RTS":   [],
     "HLT":   [],
+    "NOP":   [],
 
     # Register-only instructions
     "PUSH":  ["R"],
@@ -80,6 +92,7 @@ VALID_OPCODES = {
     "OUT0":  ["R"],
     "OUT1":  ["R"],
     "OUT2":  ["R"],
+    "RAND":  ["R"],
 }
 
 VALID_REGISTERS = {f"R{i}" for i in range(8)}

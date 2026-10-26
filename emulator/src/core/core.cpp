@@ -1,6 +1,8 @@
 #include "core.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <random>
 
 namespace {
 
@@ -12,29 +14,62 @@ struct AluResult {
     bool overflow = false;
 };
 
+constexpr double PI = 3.14159265358979323846;
+
+inline double turnsToRadians(uint16_t turns) {
+    return 2.0 * PI * turns / 65536.0;
+}
+
+inline uint16_t toFixed(double value, double scale) {
+    const double scaled = std::round(value * scale);
+    return static_cast<uint16_t>(static_cast<int16_t>(std::clamp(scaled, -32767.0, 32767.0)));
+}
+
+inline uint16_t power(uint16_t base, uint16_t exponent) {
+    uint16_t result = 1;
+    while (exponent) {
+        if (exponent & 1) result = static_cast<uint16_t>(result * base);
+        base = static_cast<uint16_t>(base * base);
+        exponent >>= 1;
+    }
+    return result;
+}
+
 inline AluResult runAlu(uint16_t a, uint16_t b, unsigned op) {
     AluResult out;
     uint32_t wide = 0;
+    const int16_t signedA = static_cast<int16_t>(a);
 
     switch (op) {
-        case 0:
+        case ALU_ADD:
             wide = static_cast<uint32_t>(a) + b;
             out.result = static_cast<uint16_t>(wide);
             break;
-        case 1:
-        case 10:
+        case ALU_SUB:
+        case ALU_CMP:
             wide = static_cast<uint32_t>(a) - b;
             out.result = static_cast<uint16_t>(wide);
             break;
-        case 2:  out.result = static_cast<uint16_t>(static_cast<uint32_t>(a) * b); break;
-        case 3:  out.result = b ? a / b : 0; break;
-        case 4:  out.result = b ? a % b : 0; break;
-        case 5:  out.result = a & b; break;
-        case 6:  out.result = a | b; break;
-        case 7:  out.result = static_cast<uint16_t>(~(a & b)); break;
-        case 8:  out.result = static_cast<uint16_t>(~(a | b)); break;
-        case 9:  out.result = a ^ b; break;
-        case 11: out.result = static_cast<uint16_t>(~a); break;
+        case ALU_MUL:  out.result = static_cast<uint16_t>(static_cast<uint32_t>(a) * b); break;
+        case ALU_DIV:  out.result = b ? a / b : 0; break;
+        case ALU_MOD:  out.result = b ? a % b : 0; break;
+        case ALU_AND:  out.result = a & b; break;
+        case ALU_OR:   out.result = a | b; break;
+        case ALU_NAND: out.result = static_cast<uint16_t>(~(a & b)); break;
+        case ALU_NOR:  out.result = static_cast<uint16_t>(~(a | b)); break;
+        case ALU_XOR:  out.result = a ^ b; break;
+        case ALU_XNOR: out.result = static_cast<uint16_t>(~(a ^ b)); break;
+        case ALU_SHL:  out.result = b < 16 ? static_cast<uint16_t>(a << b) : 0; break;
+        case ALU_SHR:  out.result = b < 16 ? static_cast<uint16_t>(a >> b) : 0; break;
+        case ALU_MIN:  out.result = std::min(a, b); break;
+        case ALU_MAX:  out.result = std::max(a, b); break;
+        case ALU_NOT:  out.result = static_cast<uint16_t>(~a); break;
+        case ALU_SIN:  out.result = toFixed(std::sin(turnsToRadians(a)), 32767.0); break;
+        case ALU_COS:  out.result = toFixed(std::cos(turnsToRadians(a)), 32767.0); break;
+        case ALU_TAN:  out.result = toFixed(std::tan(turnsToRadians(a)), 256.0); break;
+        case ALU_SQRT: out.result = static_cast<uint16_t>(std::sqrt(static_cast<double>(a))); break;
+        case ALU_POW:  out.result = power(a, b); break;
+        case ALU_ABS:  out.result = static_cast<uint16_t>(signedA < 0 ? -signedA : signedA); break;
         default: break;
     }
 
@@ -45,11 +80,11 @@ inline AluResult runAlu(uint16_t a, uint16_t b, unsigned op) {
     const bool signB = b & 0x8000;
     const bool signR = out.result & 0x8000;
 
-    if (op == 0) {
+    if (op == ALU_ADD) {
         out.carry = wide > 0xFFFF;
         out.overflow = (signA == signB) && (signA != signR);
     }
-    else if (op == 1 || op == 10) {
+    else if (op == ALU_SUB || op == ALU_CMP) {
         out.carry = a < b;
         out.overflow = (signA != signB) && (signA != signR);
     }
@@ -59,7 +94,17 @@ inline AluResult runAlu(uint16_t a, uint16_t b, unsigned op) {
 
 }
 
-Core::Core() : ram(ADDRESS_SPACE, 0) {}
+Core::Core() : ram(ADDRESS_SPACE, 0) {
+    std::random_device device;
+    rngState = device() | 1u;
+}
+
+uint16_t Core::nextRandom() {
+    rngState ^= rngState << 13;
+    rngState ^= rngState >> 17;
+    rngState ^= rngState << 5;
+    return static_cast<uint16_t>(rngState >> 8);
+}
 
 void Core::writeRam(uint16_t address, uint16_t data) {
     ram[address] = data;
@@ -94,8 +139,8 @@ void Core::halfTick() {
     const uint16_t oldRA = r[srcRA];
     const uint16_t oldRB = r[srcRB];
 
-    const bool aluEnabled = cu.aluData & 16;
-    const AluResult alu = aluEnabled ? runAlu(oldRA, oldRB, cu.aluData & 15) : AluResult{};
+    const bool aluEnabled = cu.aluEnabled;
+    const AluResult alu = aluEnabled ? runAlu(oldRA, oldRB, cu.aluOp) : AluResult{};
 
     const bool containsAddress = cu.addressMode == ADDR_ALWAYS ||
                                  (cu.addressMode == ADDR_IF_JUMP_TAKEN && jumpTaken(subOp, flags));
@@ -123,7 +168,7 @@ void Core::halfTick() {
     }
 
     if (regWrite && (pAddr ? clk : !clk)) {
-        r[dstR] = cu.useIn ? io[cu.ioPort]
+        r[dstR] = cu.useIn ? (cu.ioPort == RANDOM_PORT ? nextRandom() : io[cu.ioPort])
                 : (pSp || pRegAddr) ? ramOut
                 : pExt ? ir1
                 : alu.result;
@@ -171,7 +216,7 @@ void Core::halfTick() {
 
     const uint16_t newRam = ram[fetchAddress];
 
-    if (cu.useOut) {
+    if (cu.useOut && cu.ioPort != RANDOM_PORT) {
         const uint16_t value = r[srcRA];
         if (io[cu.ioPort] != value) {
             io[cu.ioPort] = value;

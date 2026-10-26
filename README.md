@@ -21,7 +21,10 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 </br>
 
 <img src="Screenshot.png"/>
-<center><i>Emulator playing pong.bin program</i></center>
+<div align="center"><i>Emulator playing pong.bin program</i></div>
+</br>
+<div align="center"><img src="organ16_cube.gif" width="50%"></br>
+<i>Spinning cube (Rendered in emulator)</i></div>
 
 ## Repository Guide
 
@@ -65,7 +68,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 ## ISA:
 
-(Currently there are 39 instructions, but by design the CPU could support 128 instructions)
+(Currently there are 52 instructions, but by design the CPU could support 128 instructions)
 Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
 
 - The first 3 bits of the first word represent the Opcode.
@@ -111,16 +114,30 @@ It will place every source file at the memory address specified in the linker sc
 
 - [x] Emulator
 - [x] Pong program
-- [ ] IRL breadboard implementation ?
-- [ ] Random number generation
-- [ ] More instructions :
+- [x] Random number generation
+- [x] More instructions :
   - [x] OUT[0/1/2] (Output a 16 bit number to an I/O port)
   - [x] IN[0/1/2] (Get input from an I/O port)
-  - [ ] XNOR
+  - [x] More arithmetic instructions : 
+    - [x] XNOR
+    - [x] MIN
+    - [x] MAX
+    - [x] SIN
+    - [x] COS
+    - [x] TAN
+    - [x] SQRT
+    - [x] POW
+    - [x] ABS
   - [ ] MOVI vs MOV (Being able to move a register's value into another register (without doing MOV R1, 0 then ADD, R1, R1, R2))
-  - [ ] SHL/SHR (Shift left/right) (via a new Shifting Unit)
-  - [ ] NOP (No operation = blank but not halt)
-- [ ] Support for operations and comparisons between memory-registers and registers-immediate (memory-immediate/memory-memory requires a big revision of the ISA (2 immediates per instruction), so not for now..)
-- [ ] Interrupts ???
-- [ ] Peripherals ???
+  - [x] SHL/SHR (Shift left/right logical) (via a new Shifting Unit)
+  - [x] NOP (No operation = blank but not halt)
+- [ ] Support for operations and comparisons between memory<->registers and registers<->immediate (memory<->immediate/memory<->memory requires a big revision of the ISA (2 immediates per instruction), so not for now..)
+
+
+### Future-future plans : (v3.0.0+) : 
+
+- [ ] Interrupts
+- [ ] Exceptions (a kind of interrupt)
+- [ ] Peripherals
+- [ ] IRL breadboard implementation (???)
 - [ ] PCB version (In a long long time 😄)

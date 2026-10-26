@@ -20,10 +20,21 @@ INSTR_FORMAT = {
     "NAND": {"regs": 3, "imm": False},
     "NOR":  {"regs": 3, "imm": False},
     "XOR":  {"regs": 3, "imm": False},
+    "XNOR": {"regs": 3, "imm": False},
+    "SHL":  {"regs": 3, "imm": False},
+    "SHR":  {"regs": 3, "imm": False},
+    "MIN":  {"regs": 3, "imm": False},
+    "MAX":  {"regs": 3, "imm": False},
+    "POW":  {"regs": 3, "imm": False},
 
     # Unary ALU (2 regs, no immediates)
     "NOT":  {"regs": 2, "imm": False},
     "CMP":  {"regs": 2, "imm": False},
+    "SIN":  {"regs": 2, "imm": False},
+    "COS":  {"regs": 2, "imm": False},
+    "TAN":  {"regs": 2, "imm": False},
+    "SQRT": {"regs": 2, "imm": False},
+    "ABS":  {"regs": 2, "imm": False},
 
     # MOV (1 reg, no immediates)
     "MOV":   {"regs": 1, "imm": True},
@@ -60,9 +71,11 @@ INSTR_FORMAT = {
     "OUT0": {"regs": 1, "imm": False},
     "OUT1": {"regs": 1, "imm": False},
     "OUT2": {"regs": 1, "imm": False},
+    "RAND": {"regs": 1, "imm": False},
 
-    # Halt
+    # Halt / no-op
     "HLT":  {"regs": 0, "imm": False},
+    "NOP":  {"regs": 0, "imm": False},
 }
 
 def is_stack_overlap(start_addr: int, instr_count: int) -> bool:
@@ -120,7 +133,7 @@ def ImmediateToBin(immediate: str, label_map: dict = None, constants_map: dict =
 def OpCodeToBinOpCode(instruction: str) -> str:
     instruction = instruction.upper().strip()
     opcode_map = {
-        "ADD":  ("000", "0000"), "SUB":  ("000", "0001"), "MUL":  ("000", "0010"),
+        "NOP":  ("000", "0000"), "SUB":  ("000", "0001"), "MUL":  ("000", "0010"),
         "DIV":  ("000", "0011"), "MOD":  ("000", "0100"), "AND":  ("000", "0101"),
         "OR":   ("000", "0110"), "NAND": ("000", "0111"), "NOR":  ("000", "1000"),
         "XOR":  ("000", "1001"), "NOT":  ("001", "1011"), "CMP":  ("001", "1010"),
@@ -133,6 +146,11 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "POP":  ("101", "0001"), "STORER": ("011", "0010"), "LOADR": ("011", "0011"),
         "IN0":  ("111", "0001"), "IN1":  ("111", "0010"), "IN2":  ("111", "0011"),
         "OUT0":  ("111", "0100"), "OUT1":  ("111", "0101"), "OUT2":  ("111", "0110"),
+        "RAND": ("111", "0111"), "ADD":  ("000", "1010"), "SHL":  ("000", "1011"),
+        "SHR":  ("000", "1100"), "XNOR": ("000", "1101"), "MIN":  ("000", "1110"),
+        "MAX":  ("000", "1111"), "SIN":  ("001", "0000"), "COS":  ("001", "0001"),
+        "TAN":  ("001", "0010"), "SQRT": ("001", "0011"), "POW":  ("001", "0100"),
+        "ABS":  ("001", "0101"),
     }
     if instruction in opcode_map:
         op, sub = opcode_map[instruction]
@@ -229,7 +247,7 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
                 return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map, constants_map)
             else:
                 return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)
-        if op_bin == "1010001" or op_bin == "1110001" or op_bin == "1110010" or op_bin == "1110011":
+        if op_bin == "1010001" or op_bin == "1110001" or op_bin == "1110010" or op_bin == "1110011" or op_bin == "1110111":
             return op_bin + DataToBinData(regs) + "000000"
         else:
             return op_bin + "000" + DataToBinData(regs) + "000"
