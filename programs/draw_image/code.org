@@ -4,21 +4,21 @@
 
 # R2 is the counter
 
-MOV R2, 0
+MOVI R2, 0
 
 draw_loop:
-    MOV R0, IMG_START
+    MOVI R0, IMG_START
     ADD R0, R0, R2
     LOADR R0, R0
 
-    MOV R1, FRAMEBUFFER
+    MOVI R1, FRAMEBUFFER
     ADD R1, R1, R2
     STORER R0, R1
 
-    MOV R3, 1
+    MOVI R3, 1
     ADD R2, R2, R3
 
-    MOV R4, FRAMEBUFFER_END
+    MOVI R4, FRAMEBUFFER_END
     CMP R1, R4
     JAE end
 

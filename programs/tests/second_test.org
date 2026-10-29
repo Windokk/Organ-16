@@ -16,11 +16,11 @@ LABEL3:
 
     # === Subroutine Test ===
     JSR FUNC
-    MOV R3, 0x9999          # After return from FUNC
+    MOVI R3, 0x9999          # After return from FUNC
 
     # === Halt ===
     HLT
 
 FUNC:
-    MOV R4, 0x1234         # Subroutine content
+    MOVI R4, 0x1234         # Subroutine content
     RTS

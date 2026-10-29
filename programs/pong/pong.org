@@ -72,7 +72,7 @@
 @define DIGIT_HEIGHT 10
 
 pre_init:
-    MOV R0, 1
+    MOVI R0, 1
     STORE R0, FIRST_ROUND_START_DX
     STORE R0, FIRST_ROUND_START_DY
     STORE R0, (FIRST_ROUND_START_DX + 2)
@@ -94,7 +94,7 @@ pre_init:
     STORE R0, (FIRST_ROUND_START_DX + 18)
     STORE R0, (FIRST_ROUND_START_DY + 18)
 
-    MOV R0, -1
+    MOVI R0, -1
     STORE R0, (FIRST_ROUND_START_DX + 1)
     STORE R0, (FIRST_ROUND_START_DY + 1)
     STORE R0, (FIRST_ROUND_START_DX + 3)
@@ -116,43 +116,43 @@ pre_init:
     STORE R0, (FIRST_ROUND_START_DX + 19)
     STORE R0, (FIRST_ROUND_START_DY + 19)
 
-    MOV R0, 0x7b6f
+    MOVI R0, 0x7b6f
     STORE R0, (DIGIT_FONT + 0)
-    MOV R0, 0x749a
+    MOVI R0, 0x749a
     STORE R0, (DIGIT_FONT + 1)
-    MOV R0, 0x73e7
+    MOVI R0, 0x73e7
     STORE R0, (DIGIT_FONT + 2)
-    MOV R0, 0x79e7
+    MOVI R0, 0x79e7
     STORE R0, (DIGIT_FONT + 3)
-    MOV R0, 0x49ed
+    MOVI R0, 0x49ed
     STORE R0, (DIGIT_FONT + 4)
-    MOV R0, 0x79cf
+    MOVI R0, 0x79cf
     STORE R0, (DIGIT_FONT + 5)
-    MOV R0, 0x7bcf
+    MOVI R0, 0x7bcf
     STORE R0, (DIGIT_FONT + 6)
-    MOV R0, 0x4927
+    MOVI R0, 0x4927
     STORE R0, (DIGIT_FONT + 7)
-    MOV R0, 0x7bef
+    MOVI R0, 0x7bef
     STORE R0, (DIGIT_FONT + 8)
-    MOV R0, 0x79ef
+    MOVI R0, 0x79ef
     STORE R0, (DIGIT_FONT + 9)
 
-    MOV R0, -2
+    MOVI R0, -2
     STORE R0, (PADDLE_ANGLES + 0)
     STORE R0, (PADDLE_ANGLES + 1)
 
-    MOV R0, -1
+    MOVI R0, -1
     STORE R0, (PADDLE_ANGLES + 2)
     STORE R0, (PADDLE_ANGLES + 3)
 
-    MOV R0, 0
+    MOVI R0, 0
     STORE R0, (PADDLE_ANGLES + 4)
 
-    MOV R0, 1
+    MOVI R0, 1
     STORE R0, (PADDLE_ANGLES + 5)
     STORE R0, (PADDLE_ANGLES + 6)
 
-    MOV R0, 2
+    MOVI R0, 2
     STORE R0, (PADDLE_ANGLES + 7)
     STORE R0, (PADDLE_ANGLES + 8)
 
@@ -160,7 +160,7 @@ pre_init:
 main:
 
     ; Initialize round counter at 0
-    MOV R0, ZERO
+    MOVI R0, ZERO
     STORE R0, ROUND_COUNTER
     STORE R0, BALL_TICK
     STORE R0, SCORE1
@@ -171,14 +171,14 @@ main:
     gameLoop:
 
         LOAD R0, BALL_TICK
-        MOV R1, ONE
+        MOVI R1, ONE
         ADD R0, R0, R1
         STORE R0, BALL_TICK
-        MOV R1, BALL_DELAY
+        MOVI R1, BALL_DELAY
         CMP R0, R1
         JNE paddle_pos
 
-        MOV R0, ZERO
+        MOVI R0, ZERO
         STORE R0, BALL_TICK
 
         ### Store old ball ###
@@ -192,10 +192,10 @@ main:
         LOAD R7, BALL_DY
 
         ; Screen boundaries
-        MOV R3, (SCREEN_WIDTH - 1)
+        MOVI R3, (SCREEN_WIDTH - 1)
 
         ; Check X collision (left/right)
-        MOV R5, ZERO
+        MOVI R5, ZERO
         CMP R0, R5  ; left
         JE score_player2
 
@@ -206,8 +206,8 @@ main:
         paddle_collision:
             LOAD R0, BALL_X
 
-            MOV R1, (PADDLE1_X + 1)
-            MOV R2, (PADDLE2_X - 1)
+            MOVI R1, (PADDLE1_X + 1)
+            MOVI R2, (PADDLE2_X - 1)
 
             CMP R0, R2
             JE paddle2_collision
@@ -217,7 +217,7 @@ main:
 
             LOAD R0, BALL_Y
             LOAD R1, PADDLE1_Y      ; R1 = PADDLE TOP 
-            MOV R2, PADDLE_HEIGHT
+            MOVI R2, PADDLE_HEIGHT
             ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
 
             CMP R0, R1
@@ -228,7 +228,7 @@ main:
 
             JSR set_ball_angle
 
-            MOV R0, 1
+            MOVI R0, 1
             STORE R0, BALL_DX
 
             JMP ball_pos
@@ -240,7 +240,7 @@ main:
             LOAD R0, BALL_X
             LOAD R2, BALL_DX
             
-            MOV R4, 0
+            MOVI R4, 0
             CMP R2, R4
             JL x_minus_1
             JG x_plus_1
@@ -251,11 +251,11 @@ main:
 
             ADD R1, R1, R3
 
-            MOV R4, ZERO
+            MOVI R4, ZERO
             CMP R1, R4
             JL y_bounce_top
 
-            MOV R4, (SCREEN_HEIGHT - 1)
+            MOVI R4, (SCREEN_HEIGHT - 1)
             CMP R1, R4
             JG y_bounce_bottom
 
@@ -266,8 +266,8 @@ main:
             IN0 R0
             IN1 R1
 
-            MOV R2, 1
-            MOV R3, 0b0000000100000000
+            MOVI R2, 1
+            MOVI R3, 0b0000000100000000
 
             CMP R0, R2
             JE paddle1_up
@@ -289,55 +289,55 @@ main:
             LOAD R0, OLD_BALL_X
             LOAD R1, OLD_BALL_Y
             
-            MOV R2, BLACK
+            MOVI R2, BLACK
             JSR draw_pixel ; Erase old ball
 
-            MOV R0, PADDLE1_X
+            MOVI R0, PADDLE1_X
             LOAD R1, OLD_PADDLE1_Y
             JSR draw_pixel
 
-            MOV R0, PADDLE2_X
+            MOVI R0, PADDLE2_X
             LOAD R1, OLD_PADDLE2_Y
             JSR draw_pixel
 
             LOAD R0, BALL_X
             LOAD R1, BALL_Y
 
-            MOV R2, BALL_COLOR
+            MOVI R2, BALL_COLOR
             JSR draw_pixel ; Draw the ball
 
-            MOV R0, PADDLE1_X
+            MOVI R0, PADDLE1_X
             LOAD R1, PADDLE1_Y
-            MOV R2, PADDLE1_COLOR
+            MOVI R2, PADDLE1_COLOR
             JSR draw_paddle ; Draw the left paddle
 
-            MOV R0, PADDLE2_X
+            MOVI R0, PADDLE2_X
             LOAD R1, PADDLE2_Y
-            MOV R2, PADDLE2_COLOR
+            MOVI R2, PADDLE2_COLOR
             JSR draw_paddle ; Draw the right paddle
 
             LOAD R0, BALL_TICK
-            MOV R1, ZERO
+            MOVI R1, ZERO
             CMP R0, R1
             JNE end_frame
 
             LOAD R0, OLD_BALL_X
             LOAD R1, OLD_BALL_Y
-            MOV R2, SCORE_Y
+            MOVI R2, SCORE_Y
             SUB R1, R1, R2
-            MOV R2, DIGIT_HEIGHT
+            MOVI R2, DIGIT_HEIGHT
             CMP R1, R2
             JAE end_frame
 
-            MOV R2, SCORE1_X
+            MOVI R2, SCORE1_X
             SUB R3, R0, R2
-            MOV R2, DIGIT_WIDTH
+            MOVI R2, DIGIT_WIDTH
             CMP R3, R2
             JB redraw_score1
 
-            MOV R2, SCORE2_X
+            MOVI R2, SCORE2_X
             SUB R3, R0, R2
-            MOV R2, DIGIT_WIDTH
+            MOVI R2, DIGIT_WIDTH
             CMP R3, R2
             JB redraw_score2
 
@@ -364,10 +364,10 @@ redraw_score2:
 
 paddle1_up:
     LOAD R4, PADDLE1_Y        ; current top
-    MOV R2, 1
+    MOVI R2, 1
     SUB R4, R4, R2            ; move up
     STORE R4, PADDLE1_Y
-    MOV R5, (PADDLE_HEIGHT + 1)
+    MOVI R5, (PADDLE_HEIGHT + 1)
     ADD R5, R5, R4            ; Move current bottom pos into R5
     STORE R5, OLD_PADDLE1_Y   ; old paddle pos
     JMP check_paddle2_up
@@ -375,17 +375,17 @@ paddle1_up:
 paddle1_down:
     LOAD R4, PADDLE1_Y        ; current top
     STORE R4, OLD_PADDLE1_Y   ; old paddle pos
-    MOV R2, 1
+    MOVI R2, 1
     ADD R4, R4, R2            ; move down
     STORE R4, PADDLE1_Y
     JMP check_paddle2_up
 
 paddle2_up:
     LOAD R4, PADDLE2_Y        ; current top
-    MOV R2, 1
+    MOVI R2, 1
     SUB R4, R4, R2            ; move up
     STORE R4, PADDLE2_Y
-    MOV R5, (PADDLE_HEIGHT + 1)
+    MOVI R5, (PADDLE_HEIGHT + 1)
     ADD R5, R5, R4            ; Move current bottom pos into R5
     STORE R5, OLD_PADDLE2_Y   ; old paddle pos
     JMP draw
@@ -393,7 +393,7 @@ paddle2_up:
 paddle2_down:
     LOAD R4, PADDLE2_Y        ; current top
     STORE R4, OLD_PADDLE2_Y   ; old paddle pos
-    MOV R2, 1
+    MOVI R2, 1
     ADD R4, R4, R2            ; move down
     STORE R4, PADDLE2_Y
     JMP draw
@@ -404,8 +404,8 @@ start_round:
     JSR draw_scores
 
     ; Initialize ball in center
-    MOV R0, (SCREEN_WIDTH / 2)
-    MOV R1, (SCREEN_HEIGHT / 2)
+    MOVI R0, (SCREEN_WIDTH / 2)
+    MOVI R1, (SCREEN_HEIGHT / 2)
     STORE R0, BALL_X
     STORE R1, BALL_Y
 
@@ -416,19 +416,19 @@ start_round:
     STORE R0, PADDLE2_Y
 
     LOAD R0, ROUND_COUNTER
-    MOV R7, FIRST_ROUND_START_DX    ; This round's initial DX is stored at FIRST_ROUND_START_DX + ROUND_COUNTER
+    MOVI R7, FIRST_ROUND_START_DX    ; This round's initial DX is stored at FIRST_ROUND_START_DX + ROUND_COUNTER
     ADD R7, R7, R0                  ; Add [first_round's_dx] + [round_counter] to obtain this round's dx
     LOADR R0, R7                        
     STORE R0, BALL_DX
 
     LOAD R1, ROUND_COUNTER
-    MOV R7, FIRST_ROUND_START_DY    ; This round's initial DY is stored at FIRST_ROUND_START_DY + ROUND_COUNTER
+    MOVI R7, FIRST_ROUND_START_DY    ; This round's initial DY is stored at FIRST_ROUND_START_DY + ROUND_COUNTER
     ADD R7, R7, R1                  ; Add [first_round's_dy] + [round_counter] to obtain this round's dy
     LOADR R1, R7
     STORE R1, BALL_DY
 
     LOAD R0, ROUND_COUNTER  ; Round Counter += 1
-    MOV R1, 1
+    MOVI R1, 1
     ADD R0, R0, R1
     STORE R0, ROUND_COUNTER
 
@@ -436,10 +436,10 @@ start_round:
 
 clear_everything_subr:
 
-    MOV R0, FRAMEBUFFER
-    MOV R1, FRAMEBUFFER_END
-    MOV R2, BLACK
-    MOV R3, ONE
+    MOVI R0, FRAMEBUFFER
+    MOVI R1, FRAMEBUFFER_END
+    MOVI R2, BLACK
+    MOVI R3, ONE
 
     clear_framebuffer_loop:
         STORER R2, R0
@@ -452,7 +452,7 @@ clear_everything_subr:
 x_minus_1:
     ; Parameters
     ; R0 = X
-    MOV R7, 1
+    MOVI R7, 1
     SUB R0, R0, R7
     STORE R0, BALL_X
     JMP comparisonY
@@ -460,13 +460,13 @@ x_minus_1:
 x_plus_1:
     ; Parameters
     ; R0 = X
-    MOV R7, 1
+    MOVI R7, 1
     ADD R0, R0, R7
     STORE R0, BALL_X
     JMP comparisonY
 
 y_bounce_top:
-    MOV R4, ZERO
+    MOVI R4, ZERO
     SUB R1, R4, R1
     SUB R3, R4, R3
     STORE R1, BALL_Y
@@ -474,10 +474,10 @@ y_bounce_top:
     JMP paddle_pos
 
 y_bounce_bottom:
-    MOV R4, (SCREEN_HEIGHT - 1)
+    MOVI R4, (SCREEN_HEIGHT - 1)
     SUB R5, R4, R1
     ADD R1, R4, R5
-    MOV R4, ZERO
+    MOVI R4, ZERO
     SUB R3, R4, R3
     STORE R1, BALL_Y
     STORE R3, BALL_DY
@@ -487,7 +487,7 @@ set_ball_angle:
     ; Parameters: R0 = ball Y, R1 = paddle top
 
     SUB R3, R0, R1
-    MOV R4, PADDLE_ANGLES
+    MOVI R4, PADDLE_ANGLES
     ADD R4, R4, R3
     LOADR R3, R4
     STORE R3, BALL_DY
@@ -499,8 +499,8 @@ draw_pixel:
     ; R1 = Y 
     ; R2 = Color
 
-    MOV       R4, SCREEN_WIDTH
-    MOV       R7, FRAMEBUFFER
+    MOVI       R4, SCREEN_WIDTH
+    MOVI       R7, FRAMEBUFFER
     MUL       R5, R1, R4            ; R5 = Y * SCREEN_WIDTH
     ADD       R5, R5, R0            ; R5 = Y * SCREEN_WIDTH + X (offset)
     ADD       R5, R7, R5            ; R5 = FRAMEBUFFER + offset
@@ -510,19 +510,19 @@ draw_pixel:
 draw_paddle:
     ; Parameters: R0 = X, R1 = Y, R2 = Color
 
-    MOV R3, PADDLE_HEIGHT
+    MOVI R3, PADDLE_HEIGHT
     ADD R3, R1, R3         ; R3 = bottom Y of paddle
-    MOV R6, 0
+    MOVI R6, 0
     ADD R6, R6, R0
 
     draw_paddle_loop:
 
-        MOV R0, 0
+        MOVI R0, 0
         ADD R0, R0, R6
 
         JSR draw_pixel
         
-        MOV R4, ONE
+        MOVI R4, ONE
         ADD R1, R1, R4
     
         CMP R1, R3
@@ -533,7 +533,7 @@ draw_paddle:
 paddle2_collision:
     LOAD R0, BALL_Y
     LOAD R1, PADDLE2_Y      ; R1 = PADDLE TOP
-    MOV R2, PADDLE_HEIGHT
+    MOVI R2, PADDLE_HEIGHT
     ADD R2, R1, R2          ; R2 = PADDLE BOTTOM
 
     CMP R0, R1
@@ -544,27 +544,27 @@ paddle2_collision:
 
     JSR set_ball_angle
 
-    MOV R0, -1
+    MOVI R0, -1
     STORE R0, BALL_DX
     
     JMP ball_pos
 
 score_player1:
     LOAD R0, SCORE1
-    MOV R1, ONE
+    MOVI R1, ONE
     ADD R0, R0, R1
     STORE R0, SCORE1
-    MOV R1, N_MAX_SCORE
+    MOVI R1, N_MAX_SCORE
     CMP R0, R1
     JE end
     JMP start_round
 
 score_player2:
     LOAD R0, SCORE2
-    MOV R1, ONE
+    MOVI R1, ONE
     ADD R0, R0, R1
     STORE R0, SCORE2
-    MOV R1, N_MAX_SCORE
+    MOVI R1, N_MAX_SCORE
     CMP R0, R1
     JE end
     JMP start_round
@@ -575,17 +575,17 @@ draw_scores:
     RTS
 
 draw_score1:
-    MOV R0, SCORE1_X
-    MOV R1, SCORE_Y
-    MOV R2, PADDLE1_COLOR
+    MOVI R0, SCORE1_X
+    MOVI R1, SCORE_Y
+    MOVI R2, PADDLE1_COLOR
     LOAD R3, SCORE1
     JSR draw_digit
     RTS
 
 draw_score2:
-    MOV R0, SCORE2_X
-    MOV R1, SCORE_Y
-    MOV R2, PADDLE2_COLOR
+    MOVI R0, SCORE2_X
+    MOVI R1, SCORE_Y
+    MOVI R2, PADDLE2_COLOR
     LOAD R3, SCORE2
     JSR draw_digit
     RTS
@@ -596,33 +596,33 @@ draw_digit:
     STORE R0, DIGIT_X0
     STORE R1, DIGIT_Y0
 
-    MOV R4, DIGIT_FONT
+    MOVI R4, DIGIT_FONT
     ADD R4, R4, R3
     LOADR R6, R4            ; glyph bitmask, bit = row * 3 + col
-    MOV R3, ONE
+    MOVI R3, ONE
 
     draw_digit_loop:
         AND R4, R6, R3
-        MOV R5, ZERO
+        MOVI R5, ZERO
         CMP R4, R5
         JE draw_digit_next
         JSR draw_cell
 
         draw_digit_next:
-            MOV R4, CELL_SIZE
+            MOVI R4, CELL_SIZE
             ADD R3, R3, R3
             ADD R0, R0, R4
             LOAD R4, DIGIT_X0
-            MOV R5, DIGIT_WIDTH
+            MOVI R5, DIGIT_WIDTH
             ADD R4, R4, R5
             CMP R0, R4
             JNE draw_digit_loop
 
             LOAD R0, DIGIT_X0
-            MOV R4, CELL_SIZE
+            MOVI R4, CELL_SIZE
             ADD R1, R1, R4
             LOAD R4, DIGIT_Y0
-            MOV R5, DIGIT_HEIGHT
+            MOVI R5, DIGIT_HEIGHT
             ADD R4, R4, R5
             CMP R1, R4
             JNE draw_digit_loop
@@ -636,7 +636,7 @@ draw_cell:
     PUSH R1
     PUSH R3
 
-    MOV R3, ONE
+    MOVI R3, ONE
     JSR draw_pixel
     ADD R0, R0, R3
     JSR draw_pixel

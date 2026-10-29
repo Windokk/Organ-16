@@ -4,8 +4,8 @@ HLT
 
 my_func:
 
-    MOV R0, 10
-    MOV R1, 16
+    MOVI R0, 10
+    MOVI R1, 16
 
     PUSH R0
     PUSH R1

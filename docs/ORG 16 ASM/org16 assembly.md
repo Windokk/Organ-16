@@ -19,7 +19,7 @@ Here are the 52 currently usable instructions :
 | NOR         | `000`    | `1000`      | (1 word)   | NOR R1, R2, R3   | Bitwise NOR, store in R1              |
 | XOR         | `000`    | `1001`      | (1 word)   | XOR R1, R2, R3   | Bitwise XOR, store in R1              |
 | NOT         | `001`    | `1011`      | (1 word)   | NOT R1, R2       | Bitwise NOT of R2 into R1             |
-| MOV         | `010`    | `0000`      | (2 words)  | MOV R1, 0x1234   | Move 16-bit immediate into R1         |
+| MOVI        | `010`    | `0000`      | (2 words)  | MOVI R1, 0x1234  | Move 16-bit immediate into R1         |
 | LOAD        | `011`    | `0000`      | (2 words)  | LOAD R1, 0x1000  | Load from memory to R1                |
 | LOADR       | `011`    | `0011`      | (1 word)   | LOADR R3, R1     | Load from memory[R1] to R3            |
 | STORE       | `011`    | `0001`      | (2 words)  | STORE R1, 0x1000 | Store R1 at memory[Immediate]         |
@@ -56,10 +56,10 @@ Here are the 52 currently usable instructions :
 | SIN         | `001`    | `0000`      | (1 word)   | SIN R0, R1       | Stores sin(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
 | COS         | `001`    | `0001`      | (1 word)   | COS R0, R1       | Stores cos(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
 | TAN         | `001`    | `0010`      | (1 word)   | TAN R0, R1       | Stores tan(R1) into R0 (R1 = angle in turns, signed Q8.8 result, saturated) |
-| SQRT        | `001`    | `0011`      | (1 word)   | SQRT R0, R1      | Stores the integer square root of R1 (unsigned) into R0 |
-| POW         | `001`    | `0100`      | (1 word)   | POW R0, R1, R2   | Stores R1 raised to the power R2 (low 16 bits) into R0 |
-| ABS         | `001`    | `0101`      | (1 word)   | ABS R0, R1       | Stores the absolute value of R1 (signed) into R0      |
-| NOP         | `000`    | `0000`      | (1 word)   | NOP              | No operation, but not halt either, just do nothing for one tick |
+| SQRT        | `001`    | `0011`      | (1 word)   | SQRT R0, R1      | Stores the integer square root of R1 (unsigned) into R0           |
+| POW         | `001`    | `0100`      | (1 word)   | POW R0, R1, R2   | Stores R1 raised to the power R2 (low 16 bits) into R0            |
+| ABS         | `001`    | `0101`      | (1 word)   | ABS R0, R1       | Stores the absolute value of R1 (signed) into R0                  |
+| NOP         | `000`    | `0000`      | (1 word)   | NOP              | No operation, but not halt either, just do nothing for one tick   |
 
 #### Notes : 
 
@@ -91,7 +91,7 @@ Decimal: Plain number with no prefix (e.g., 12)
 
 Hexadecimal: Prefix with 0x (e.g., 0xABCD)
 
-Immediates can also be operations to be evaluated at compile time : MOV R0, 2 * 2
+Immediates can also be operations to be evaluated at compile time : MOVI R0, 2 * 2
 
 ### Constants :
 

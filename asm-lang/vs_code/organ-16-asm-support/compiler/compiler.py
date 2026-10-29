@@ -36,8 +36,8 @@ INSTR_FORMAT = {
     "SQRT": {"regs": 2, "imm": False},
     "ABS":  {"regs": 2, "imm": False},
 
-    # MOV (1 reg, no immediates)
-    "MOV":   {"regs": 1, "imm": True},
+    # MOVI (1 reg, no immediates)
+    "MOVI":  {"regs": 1, "imm": True},
 
     # Memory operations
     "LOAD":  {"regs": 1, "imm": True},
@@ -137,7 +137,7 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "DIV":  ("000", "0011"), "MOD":  ("000", "0100"), "AND":  ("000", "0101"),
         "OR":   ("000", "0110"), "NAND": ("000", "0111"), "NOR":  ("000", "1000"),
         "XOR":  ("000", "1001"), "NOT":  ("001", "1011"), "CMP":  ("001", "1010"),
-        "MOV":  ("010", "0000"), "LOAD": ("011", "0000"), "STORE":("011", "0001"),
+        "MOVI": ("010", "0000"), "LOAD": ("011", "0000"), "STORE":("011", "0001"),
         "JMP":  ("100", "0000"), "JE":   ("100", "0001"), "JNE":  ("100", "0010"),
         "JB":   ("100", "0011"), "JBE":  ("100", "0100"), "JA":   ("100", "0101"),
         "JAE":  ("100", "0110"), "JL":   ("100", "0111"), "JLE":  ("100", "1000"),
