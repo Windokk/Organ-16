@@ -68,7 +68,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 ## ISA:
 
-(Currently there are 52 instructions, but by design the CPU could support 128 instructions)
+(Currently there are 53 instructions, but by design the CPU could support 128 instructions)
 Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
 
 - The first 3 bits of the first word represent the Opcode.
@@ -108,7 +108,6 @@ It will place every source file at the memory address specified in the linker sc
 ### Known issues/Missing features:
 
 - Support for signed operations is not enforced; it is up to the program to choose whether to work with signed or unsigned numbers.
-- You currently can't move a register's value into another register : you have to do an ALU operation to do so : MOVI R1, 0 then ADD, R1, R1, R2  to move R2's value into R1 😕
 
 ### Future plans (v2.0.0):
 
@@ -128,11 +127,12 @@ It will place every source file at the memory address specified in the linker sc
     - [x] SQRT
     - [x] POW
     - [x] ABS
-  - [ ] MOVI vs MOV (Being able to move a register's value into another register (without doing MOV R1, 0 then ADD, R1, R1, R2))
+  - [x] MOVI vs MOV (Being able to move a register's value into another register (without doing MOVI R1, 0 then ADD, R1, R1, R2))
   - [x] SHL/SHR (Shift left/right logical) (via a new Shifting Unit)
   - [x] NOP (No operation = blank but not halt)
 - [ ] Support for operations and comparisons between memory<->registers and registers<->immediate (memory<->immediate/memory<->memory requires a big revision of the ISA (2 immediates per instruction), so not for now..)
-
+  - [ ] COMPI (Compare a register with an immediate)
+  - [ ] COMPM (Compare a register with memory)
 
 ### Future-future plans : (v3.0.0+) : 
 

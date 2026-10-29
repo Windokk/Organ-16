@@ -36,8 +36,9 @@ INSTR_FORMAT = {
     "SQRT": {"regs": 2, "imm": False},
     "ABS":  {"regs": 2, "imm": False},
 
-    # MOVI (1 reg, no immediates)
+    # MOVI (1 reg + immediate), MOV (2 regs, no immediates)
     "MOVI":  {"regs": 1, "imm": True},
+    "MOV":   {"regs": 2, "imm": False},
 
     # Memory operations
     "LOAD":  {"regs": 1, "imm": True},
@@ -150,7 +151,7 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "SHR":  ("000", "1100"), "XNOR": ("000", "1101"), "MIN":  ("000", "1110"),
         "MAX":  ("000", "1111"), "SIN":  ("001", "0000"), "COS":  ("001", "0001"),
         "TAN":  ("001", "0010"), "SQRT": ("001", "0011"), "POW":  ("001", "0100"),
-        "ABS":  ("001", "0101"),
+        "ABS":  ("001", "0101"), "MOV":  ("010", "0001"),
     }
     if instruction in opcode_map:
         op, sub = opcode_map[instruction]

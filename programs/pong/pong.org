@@ -512,13 +512,11 @@ draw_paddle:
 
     MOVI R3, PADDLE_HEIGHT
     ADD R3, R1, R3         ; R3 = bottom Y of paddle
-    MOVI R6, 0
-    ADD R6, R6, R0
+    MOV R6, R0
 
     draw_paddle_loop:
 
-        MOVI R0, 0
-        ADD R0, R0, R6
+        MOV R0, R6
 
         JSR draw_pixel
         

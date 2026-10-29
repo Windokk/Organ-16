@@ -72,7 +72,7 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="1.0"/>
+    <a name="simulationFrequency" val="2048000.0"/>
     <comp lib="0" loc="(1060,1020)" name="Tunnel">
       <a name="label" val="IO_DATA_OUT"/>
       <a name="width" val="16"/>
@@ -375,7 +375,7 @@
     <comp lib="9" loc="(1585,435)" name="Text">
       <a name="color" val="#f01fe5"/>
       <a name="font" val="SansSerif bold 46"/>
-      <a name="text" val="ORGAN-16 v1.0.0"/>
+      <a name="text" val="ORGAN-16 v1.6.0"/>
       <a name="valign" val="center"/>
     </comp>
     <comp lib="9" loc="(1595,540)" name="Text">
@@ -916,6 +916,9 @@
       <a name="label" val="IO_PORT"/>
       <a name="width" val="2"/>
     </comp>
+    <comp lib="0" loc="(3200,1980)" name="Tunnel">
+      <a name="label" val="RTS"/>
+    </comp>
     <comp lib="0" loc="(3210,1590)" name="Tunnel">
       <a name="label" val="ENABLE_ALU"/>
     </comp>
@@ -924,9 +927,6 @@
       <a name="facing" val="west"/>
       <a name="label" val="HALT"/>
       <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(3220,1980)" name="Tunnel">
-      <a name="label" val="RTS"/>
     </comp>
     <comp lib="0" loc="(3250,1690)" name="Tunnel">
       <a name="label" val="SRC_REGB"/>
@@ -1891,7 +1891,7 @@
     <wire from="(3140,1920)" to="(3460,1920)"/>
     <wire from="(3140,1940)" to="(3530,1940)"/>
     <wire from="(3140,1960)" to="(3440,1960)"/>
-    <wire from="(3140,1980)" to="(3220,1980)"/>
+    <wire from="(3140,1980)" to="(3200,1980)"/>
     <wire from="(3140,2000)" to="(3430,2000)"/>
     <wire from="(3140,2020)" to="(3210,2020)"/>
     <wire from="(3140,2040)" to="(3310,2040)"/>
@@ -2465,8 +2465,9 @@
       <a name="label" val="R_ABS"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(1490,2320)" name="Constant">
-      <a name="value" val="0x0"/>
+    <comp lib="0" loc="(1490,2320)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="A"/>
       <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(1500,2520)" name="Tunnel">
@@ -12750,7 +12751,7 @@ fff3 fff7 fffa fffd
       <a name="text" val="ABS (signed)"/>
     </comp>
     <comp lib="9" loc="(1500,2090)" name="Text">
-      <a name="text" val="ALUOpCode 16-22 : MAX SIN COS TAN SQRT POW ABS"/>
+      <a name="text" val="ALUOpCode 16-23 : MAX SIN COS TAN SQRT POW ABS MOV"/>
     </comp>
     <comp lib="9" loc="(1515,3260)" name="Text">
       <a name="text" val="TAN (ROM), Q8.8"/>
@@ -12791,7 +12792,7 @@ fff3 fff7 fffa fffd
     <comp lib="9" loc="(380,475)" name="Text">
       <a name="text" val="ADD"/>
     </comp>
-    <comp lib="9" loc="(556,3614)" name="Text">
+    <comp lib="9" loc="(555,3610)" name="Text">
       <a name="text" val="DIV : division by 0 gives 0"/>
     </comp>
     <comp lib="9" loc="(650,1825)" name="Text">
@@ -14132,6 +14133,15 @@ fff3 fff7 fffa fffd
       <a name="value" val="0x0"/>
       <a name="width" val="4"/>
     </comp>
+    <comp lib="0" loc="(3060,1890)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="SubOpCode"/>
+      <a name="width" val="4"/>
+    </comp>
+    <comp lib="0" loc="(3060,1910)" name="Constant">
+      <a name="value" val="0x0"/>
+      <a name="width" val="4"/>
+    </comp>
     <comp lib="0" loc="(3080,1160)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="DEC_ALU"/>
@@ -14154,7 +14164,6 @@ fff3 fff7 fffa fffd
     <comp lib="0" loc="(3120,3940)" name="Constant">
       <a name="value" val="0x0"/>
     </comp>
-    <comp lib="0" loc="(3130,1990)" name="Constant"/>
     <comp lib="0" loc="(3130,2440)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="west"/>
@@ -14456,6 +14465,9 @@ fff3 fff7 fffa fffd
     <comp lib="3" loc="(3090,6330)" name="Comparator">
       <a name="width" val="4"/>
     </comp>
+    <comp lib="3" loc="(3120,1900)" name="Comparator">
+      <a name="width" val="4"/>
+    </comp>
     <comp lib="5" loc="(3600,300)" name="ROM">
       <a name="addrWidth" val="7"/>
       <a name="appearance" val="logisim_evolution"/>
@@ -14463,8 +14475,9 @@ fff3 fff7 fffa fffd
 0 61 62 63 64 65 66 67
 68 69 60 6d 6e 6c 6f 70
 71 72 73 74 75 76 4*0 2a
-6b 4*0 17*40 0 0 40 29*0 40
-31*0 c0 1c0 2c0 0 100 200 3c0
+6b 4*0 40 77 15*40 0 0 40
+29*0 40 31*0 c0 1c0 2c0 0 100
+200 3c0
 </a>
       <a name="dataWidth" val="10"/>
     </comp>
@@ -14935,6 +14948,8 @@ fff3 fff7 fffa fffd
     <wire from="(3040,6260)" to="(3040,6270)"/>
     <wire from="(3040,6260)" to="(3050,6260)"/>
     <wire from="(3050,6720)" to="(3130,6720)"/>
+    <wire from="(3060,1890)" to="(3080,1890)"/>
+    <wire from="(3060,1910)" to="(3080,1910)"/>
     <wire from="(3070,3960)" to="(3070,3980)"/>
     <wire from="(3070,3980)" to="(3190,3980)"/>
     <wire from="(3070,3990)" to="(3070,4150)"/>
@@ -15012,16 +15027,16 @@ fff3 fff7 fffa fffd
     <wire from="(3100,6050)" to="(3110,6050)"/>
     <wire from="(3100,6060)" to="(3110,6060)"/>
     <wire from="(3110,6830)" to="(3130,6830)"/>
+    <wire from="(3120,1900)" to="(3130,1900)"/>
     <wire from="(3120,3940)" to="(3140,3940)"/>
-    <wire from="(3130,1990)" to="(3140,1990)"/>
+    <wire from="(3130,1900)" to="(3130,1990)"/>
+    <wire from="(3130,1990)" to="(3150,1990)"/>
     <wire from="(3130,6070)" to="(3130,6090)"/>
     <wire from="(3130,6720)" to="(3130,6750)"/>
     <wire from="(3130,6750)" to="(3160,6750)"/>
     <wire from="(3130,6770)" to="(3130,6830)"/>
     <wire from="(3130,6770)" to="(3160,6770)"/>
-    <wire from="(3140,1870)" to="(3140,1990)"/>
-    <wire from="(3140,1990)" to="(3140,2010)"/>
-    <wire from="(3140,1990)" to="(3150,1990)"/>
+    <wire from="(3140,1870)" to="(3140,2010)"/>
     <wire from="(3140,2010)" to="(3150,2010)"/>
     <wire from="(3140,3940)" to="(3140,3950)"/>
     <wire from="(3140,3940)" to="(3190,3940)"/>

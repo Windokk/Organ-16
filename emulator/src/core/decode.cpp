@@ -42,6 +42,8 @@ Decoded decode(unsigned opCode, unsigned sub) {
         aluOp = aluOpsByThreeRegSub[sub];
     else if (opCode == 1)
         aluOp = aluOpsByTwoRegSub[sub];
+    else if (opCode == 2 && sub == 1)
+        aluOp = ALU_MOV;
 
     if (aluOp >= 0) {
         d.aluEnabled = true;
@@ -53,7 +55,7 @@ Decoded decode(unsigned opCode, unsigned sub) {
                  (opCode == 5 && sub == 1) ||
                  (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
 
-    d.nextExt = (opCode == 2) || (opCode == 4) ||
+    d.nextExt = (opCode == 2 && sub == 0) || (opCode == 4) ||
                 (opCode == 3 && sub < 2) ||
                 (opCode == 5 && sub == 1);
 

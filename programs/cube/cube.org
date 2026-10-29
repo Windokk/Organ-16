@@ -209,7 +209,7 @@ rotate:
     MUL R6, R1, R4
     SUB R0, R5, R6
     JSR sar8
-    OR R2, R0, R0
+    MOV R2, R0
     LOAD R1, ROT_VY
     LOAD R3, CB8
     LOAD R4, SB8
@@ -292,8 +292,8 @@ draw_face:
     STORE R3, F_YMIN
     STORE R4, F_YMAX
 
-    OR R1, R3, R3
-    OR R2, R4, R4
+    MOV R1, R3
+    MOV R2, R4
 
 init_rows:
     MOVI R3, XL
@@ -479,7 +479,7 @@ edge_rows:
 edge_flat:
     MOVI R0, 0
     JSR update_row
-    OR R3, R1, R1
+    MOV R3, R1
     JSR update_row
     RTS
 
@@ -517,7 +517,7 @@ erase_row:
     STORE R6, ROW_BASE
     CMP R2, R4
     JAE erase_right
-    OR R6, R2, R2
+    MOV R6, R2
     MOVI R7, 1
     SUB R7, R4, R7
     MIN R7, R7, R3
@@ -529,7 +529,7 @@ erase_right:
     MOVI R6, 1
     ADD R6, R5, R6
     MAX R6, R6, R2
-    OR R7, R3, R3
+    MOV R7, R3
     JSR erase_span
 
 erase_store:

@@ -70,6 +70,7 @@ inline AluResult runAlu(uint16_t a, uint16_t b, unsigned op) {
         case ALU_SQRT: out.result = static_cast<uint16_t>(std::sqrt(static_cast<double>(a))); break;
         case ALU_POW:  out.result = power(a, b); break;
         case ALU_ABS:  out.result = static_cast<uint16_t>(signedA < 0 ? -signedA : signedA); break;
+        case ALU_MOV:  out.result = a; break;
         default: break;
     }
 

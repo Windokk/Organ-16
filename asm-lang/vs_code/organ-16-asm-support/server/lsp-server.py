@@ -59,6 +59,9 @@ VALID_OPCODES = {
     # register + immediate only
     "MOVI":   ["R", "I"],
 
+    # register to register
+    "MOV":   ["R", "R"],
+
     # memory instructions
     "LOAD":  ["R", "M"],
     "STORE": ["R", "M"],

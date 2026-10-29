@@ -4,7 +4,7 @@
 
 ### Instructions :
 
-Here are the 52 currently usable instructions :
+Here are the 53 currently usable instructions :
 
 | Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description of the example            |
 |-------------|----------|-------------|------------|------------------|---------------------------------------|
@@ -20,6 +20,7 @@ Here are the 52 currently usable instructions :
 | XOR         | `000`    | `1001`      | (1 word)   | XOR R1, R2, R3   | Bitwise XOR, store in R1              |
 | NOT         | `001`    | `1011`      | (1 word)   | NOT R1, R2       | Bitwise NOT of R2 into R1             |
 | MOVI        | `010`    | `0000`      | (2 words)  | MOVI R1, 0x1234  | Move 16-bit immediate into R1         |
+| MOV         | `010`    | `0001`      | (1 word)   | MOV R1, R2       | Move R2's content into R1             |
 | LOAD        | `011`    | `0000`      | (2 words)  | LOAD R1, 0x1000  | Load from memory to R1                |
 | LOADR       | `011`    | `0011`      | (1 word)   | LOADR R3, R1     | Load from memory[R1] to R3            |
 | STORE       | `011`    | `0001`      | (2 words)  | STORE R1, 0x1000 | Store R1 at memory[Immediate]         |
