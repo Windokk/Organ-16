@@ -50,6 +50,8 @@ VALID_OPCODES = {
 
     "NOT":   ["R", "R"],
     "CMP":   ["R", "R"],
+    "COMPI": ["R", "I"],
+    "COMPM": ["R", "M"],
     "SIN":   ["R", "R"],
     "COS":   ["R", "R"],
     "TAN":   ["R", "R"],

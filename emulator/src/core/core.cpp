@@ -144,7 +144,7 @@ void Core::halfTick() {
     const uint16_t oldRB = r[srcRB];
 
     const bool aluEnabled = cu.aluEnabled;
-    const AluResult alu = aluEnabled ? runAlu(oldRA, oldRB, cu.aluOp) : AluResult{};
+    const AluResult alu = aluEnabled ? runAlu(oldRA, cu.aluUsesExt ? ir1 : oldRB, cu.aluOp) : AluResult{};
 
     const bool containsAddress = cu.addressMode == ADDR_ALWAYS ||
                                  (cu.addressMode == ADDR_IF_JUMP_TAKEN && jumpTaken(subOp, flags));
@@ -192,7 +192,7 @@ void Core::halfTick() {
     if (pSp && !clk)
         sp = cu.spPop ? sp + 1 : sp - 1;
 
-    if (clk && cu.flagsWrite)
+    if (clk && cu.flagsWrite && (pExt || !cu.nextExt))
         flags = alu.zero | (alu.negative << 1) | (alu.carry << 2) | (alu.overflow << 3);
 
     if (!clk)

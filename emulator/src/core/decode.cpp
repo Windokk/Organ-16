@@ -31,7 +31,7 @@ constexpr std::array<int8_t, 16> aluOpsByThreeRegSub = {
 
 constexpr std::array<int8_t, 16> aluOpsByTwoRegSub = {
     ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS, ALU_INC, ALU_DEC,
-    -1, -1, ALU_CMP, ALU_NOT, -1, -1, -1, -1
+    ALU_CMP, ALU_CMP, ALU_CMP, ALU_NOT, -1, -1, -1, -1
 };
 
 Decoded decode(unsigned opCode, unsigned sub) {
@@ -50,12 +50,14 @@ Decoded decode(unsigned opCode, unsigned sub) {
         d.aluOp = static_cast<uint8_t>(aluOp);
     }
 
+    d.aluUsesExt = (opCode == 1 && (sub == 8 || sub == 9));
+
     d.regWrite = (d.aluEnabled && d.aluOp != ALU_CMP) || (opCode == 2) ||
                  (opCode == 3 && (sub == 0 || sub == 3 || sub == 4)) ||
                  (opCode == 5 && sub == 1) ||
                  (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
 
-    d.nextExt = (opCode == 2 && sub == 0) || (opCode == 4) ||
+    d.nextExt = (opCode == 2 && sub == 0) || d.aluUsesExt || (opCode == 4) ||
                 (opCode == 3 && sub < 2) ||
                 (opCode == 5 && sub == 1);
 
@@ -72,7 +74,7 @@ Decoded decode(unsigned opCode, unsigned sub) {
     d.useIn = (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
     d.useOut = (opCode == 7 && sub >= 4);
 
-    if (opCode == 3 || (opCode == 5 && sub == 1))
+    if (opCode == 3 || (opCode == 5 && sub == 1) || (opCode == 1 && sub == 9))
         d.addressMode = ADDR_ALWAYS;
     else if (opCode == 4)
         d.addressMode = ADDR_IF_JUMP_TAKEN;

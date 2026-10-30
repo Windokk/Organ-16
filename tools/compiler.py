@@ -30,6 +30,8 @@ INSTR_FORMAT = {
     # Unary ALU (2 regs, no immediates)
     "NOT":  {"regs": 2, "imm": False},
     "CMP":  {"regs": 2, "imm": False},
+    "COMPI": {"regs": 1, "imm": True},
+    "COMPM": {"regs": 1, "imm": True},
     "SIN":  {"regs": 2, "imm": False},
     "COS":  {"regs": 2, "imm": False},
     "TAN":  {"regs": 2, "imm": False},
@@ -159,6 +161,7 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "TAN":  ("001", "0010"), "SQRT": ("001", "0011"), "POW":  ("001", "0100"),
         "ABS":  ("001", "0101"), "MOV":  ("010", "0001"),
         "INC":  ("001", "0110"), "DEC":  ("001", "0111"),
+        "COMPI": ("001", "1000"), "COMPM": ("001", "1001"),
         "LOADRP": ("011", "0100"), "STORERP": ("011", "0101"),
     }
     if instruction in opcode_map:
@@ -252,7 +255,7 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
         return op_bin + "000000000"
     elif len(regs) == 1:
         if imm:
-            if op_bin == "0110001":
+            if op_bin == "0110001" or op_bin == "0011000" or op_bin == "0011001":
                 return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map, constants_map)
             else:
                 return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)

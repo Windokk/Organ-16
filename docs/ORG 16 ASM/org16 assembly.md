@@ -4,7 +4,7 @@
 
 ### Instructions :
 
-Here are the 57 currently usable instructions :
+Here are the 59 currently usable instructions :
 
 | Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description of the example            |
 |-------------|----------|-------------|------------|------------------|---------------------------------------|
@@ -65,6 +65,8 @@ Here are the 57 currently usable instructions :
 | DEC         | `001`    | `0111`      | (1 word)   | DEC R1           | R1 = R1 - 1 (wraps at 0x0000)                                     |
 | LOADRP      | `011`    | `0100`      | (1 word)   | LOADRP R3, R1    | Load memory[R1] into R3, then R1 = R1 + 1                         |
 | STORERP     | `011`    | `0101`      | (1 word)   | STORERP R3, R1   | Store R3 at memory[R1], then R1 = R1 + 1                          |
+| COMPI       | `001`    | `1000`      | (2 words)  | COMPI R1, 0x10   | Compare R1's value with the 0x10                                  |
+| COMPM       | `001`    | `1001`      | (2 words)  | COMPM R1, 0x1000 | Compare R1's value with memory[0x1000]                            |
 
 #### Notes : 
 
@@ -72,6 +74,7 @@ Here are the 57 currently usable instructions :
 - SIN, COS, TAN take an angle in turns (0x4000 = 90°). SIN and COS return Q1.15, TAN returns Q8.8 (saturated).
 - SQRT is floor(sqrt(R1)). POW is R1^R2 truncated to 16 bits (0^0 = 1). ABS is signed (0x8000 stays 0x8000).
 - INC, DEC leave the flags untouched. LOADRP, STORERP increment the pointer after the access; don't use the same register twice.
+- COMPI, COMPM only set the flags and are not commutative: the register is the left operand.
 - RAND reads (virtual) IO port 3 (random generator).
 
 ### Instruction decomposition : 

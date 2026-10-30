@@ -12,6 +12,7 @@ enum AluOp : uint8_t {
 struct Decoded {
     uint8_t aluOp = 0;
     bool aluEnabled = false;
+    bool aluUsesExt = false;
     uint8_t ioPort = 0;
     uint8_t addressMode = 0;
     bool regWrite = false;
