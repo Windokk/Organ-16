@@ -55,6 +55,8 @@ VALID_OPCODES = {
     "TAN":   ["R", "R"],
     "SQRT":  ["R", "R"],
     "ABS":   ["R", "R"],
+    "INC":   ["R"],
+    "DEC":   ["R"],
 
     # register + immediate only
     "MOVI":   ["R", "I"],
@@ -67,6 +69,8 @@ VALID_OPCODES = {
     "STORE": ["R", "M"],
     "LOADR": ["R", "R"],
     "STORER":["R", "R"],
+    "LOADRP":["R", "R"],
+    "STORERP":["R", "R"],
 
     # jumps accept label, immediate, constant
     "JMP":   ["J"],

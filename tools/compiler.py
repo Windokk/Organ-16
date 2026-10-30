@@ -36,6 +36,10 @@ INSTR_FORMAT = {
     "SQRT": {"regs": 2, "imm": False},
     "ABS":  {"regs": 2, "imm": False},
 
+    # Increment / decrement (1 register, in place)
+    "INC":  {"regs": 1, "imm": False},
+    "DEC":  {"regs": 1, "imm": False},
+
     # MOVI (1 reg + immediate), MOV (2 regs, no immediates)
     "MOVI":  {"regs": 1, "imm": True},
     "MOV":   {"regs": 2, "imm": False},
@@ -45,6 +49,8 @@ INSTR_FORMAT = {
     "STORE": {"regs": 1, "imm": True},
     "LOADR": {"regs": 2, "imm": False},
     "STORER":{"regs": 2, "imm": False},
+    "LOADRP":{"regs": 2, "imm": False},
+    "STORERP":{"regs": 2, "imm": False},
 
     # Jumps
     "JMP":  {"regs": 0, "imm": True},
@@ -152,6 +158,8 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "MAX":  ("000", "1111"), "SIN":  ("001", "0000"), "COS":  ("001", "0001"),
         "TAN":  ("001", "0010"), "SQRT": ("001", "0011"), "POW":  ("001", "0100"),
         "ABS":  ("001", "0101"), "MOV":  ("010", "0001"),
+        "INC":  ("001", "0110"), "DEC":  ("001", "0111"),
+        "LOADRP": ("011", "0100"), "STORERP": ("011", "0101"),
     }
     if instruction in opcode_map:
         op, sub = opcode_map[instruction]
@@ -248,14 +256,16 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
                 return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map, constants_map)
             else:
                 return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)
+        if op_bin == "0010110" or op_bin == "0010111":
+            return op_bin + DataToBinData(regs) + "000" + DataToBinData(regs)
         if op_bin == "1010001" or op_bin == "1110001" or op_bin == "1110010" or op_bin == "1110011" or op_bin == "1110111":
             return op_bin + DataToBinData(regs) + "000000"
         else:
             return op_bin + "000" + DataToBinData(regs) + "000"
     elif len(regs) == 2:
-        if op_bin == "0011010" or op_bin == "0110010":
+        if op_bin == "0011010" or op_bin == "0110010" or op_bin == "0110101":
             return op_bin + "000" + DataToBinData(regs)
-        elif op_bin == "0110011":
+        elif op_bin == "0110011" or op_bin == "0110100":
             return op_bin + DataToBinData([regs[0]]) + "000" + DataToBinData([regs[1]])
         else:
             return op_bin + DataToBinData(regs) + "000"

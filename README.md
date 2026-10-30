@@ -68,7 +68,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 ## ISA:
 
-(Currently there are 53 instructions, but by design the CPU could support 128 instructions)
+(Currently there are 57 instructions, but by design the CPU could support 128 instructions)
 Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
 
 - The first 3 bits of the first word represent the Opcode.

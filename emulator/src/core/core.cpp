@@ -71,6 +71,8 @@ inline AluResult runAlu(uint16_t a, uint16_t b, unsigned op) {
         case ALU_POW:  out.result = power(a, b); break;
         case ALU_ABS:  out.result = static_cast<uint16_t>(signedA < 0 ? -signedA : signedA); break;
         case ALU_MOV:  out.result = a; break;
+        case ALU_INC:  out.result = static_cast<uint16_t>(b + 1); break;
+        case ALU_DEC:  out.result = static_cast<uint16_t>(b - 1); break;
         default: break;
     }
 
@@ -133,6 +135,7 @@ void Core::halfTick() {
     const bool pSp = ffSpChange;
     const bool pJsr = ffJsr;
     const bool pRegAddr = ffRegAddr;
+    const bool pPostInc = ffPostInc;
 
     const uint16_t prePc = pc;
     const uint16_t preSp = sp;
@@ -149,6 +152,8 @@ void Core::halfTick() {
     clockValue = !clockValue;
     ++tickCount;
     const bool clk = clockValue && !cu.hlt;
+    const bool fallingEdge = prevClk && !clk;
+    prevClk = clk;
 
     const bool regWrite = cu.regWrite && (pExt || aluEnabled || pRegAddr || cu.useIn);
 
@@ -163,17 +168,21 @@ void Core::halfTick() {
         ffJsr = inJsr && !pExt;
         ffRts = cu.rts;
         ffRegAddr = cu.regIsAddress && !pRegAddr;
+        ffPostInc = cu.postInc && pRegAddr;
     }
     else {
         ffAddrBase = inContainsAddress && !inJsr;
     }
 
-    if (regWrite && (pAddr ? clk : !clk)) {
+    if (regWrite && ((pAddr && pExt) ? clk : !clk)) {
         r[dstR] = cu.useIn ? (cu.ioPort == RANDOM_PORT ? nextRandom() : io[cu.ioPort])
                 : (pSp || pRegAddr) ? ramOut
                 : pExt ? ir1
                 : alu.result;
     }
+
+    if (pPostInc && fallingEdge)
+        r[srcRB] = runAlu(oldRA, oldRB, ALU_INC).result;
 
     if (clk && !ffJsr && !ffSpChange && !inSpChange && !pRegAddr) {
         const bool writeToPc = (cu.loadPC && pExt && !pJsr && pAddr) || cu.rts;
@@ -245,7 +254,7 @@ Core::StateKey Core::stateKey() const {
     key[12] = ir1;
     key[13] = ramOut;
     key[14] = flags | (ffExt << 4) | (ffAddrBase << 5) | (ffAddrJsr << 6) | (ffSpChange << 7) |
-              (ffJsr << 8) | (ffRts << 9) | (ffRegAddr << 10) | (writeFF << 11);
+              (ffJsr << 8) | (ffRts << 9) | (ffRegAddr << 10) | (writeFF << 11) | (ffPostInc << 12) | (prevClk << 13);
     return key;
 }
 
@@ -283,7 +292,7 @@ void Core::reset() {
     sp = pc = ramAddr = ir0 = ir1 = ramOut = 0;
     flags = 0;
     clockValue = false;
-    ffExt = ffAddrBase = ffAddrJsr = ffSpChange = ffJsr = ffRts = ffRegAddr = false;
+    ffExt = ffAddrBase = ffAddrJsr = ffSpChange = ffJsr = ffRts = ffRegAddr = ffPostInc = prevClk = false;
     writeFF = false;
     tickCount = 0;
     screen.fill(0);

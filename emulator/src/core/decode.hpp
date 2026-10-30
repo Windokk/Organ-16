@@ -6,7 +6,7 @@
 enum AluOp : uint8_t {
     ALU_ADD, ALU_SUB, ALU_MUL, ALU_DIV, ALU_MOD, ALU_AND, ALU_OR, ALU_NAND, ALU_NOR, ALU_XOR,
     ALU_XNOR, ALU_SHL, ALU_SHR, ALU_MIN, ALU_MAX, ALU_NOT, ALU_CMP,
-    ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS, ALU_MOV
+    ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS, ALU_MOV, ALU_INC, ALU_DEC
 };
 
 struct Decoded {
@@ -24,6 +24,7 @@ struct Decoded {
     bool jsr = false;
     bool rts = false;
     bool regIsAddress = false;
+    bool postInc = false;
     bool hlt = false;
     bool useIn = false;
     bool useOut = false;

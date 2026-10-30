@@ -4,7 +4,7 @@
 
 ### Instructions :
 
-Here are the 53 currently usable instructions :
+Here are the 57 currently usable instructions :
 
 | Instruction | `OpCode` | `SubOpCode` | Word count | Example          | Description of the example            |
 |-------------|----------|-------------|------------|------------------|---------------------------------------|
@@ -61,19 +61,18 @@ Here are the 53 currently usable instructions :
 | POW         | `001`    | `0100`      | (1 word)   | POW R0, R1, R2   | Stores R1 raised to the power R2 (low 16 bits) into R0            |
 | ABS         | `001`    | `0101`      | (1 word)   | ABS R0, R1       | Stores the absolute value of R1 (signed) into R0                  |
 | NOP         | `000`    | `0000`      | (1 word)   | NOP              | No operation, but not halt either, just do nothing for one tick   |
+| INC         | `001`    | `0110`      | (1 word)   | INC R1           | R1 = R1 + 1 (wraps at 0xFFFF)                                     |
+| DEC         | `001`    | `0111`      | (1 word)   | DEC R1           | R1 = R1 - 1 (wraps at 0x0000)                                     |
+| LOADRP      | `011`    | `0100`      | (1 word)   | LOADRP R3, R1    | Load memory[R1] into R3, then R1 = R1 + 1                         |
+| STORERP     | `011`    | `0101`      | (1 word)   | STORERP R3, R1   | Store R3 at memory[R1], then R1 = R1 + 1                          |
 
 #### Notes : 
 
-- DIV and MOD by 0 give 0.
-- MIN and MAX compare their operands as unsigned values.
-- SIN, COS and TAN take an angle expressed in turns : 0x0000 = 0°, 0x4000 = 90°, 0x8000 = 180°, 0xC000 = 270°.
-- SIN and COS return a signed Q1.15 value (-1.0 to 1.0 mapped to -32767 to 32767).
-- TAN returns a signed Q8.8 value (1.0 = 0x0100), saturated to -32767 / 32767.
-- Qm.n notation : m includes the sign bit (Q8.8 = 1 sign + 7 integer + 8 fractional bits).
-- SQRT returns floor(sqrt(R1)) with R1 unsigned.
-- POW returns R1 raised to the power R2 (both unsigned), truncated to 16 bits. 0 raised to 0 gives 1. It takes three registers like the 3-register ALU instructions, even though its opcode sits in the `001` group.
-- ABS interprets R1 as signed; ABS of 0x8000 stays 0x8000.
-- RAND returns a new pseudo-random 16-bit value on each execution. In hardware it behaves like an IN instruction reading IO port 3, which is wired to a random generator.
+- DIV and MOD by 0 give 0. MIN and MAX are unsigned.
+- SIN, COS, TAN take an angle in turns (0x4000 = 90°). SIN and COS return Q1.15, TAN returns Q8.8 (saturated).
+- SQRT is floor(sqrt(R1)). POW is R1^R2 truncated to 16 bits (0^0 = 1). ABS is signed (0x8000 stays 0x8000).
+- INC, DEC leave the flags untouched. LOADRP, STORERP increment the pointer after the access; don't use the same register twice.
+- RAND reads (virtual) IO port 3 (random generator).
 
 ### Instruction decomposition : 
 

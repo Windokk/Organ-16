@@ -30,7 +30,7 @@ constexpr std::array<int8_t, 16> aluOpsByThreeRegSub = {
 };
 
 constexpr std::array<int8_t, 16> aluOpsByTwoRegSub = {
-    ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS, -1, -1,
+    ALU_SIN, ALU_COS, ALU_TAN, ALU_SQRT, ALU_POW, ALU_ABS, ALU_INC, ALU_DEC,
     -1, -1, ALU_CMP, ALU_NOT, -1, -1, -1, -1
 };
 
@@ -51,7 +51,7 @@ Decoded decode(unsigned opCode, unsigned sub) {
     }
 
     d.regWrite = (d.aluEnabled && d.aluOp != ALU_CMP) || (opCode == 2) ||
-                 (opCode == 3 && (sub == 0 || sub == 3)) ||
+                 (opCode == 3 && (sub == 0 || sub == 3 || sub == 4)) ||
                  (opCode == 5 && sub == 1) ||
                  (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
 
@@ -60,13 +60,14 @@ Decoded decode(unsigned opCode, unsigned sub) {
                 (opCode == 5 && sub == 1);
 
     d.flagsWrite = d.aluEnabled && d.aluOp == ALU_CMP;
-    d.memWrite = (opCode == 3 && (sub == 1 || sub == 2));
+    d.memWrite = (opCode == 3 && (sub == 1 || sub == 2 || sub == 5));
     d.loadPC = (opCode == 4);
     d.spPop = (opCode == 4 && sub == 12) || (opCode == 5 && sub == 1);
     d.spChange = (opCode == 4 && (sub == 11 || sub == 12)) || (opCode == 5);
     d.jsr = (opCode == 4 && sub == 11);
     d.rts = (opCode == 4 && sub == 12);
-    d.regIsAddress = (opCode == 3 && (sub == 2 || sub == 3));
+    d.regIsAddress = (opCode == 3 && (sub >= 2 && sub <= 5));
+    d.postInc = (opCode == 3 && (sub == 4 || sub == 5));
     d.hlt = (opCode == 7 && sub == 0);
     d.useIn = (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
     d.useOut = (opCode == 7 && sub >= 4);
