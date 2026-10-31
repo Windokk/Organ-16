@@ -1066,7 +1066,6 @@ void Workbench::paintFooter(QPainter& p, const Layout& L) {
     item("PC", Hex(regs_[9]));
     item("SP", Hex(regs_[8]));
     item("Program", program_);
-    Text(p, f.mono12, inkSoft, L.ix + L.iw - 12, cy, "Half-tick accurate model of the Organ 16 core", Qt::AlignRight);
 }
 
 void Workbench::beginEdit(EditKind kind, int index, const QRectF& rect, const QString& text) {
