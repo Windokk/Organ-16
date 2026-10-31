@@ -15,11 +15,24 @@ file(GLOB_RECURSE PROJECT_SOURCES
     src/*.cpp
 )
 
+file(GLOB FONT_FILES CONFIGURE_DEPENDS src/fonts/*.ttf)
+set(FONT_QRC "${CMAKE_BINARY_DIR}/fonts.qrc")
+set(FONT_QRC_CONTENT "<RCC><qresource prefix=\"/fonts\">\n")
+foreach(font ${FONT_FILES})
+    get_filename_component(font_name ${font} NAME)
+    string(APPEND FONT_QRC_CONTENT "<file alias=\"${font_name}\">${font}</file>\n")
+endforeach()
+string(APPEND FONT_QRC_CONTENT "</qresource></RCC>\n")
+file(WRITE ${FONT_QRC} "${FONT_QRC_CONTENT}")
+
 qt_add_executable(Emulator
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
     src/resources.qrc
+    ${FONT_QRC}
 )
+
+target_compile_definitions(Emulator PRIVATE ORGAN_FONT_DIR="${CMAKE_SOURCE_DIR}/src/fonts")
 
 target_include_directories(Emulator PUBLIC src)
 

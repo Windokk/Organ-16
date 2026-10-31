@@ -1307,7 +1307,7 @@
       <a name="appearance" val="logisim_evolution"/>
       <a name="label" val="CURRENTLY_JSR"/>
     </comp>
-    <comp lib="9" loc="(1673,2431)" name="Text">
+    <comp lib="9" loc="(1670,2430)" name="Text">
       <a name="font" val="SansSerif bold 46"/>
       <a name="text" val="IO INTERFACE"/>
       <a name="valign" val="center"/>

@@ -1,0 +1,3 @@
+[submodule "submodule/b612"]
+	path = submodule/b612
+	url = https://github.com/polarsys/b612.git

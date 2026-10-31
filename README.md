@@ -31,7 +31,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 - [asm-lang/](asm-lang/)  : contains extension(s) for common IDEs to support Organ16 assembly
 - [circuits/](circuits/)  : contains every logisim (evolution) related files
 - [docs/](docs/)          : documentation on the whole project (logisim, emulator, asm, irl implementation)
-- [emulator/](emulator/)  : the source code for the emulator (written in C++ with Qt)
+- [emulator/](emulator/)  : the source code for the emulator (written in C++ with Qt). Put the B612 `.ttf` fonts in `emulator/src/fonts/` before building
 - [programs/](programs/)  : various test/demo programs to be executed on the emulator/on logisim
 - [tools/](tools/)        : various tools used for developping and building the CPU and its extensions
 
@@ -112,6 +112,8 @@ It will place every source file at the memory address specified in the linker sc
 ### Future plans : v2.5.0 :
 
 - [x] Mini-C compiler : occ (Organ C Compiler) v.0.2
+- [x] New emulator style
+- [ ] Instructions reader (in emulator)
 - [ ] Interrupts
 - [ ] Exceptions (a kind of interrupt)
 - [ ] Cache
@@ -120,6 +122,7 @@ It will place every source file at the memory address specified in the linker sc
 ### Future-future plans (v4.0.0?)
 
 - [ ] Multi-core
-- [ ] 32 bit evolution (Carillon 32)
+- [ ] 32 bit evolution (Carillon 32) --> this means abandonning circuit simulation in Logisim evolution (max = 24 bit adress space)
+- [ ] Doom port
 - [ ] IRL breadboard implementation (???)
 - [ ] PCB version (In a long long time 😄)

@@ -28,11 +28,18 @@ void SimThread::stop() {
         worker.join();
 }
 
+void SimThread::setBreakpoint(uint16_t address, bool enabled) {
+    const uint8_t previous = breakpoints[address].exchange(enabled ? 1 : 0);
+    if (previous != (enabled ? 1 : 0))
+        breakpointCount.fetch_add(enabled ? 1 : -1);
+}
+
 void SimThread::loop() {
     using Clock = std::chrono::steady_clock;
 
     double halfTickDebt = 0;
     bool wasAutomatic = false;
+    int skipPc = -1;
     Clock::time_point last = Clock::now();
 
     while (running.load()) {
@@ -48,6 +55,10 @@ void SimThread::loop() {
             wasAutomatic = true;
             halfTickDebt = 0;
             last = now;
+            {
+                std::unique_lock<std::mutex> guard = core.lock();
+                skipPc = core.pc;
+            }
         }
 
         const double elapsed = std::min(std::chrono::duration<double>(now - last).count(), MAX_CATCH_UP_SECONDS);
@@ -61,12 +72,32 @@ void SimThread::loop() {
 
         while (halfTickDebt >= 1.0 && running.load() && automatic.load()) {
             const uint64_t chunk = std::min<uint64_t>(static_cast<uint64_t>(halfTickDebt), RUN_CHUNK);
+            uint64_t done = chunk;
             {
                 std::unique_lock<std::mutex> guard = core.lock();
-                core.run(chunk);
+                if (breakpointCount.load() == 0) {
+                    core.run(chunk);
+                }
+                else {
+                    done = 0;
+                    while (done < chunk) {
+                        core.run(1);
+                        ++done;
+                        if (core.clockValue || core.ffExt || core.ffSpChange || core.ffRegAddr || core.ffJsr)
+                            continue;
+                        if (core.pc == skipPc)
+                            continue;
+                        skipPc = -1;
+                        if (breakpoints[core.pc].load()) {
+                            hit.store(true);
+                            automatic.store(false);
+                            break;
+                        }
+                    }
+                }
             }
-            executed.fetch_add(chunk);
-            halfTickDebt -= static_cast<double>(chunk);
+            executed.fetch_add(done);
+            halfTickDebt -= static_cast<double>(done);
 
             while (core.hasWaiters())
                 std::this_thread::yield();

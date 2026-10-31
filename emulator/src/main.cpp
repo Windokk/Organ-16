@@ -1,214 +1,53 @@
-/*
-This is "main.cpp", the main file for the Organ16 emulator.
-This whole project is work in progress and needs optimization and fixing.
-Expect garbage code, bugs and crashes.
-*/
-
-#include "qt_includes.hpp"
-
-#include <bitset>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <cstdint>
-
-#include "layouts/screen/canvas.hpp"
-#include "layouts/regs/clck_btn.hpp"
-#include "layouts/regs/flow_layout.hpp"
-#include "layouts/ram_panel.hpp"
-#include "layouts/io_ports.hpp"
+#include <QApplication>
+#include <QCommandLineParser>
+#include <QDateTime>
+#include <QDir>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QGridLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QMessageBox>
+#include <QScreen>
+#include <QScrollArea>
+#include <QShortcut>
+#include <QTimer>
 
 #include "core/core.hpp"
 #include "core/sim_thread.hpp"
-
 #include "export/gif_recorder.hpp"
 #include "export/screenshot.hpp"
+#include "ui/theme.hpp"
+#include "ui/workbench.hpp"
 
-#include "splitter.hpp"
-
-#include <array>
-#include <cmath>
+namespace {
 
 Core core;
 SimThread sim(core);
-QMainWindow* window;
-std::unordered_map<RegisterName, QLineEdit*> registersLineEdits;
-std::unordered_map<std::string, QWidget*> debugValuesLEDs;
-std::unordered_map<std::string, int> shownDebugValues;
-std::array<int32_t, 14> shownRegisters;
-QLabel* clockLabel;
-QLabel* clockTicks;
-CanvasWidget* canvas;
-IOPortsPanel* ioPanel;
-RamPanel* ramPanel;
-QTableView* ramView;
-FullSplitter* HSplitterBottom;
-QAction *toggleAutomatic;
-QAction *toggleManual;
-QTimer frameTimer;
-QTimer gifTimer;
+Workbench* workbench = nullptr;
+QWidget* window = nullptr;
+QWidget* debugWindow = nullptr;
+std::vector<std::pair<const char*, QWidget*>> debugLeds;
 GifRecorder gifRecorder;
-QAction* recordGifAction;
+QTimer gifTimer;
+QAction* recordGifAction = nullptr;
 
 constexpr int GIF_CAPTURE_INTERVAL_MS = 40;
 
-bool debugPanelShown = false;
-int shownClockValue = -1;
-
-int savedClockFrequency = 50;
-double clockFrequency = 0;
-bool automaticClock = false;
-uint32_t halfTicksOnClockClick = 1;
-
-struct UiSnapshot {
-    std::array<uint16_t, 14> regs{};
-    bool clockValue = false;
-    std::array<bool, 8> debug{};
-    std::array<uint16_t, 3> io{};
-    bool ioDirty = false;
-    bool screenDirty = false;
-    std::array<uint16_t, SCREEN_PIXELS> screen{};
-};
-
-UiSnapshot TakeSnapshot()
-{
-    UiSnapshot snap;
-    auto guard = core.lock();
-
-    for (const auto& entry : registersLineEdits)
-        snap.regs[entry.first] = core.getReg(entry.first);
-
-    snap.clockValue = core.clockValue;
-    snap.debug = {core.ffExt, core.ffAddrBase, core.ffAddrBase || core.ffAddrJsr, core.ffAddrJsr,
-                  core.ffSpChange, core.ffJsr, core.ffRts, core.ffRegAddr};
-
-    snap.ioDirty = core.ioDirty;
-    if (snap.ioDirty) {
-        core.ioDirty = false;
-        snap.io = core.io;
-    }
-
-    snap.screenDirty = core.screenDirty;
-    if (snap.screenDirty) {
-        core.screenDirty = false;
-        snap.screen = core.screen;
-    }
-    return snap;
-}
-
-double FrequencyFromSlider(int value)
-{
-    return value <= 0 ? 0.0 : std::pow(10.0, value * 0.07);
-}
-
-QString FormatFrequency(double hz)
-{
-    if (hz >= 1e6) return QString("%1 MHz").arg(hz / 1e6, 0, 'g', 3);
-    if (hz >= 1e3) return QString("%1 kHz").arg(hz / 1e3, 0, 'g', 3);
-    return QString("%1 Hz").arg(hz, 0, 'g', 3);
-}
-
-QString FormatRegister(RegisterName name, uint16_t value)
-{
-    if (name == FLAGS)
-        return "0b" + QString::number(value & 0xF, 2).rightJustified(4, '0');
-    return "0x" + QString::number(value, 16).rightJustified(4, '0').toUpper();
-}
-
-void RefreshRegisters(const UiSnapshot& snap)
-{
-    for (auto& entry : registersLineEdits) {
-        const RegisterName name = entry.first;
-        const int32_t value = snap.regs[name];
-        if (shownRegisters[name] == value)
-            continue;
-        shownRegisters[name] = value;
-        const QSignalBlocker blocker(entry.second);
-        entry.second->setText(FormatRegister(name, static_cast<uint16_t>(value)));
-    }
-}
-
-void RefreshClockLabel(const UiSnapshot& snap)
-{
-    const int value = snap.clockValue;
-    if (shownClockValue == value)
-        return;
-    shownClockValue = value;
-
-    clockLabel->setText(value ? "HIGH" : "LOW");
-    QString color = value ? "9, 202, 25, 255" : "167, 167, 167, 255";
-    QString baseStyle = R"(
-        QLabel {
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            font-size: 14px;
-            padding: 2px 4px;
-            color: rgba(%1);
-        }
-    )";
-    clockLabel->setStyleSheet(baseStyle.arg(color));
-}
-
-void RefreshDebugValues(const UiSnapshot& snap)
-{
-    if (!debugPanelShown)
-        return;
-
-    const std::pair<const char*, bool> values[] = {
-        {"IsCurrExt", snap.debug[0]},
-        {"IsCurrAddrBase", snap.debug[1]},
-        {"IsCurrAddr", snap.debug[2]},
-        {"IsCurrAddrJsr", snap.debug[3]},
-        {"IsCurrSpChange", snap.debug[4]},
-        {"IsCurrJsr", snap.debug[5]},
-        {"IsCurrRts", snap.debug[6]},
-        {"RegIsCurrAddr", snap.debug[7]},
-    };
-
-    for (const auto& value : values) {
-        auto led = debugValuesLEDs.find(value.first);
-        if (led == debugValuesLEDs.end())
-            continue;
-        int& shown = shownDebugValues[value.first];
-        if (shown == static_cast<int>(value.second) + 1)
-            continue;
-        shown = static_cast<int>(value.second) + 1;
-        led->second->setStyleSheet(
-            value.second
-                ? "background-color: rgba(40, 197, 26, 1);"
-                : "background-color: rgba(143, 143, 143, 1);"
-        );
-    }
-}
-
-void RefreshIo(const UiSnapshot& snap)
-{
-    if (!snap.ioDirty)
-        return;
-    for (int port = 0; port < 3; ++port)
-        ioPanel->setPortValue(ioPanel->portNameFromIndex(port), snap.io[port]);
-}
-
-void RefreshUi()
-{
-    const UiSnapshot snap = TakeSnapshot();
-
-    RefreshRegisters(snap);
-    RefreshClockLabel(snap);
-    RefreshDebugValues(snap);
-    RefreshIo(snap);
-
-    if (snap.screenDirty)
-        canvas->present(snap.screen);
-
-    ramPanel->refresh();
-}
-
-void OnFrame()
-{
-    RefreshUi();
-}
+const char* const APP_STYLE = R"(
+QMenu { background: #2d3239; color: #f4f5f6; border: 1px solid #6c7480; padding: 0; }
+QMenu::item { padding: 6px 18px; }
+QMenu::item:selected { background: #4477ff; color: #ffffff; }
+QMenu::item:disabled { color: #939aa5; }
+QMenu::separator { height: 1px; background: #3c424b; }
+QToolTip { background: #2d3239; color: #f4f5f6; border: 1px solid #6c7480; }
+QScrollArea { background: #23272d; border: 0; }
+QScrollBar:vertical { background: #181b1f; width: 12px; margin: 0; }
+QScrollBar::handle:vertical { background: #6c7480; min-height: 24px; }
+QScrollBar:horizontal { background: #181b1f; height: 12px; margin: 0; }
+QScrollBar::handle:horizontal { background: #6c7480; min-width: 24px; }
+QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; }
+)";
 
 ScreenPixels CopyScreen()
 {
@@ -231,16 +70,9 @@ QString DefaultExportName(const QString& suffix)
 void SaveScreenshot()
 {
     const ScreenPixels pixels = CopyScreen();
-
-    QString path = QFileDialog::getSaveFileName(
-        window,
-        "Save screenshot",
-        DefaultExportName("jpg"),
-        "JPEG image (*.jpg *.jpeg)"
-    );
+    QString path = QFileDialog::getSaveFileName(window, "Save screenshot", DefaultExportName("jpg"), "JPEG image (*.jpg *.jpeg)");
     if (path.isEmpty())
         return;
-
     path = WithSuffix(path, "jpg");
     if (!SaveScreenshotJpeg(pixels, path))
         QMessageBox::warning(window, "File Error", "Could not save the screenshot to " + path);
@@ -258,21 +90,14 @@ void StopGifRecording()
 
 void StartGifRecording()
 {
-    QString path = QFileDialog::getSaveFileName(
-        window,
-        "Record GIF",
-        DefaultExportName("gif"),
-        "GIF image (*.gif)"
-    );
+    QString path = QFileDialog::getSaveFileName(window, "Record GIF", DefaultExportName("gif"), "GIF image (*.gif)");
     if (path.isEmpty())
         return;
-
     path = WithSuffix(path, "gif");
     if (!gifRecorder.start(path.toStdString())) {
         QMessageBox::warning(window, "File Error", "Could not create " + path);
         return;
     }
-
     gifRecorder.addFrame(CopyScreen());
     gifTimer.start(GIF_CAPTURE_INTERVAL_MS);
     recordGifAction->setText("Stop GIF recording");
@@ -287,579 +112,213 @@ void ToggleGifRecording()
         StartGifRecording();
 }
 
-void OnGifCapture()
+void ImportProgram()
 {
-    if (!gifRecorder.addFrame(CopyScreen()))
-        StopGifRecording();
+    const QString fileName = QFileDialog::getOpenFileName(window, "Open Program File", "", "Program Files (*.bin)");
+    if (!fileName.isEmpty())
+        workbench->loadProgram(fileName);
 }
 
-void ToggleManualClock(bool checked){
-    automaticClock = false;
-    sim.setAutomatic(false);
-}
-
-void ToggleAutomaticClock(bool checked){
-    automaticClock = true;
-    clockFrequency = FrequencyFromSlider(savedClockFrequency);
-    sim.setFrequency(clockFrequency);
-    sim.setAutomatic(true);
-}
-
-void ImportRAM() {
-    QString fileName = QFileDialog::getOpenFileName(
-        window,
-        "Open Program File",
-        "",
-        "Program Files (*.bin)"
-    );
-
-    if (fileName.isEmpty())
-        return;
-
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::warning(window, "File Error", "Could not open the selected file.");
-        return;
-    }
-
-    QString fileContent = QString::fromUtf8(file.readAll());
-    file.close();
-    QStringList wordList = fileContent.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-    std::vector<uint16_t> wordValues;
-    wordValues.reserve(wordList.size());
-    for (const QString& wordStr : wordList) {
-        bool ok;
-        uint16_t value = wordStr.toUShort(&ok, 16);
-        if (!ok) {
-            QMessageBox::warning(window, "File Error", "Invalid word in file : " + wordStr);
-            return;
-        }
-        wordValues.push_back(value);
-    }
-
-    {
-        auto guard = core.lock();
-        if (!core.loadRam(wordValues)) {
-            guard.unlock();
-            QMessageBox::warning(window, "File Error", "Invalid file size : " + QString::number(wordValues.size()));
-            return;
-        }
-
-        core.reset();
-    }
-    ramPanel->updateRAM();
-    RefreshUi();
-}
-
-QWidget* MakeDebugWidget(const std::string& tempValueName) {
-    QWidget *widget = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(widget);
-    layout->setContentsMargins(3, 3, 3, 3);
-
-    // Label
-    QLabel *label = new QLabel(QString::fromStdString(tempValueName));
-    label->setAlignment(Qt::AlignCenter);
-    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    
-    // LED
-    QWidget *led = new QWidget;
-    led->setFixedSize(40, 40);
-    led->setStyleSheet("background-color: rgba(143, 143, 143, 1);");
-    led->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    // Wrapper to center LED horizontally
-    QWidget *ledWrapper = new QWidget;
-    QHBoxLayout *ledLayout = new QHBoxLayout(ledWrapper);
-    ledLayout->setContentsMargins(0, 0, 0, 0);
-    ledLayout->addStretch();
-    ledLayout->addWidget(led);
-    ledLayout->addStretch();
-
-    // Add to main layout
-    layout->addWidget(label);
-    layout->addWidget(ledWrapper);
-
-    widget->setLayout(layout);
-    widget->setMaximumHeight(70);
-
-    debugValuesLEDs.emplace(tempValueName, led);
-
-    return widget;
-}
-
-void ShowDebug(){
-    if(debugPanelShown)
-        return;
-
-    debugPanelShown = true;
-
-    QWidget* debugPanel = new QWidget;
-    debugPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QVBoxLayout* debugLayout = new QVBoxLayout(debugPanel);
-
-    // ---------- Temporary Values Flip flops ----------
-    QGridLayout* gridLayout = new QGridLayout;
-    gridLayout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrExt"), 0, 0);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrAddrBase"), 0, 1);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrAddr"), 0, 2);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrAddrJsr"), 0, 3);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrSpChange"), 1, 0);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrJsr"), 1, 1);
-    gridLayout->addWidget(MakeDebugWidget("IsCurrRts"), 1, 2);
-    gridLayout->addWidget(MakeDebugWidget("RegIsCurrAddr"), 1, 3);
-    
-    debugLayout->addLayout(gridLayout);
-    HSplitterBottom->addWidget(debugPanel);
-    debugPanel->show();
-}
-
-void OnClockClick() {
-    {
-        auto guard = core.lock();
-        core.run(halfTicksOnClockClick);
-    }
-    RefreshUi();
-}
-
-void OnClockUp(){
-    halfTicksOnClockClick++;
-    clockTicks->setText(QString::number(halfTicksOnClockClick));
-}
-
-void OnClockDown(){
-    if(halfTicksOnClockClick == 0)
-        return;
-    halfTicksOnClockClick--;
-    clockTicks->setText(QString::number(halfTicksOnClockClick));
-}
-
-void OnResetClick(){
-    {
-        auto guard = core.lock();
-        core.reset();
-    }
-    canvas->clear();
-    RefreshUi();
-}
-
-QWidget* MakeRegisterWidget(const QString& regName) {
-    QWidget* w = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(w);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-    layout->setAlignment(Qt::AlignCenter);
-
-    QLineEdit* lineEdit = new QLineEdit("0x0000");
-    lineEdit->setAlignment(Qt::AlignCenter);
-    lineEdit->setFixedHeight(20);
-    QFile lineEditQss(":/style/stylesheets/lineedit.qss");
-    lineEditQss.open(QFile::ReadOnly);
-    QString lineEditStyle = QString::fromUtf8(lineEditQss.readAll());
-    lineEdit->setStyleSheet(lineEditStyle);
-    layout->addWidget(lineEdit);
-    QObject::connect(lineEdit, &QLineEdit::textChanged, [regName](QString value){
-        bool ok;
-        uint16_t result = static_cast<uint16_t>(value.toUShort(&ok, 16));
-
-        if (ok) {
-            const RegisterName name = RegisterFromString(regName.toStdString());
-            auto guard = core.lock();
-            core.setReg(name, result);
-            shownRegisters[name] = core.getReg(name);
-        }
-    });
-
-    registersLineEdits.emplace(RegisterFromString(regName.toStdString()), lineEdit);
-
-    QLabel* img = new QLabel;
-    img->setPixmap(":/images/imgs/"+regName+".png");
-    img->setScaledContents(true);
-    img->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    img->setMinimumSize(40, 40);
-    img->setMaximumSize(80, 80);
-
-    layout->addWidget(img, 0, Qt::AlignHCenter);
-
-    w->setMinimumSize(60, 60);
-
-    if(regName == "FLAGS"){
-        lineEdit->setText("0b0000");
-    }
-
-    return w;
-}
-
-QWidget* MakeResetWidget(){
-    QWidget* w = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(w);
-    layout->setContentsMargins(14, 4, 14, 4);
-    layout->setSpacing(4);
-    layout->setAlignment(Qt::AlignCenter);
-
-    QLabel* label = new QLabel("RESET ?");
-    label->setAlignment(Qt::AlignCenter);
-    label->setFixedWidth(113);
-    label->setFixedHeight(20);
-    label->setStyleSheet(QString(
-        "QLabel {"
-        "   border: none;"
-        "   background: transparent;"
-        "   color: #a7a7a7;"
-        "   font-weight: 600;"
-        "   font-size: 14px;"
-        "   padding: 2px 4px;"
-        "}"
-    ));
-    layout->addWidget(label);
-
-    ClockButton* btn = new ClockButton(":/images/imgs/RESET.png", OnResetClick, nullptr, nullptr);
-    btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    btn->setMinimumSize(40, 40);
-    btn->setMaximumSize(80, 80);
-
-    layout->addWidget(btn, 0, Qt::AlignHCenter);
-
-    w->setMinimumSize(60, 60);
-    return w;
-}
-
-QWidget* MakeClockWidget() {
-    QWidget* w = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(w);
-    layout->setContentsMargins(14, 4, 14, 4);
-    layout->setSpacing(4);
-    layout->setAlignment(Qt::AlignCenter);
-
-    QLabel* label = new QLabel("LOW");
-    label->setAlignment(Qt::AlignCenter);
-    label->setFixedWidth(113);
-    label->setFixedHeight(20);
-    label->setStyleSheet(QString(
-        "QLabel {"
-        "   border: none;"
-        "   background: transparent;"
-        "   color: #a7a7a7;"
-        "   font-weight: 600;"
-        "   font-size: 14px;"
-        "   padding: 2px 4px;"
-        "}"
-    ));
-    layout->addWidget(label);
-
-    clockLabel = label;
-
-    ClockButton* btn = new ClockButton(":/images/imgs/CLOCK.png", OnClockClick, OnClockUp, OnClockDown);
-    btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    btn->setMinimumSize(40, 40);
-    btn->setMaximumSize(80, 80);
-
-    layout->addWidget(btn, 0, Qt::AlignHCenter);
-
-    
-    QLabel* ticksLabel = new QLabel(QString::number(halfTicksOnClockClick));
-    ticksLabel->setAlignment(Qt::AlignCenter);
-    ticksLabel->setFixedWidth(113);
-    ticksLabel->setFixedHeight(20);
-    ticksLabel->setStyleSheet(QString(
-        "QLabel {"
-        "   border: none;"
-        "   background: transparent;"
-        "   color: #a7a7a7;"
-        "   font-weight: 600;"
-        "   font-size: 14px;"
-        "   padding: 2px 4px;"
-        "}"
-    ));
-    layout->addWidget(ticksLabel);
-
-    clockTicks = ticksLabel;
-
-    w->setMinimumSize(60, 60);
-    return w;
-}
-
-void SetupGUI(){
-    window = new QMainWindow;
-
-    window->resize(800, 600);
-    
-    /* ============ Menu ============== */
-    QMenuBar *menubar = new QMenuBar(window);
-    menubar->setObjectName("menubar");
-
-    QMenu *file_menu = new QMenu("File", menubar);
-    QAction* importAction = new QAction();
-    importAction->setText("Import program...");
-    importAction->setToolTip("Load a compiled program file to RAM");
-    QObject::connect(importAction, &QAction::triggered, &ImportRAM);
-    file_menu->addAction(importAction);
-    file_menu->addSeparator();
-
-    QAction* screenshotAction = new QAction();
-    screenshotAction->setText("Save screenshot (JPEG 800x800)...");
-    screenshotAction->setToolTip("Save the screen as an upscaled 800x800 JPEG (nearest neighbour)");
-    screenshotAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_P));
-    QObject::connect(screenshotAction, &QAction::triggered, &SaveScreenshot);
-    file_menu->addAction(screenshotAction);
-
-    recordGifAction = new QAction();
-    recordGifAction->setText("Start GIF recording...");
-    recordGifAction->setToolTip("Record the screen as an upscaled 800x800 GIF (nearest neighbour)");
-    recordGifAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
-    QObject::connect(recordGifAction, &QAction::triggered, &ToggleGifRecording);
-    file_menu->addAction(recordGifAction);
-
-    QMenu *debug_menu = new QMenu("Debug", menubar);
-    QAction* showSignals = new QAction();
-    showSignals->setText("Show debug panel");
-    showSignals->setToolTip("Show all intermediate/temporary values");
-    QObject::connect(showSignals, &QAction::triggered, &ShowDebug);
-    debug_menu->addAction(showSignals);
-    
-    QMenu *simulation_menu = new QMenu("Simulation", menubar);
-    QMenu* modClockFreq = new QMenu("Clock frequency...", simulation_menu);
-    modClockFreq->setToolTip("Modify automatic clock frequency");
-
-    QWidgetAction* clockFrequencyAction = new QWidgetAction(simulation_menu);
-
-    QWidget* mainFrequencyWidget = new QWidget();
-    QVBoxLayout* frequencyVLayout = new QVBoxLayout(mainFrequencyWidget);
-
-    QLabel* frequencyTitle = new QLabel(
-        QString("Frequency: %1").arg(FormatFrequency(FrequencyFromSlider(savedClockFrequency)))
-    );
-    frequencyTitle->setAlignment(Qt::AlignHCenter);
-
-    QSlider* slider = new QSlider(Qt::Horizontal);
-    slider->setMinimumSize(200, 50);
-    slider->setRange(0, 100);
-    slider->setValue(savedClockFrequency);
-    QObject::connect(slider, &QSlider::valueChanged, [frequencyTitle](int value){
-        savedClockFrequency = value;
-        clockFrequency = FrequencyFromSlider(value);
-        sim.setFrequency(clockFrequency);
-        if (value == 0 && automaticClock)
-            toggleManual->setChecked(true);
-        frequencyTitle->setText(QString("Frequency: %1").arg(FormatFrequency(clockFrequency)));
-    });
-    QFile sliderQss(":/style/stylesheets/slider.qss");
-    sliderQss.open(QFile::ReadOnly);
-    QString sliderStyle = QString::fromUtf8(sliderQss.readAll());
-    slider->setStyleSheet(sliderStyle);
-
-    frequencyVLayout->addWidget(frequencyTitle);
-    frequencyVLayout->addWidget(slider);
-
-    clockFrequencyAction->setDefaultWidget(mainFrequencyWidget);
-    modClockFreq->addAction(clockFrequencyAction);
-
-    QMenu* modClockType = new QMenu("Clock type...", simulation_menu);
-    modClockType->setToolTip("Modify clock interaction type");
-    toggleAutomatic = new QAction("Automatic", modClockType);
-    toggleAutomatic->setCheckable(true);
-    toggleAutomatic->setChecked(false);
-    QObject::connect(toggleAutomatic, &QAction::toggled, [=](bool checked){
-        if (checked) {
-            toggleManual->setChecked(false);
-            ToggleAutomaticClock(checked);
-        }
-        else{
-            toggleManual->setChecked(true);
-            ToggleManualClock(true);
-        }
-    });
-    modClockType->addAction(toggleAutomatic);
-
-    toggleManual = new QAction("Manual", modClockType);
-    toggleManual->setCheckable(true);
-    toggleManual->setChecked(false);
-    QObject::connect(toggleManual, &QAction::toggled, [=](bool checked){
-        if (checked) {
-            toggleAutomatic->setChecked(false);
-            ToggleManualClock(checked);
-        }
-        else{
-            toggleAutomatic->setChecked(true);
-            ToggleAutomaticClock(true);
-        }
-    });
-    modClockType->addAction(toggleManual);
-
-    simulation_menu->addMenu(modClockType);
-    simulation_menu->addMenu(modClockFreq);
-
-    menubar->addMenu(file_menu);
-    menubar->addMenu(debug_menu);
-    menubar->addMenu(simulation_menu);
-    window->setMenuBar(menubar);
-
-    QFile menuQss(":/style/stylesheets/menu.qss");
-    menuQss.open(QFile::ReadOnly);
-    QString menuStyle = QString::fromUtf8(menuQss.readAll());
-    qApp->setStyleSheet(menuStyle);
-
-    /* ============ Splitters ============== */
-    FullSplitter *VSplitter = new FullSplitter(Qt::Vertical);
-    VSplitter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    FullSplitter *HSplitter = new FullSplitter(Qt::Horizontal);
-    HSplitter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    HSplitterBottom = new FullSplitter(Qt::Horizontal);
-    HSplitterBottom->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    /* ============ Right panel ============== */
-    QWidget* rightPanel = new QWidget;
-    rightPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QVBoxLayout* rightLayout = new QVBoxLayout(rightPanel);
-    rightLayout->setContentsMargins(0, 0, 0, 0);
-    rightLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    
-    canvas = new CanvasWidget;
-    canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    rightLayout->addWidget(canvas);
-
-    /* ============ Left panel ============== */
-    QWidget* leftPanel = new QWidget;
-    leftPanel->setMinimumWidth(200);
-    leftPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QVBoxLayout* leftLayout = new QVBoxLayout(leftPanel);
-
-    ramPanel = new RamPanel(core);
-    ramView = new QTableView;
-    ramView->setModel(ramPanel);
-    ramView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    ramView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ramView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ramView->horizontalHeader()->setDefaultSectionSize(50);
-    ramView->verticalHeader()->setDefaultSectionSize(20);
-    ramView->setFont(QFont("Courier", 10));
-    ramView->setWindowTitle("RAM Viewer");
-    QFile ramViewQss(":/style/stylesheets/ram_panel.qss");
-    ramViewQss.open(QFile::ReadOnly);
-    QString ramViewStyle = QString::fromUtf8(ramViewQss.readAll());
-    ramView->setStyleSheet(ramViewStyle);
-    leftLayout->addWidget(ramView);
-    ramView->setMaximumWidth(870);
-
-    
-    // ---------------- Bottom panel : Regs --------------
-    QWidget* bottomPanel = new QWidget;
-    bottomPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QVBoxLayout* bottomLayout = new QVBoxLayout(bottomPanel);
-
-    QScrollArea* scrollArea = new QScrollArea;
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setFrameShape(QFrame::NoFrame);
-    QFile scrollAreaQss(":/style/stylesheets/scrollarea.qss");
-    scrollAreaQss.open(QFile::ReadOnly);
-    QString scrollAreaStyle = QString::fromUtf8(scrollAreaQss.readAll());
-    scrollArea->setStyleSheet(scrollAreaStyle);
-
-    QWidget* scrollContent = new QWidget;
-    QVBoxLayout* mainLayout = new QVBoxLayout(scrollContent);
-    mainLayout->setSpacing(10);
-    mainLayout->setContentsMargins(5, 5, 5, 5);
-
-    // ---------- General Purpose Registers ----------
-    QWidget* gpRegsGroup = new QWidget;
-    FlowLayout* gpRegsLayout = new FlowLayout(gpRegsGroup);
-    gpRegsLayout->addWidget(MakeRegisterWidget("R0"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R1"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R2"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R3"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R4"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R5"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R6"));
-    gpRegsLayout->addWidget(MakeRegisterWidget("R7"));
-    mainLayout->addWidget(gpRegsGroup);
-
-    // ---------- Special Registers ----------
-    QWidget* specRegsGroup = new QWidget;
-    FlowLayout* specRegsLayout = new FlowLayout(specRegsGroup);
-    specRegsLayout->addWidget(MakeRegisterWidget("SP"));
-    specRegsLayout->addWidget(MakeRegisterWidget("PC"));
-    specRegsLayout->addWidget(MakeRegisterWidget("FLAGS"));
-    specRegsLayout->addWidget(MakeRegisterWidget("RAM_ADDRESS"));
-    mainLayout->addWidget(specRegsGroup);
-
-    // ---------- IR Registers ----------
-    QWidget* irRegsGroup = new QWidget;
-    FlowLayout* irRegsLayout = new FlowLayout(irRegsGroup);
-    irRegsLayout->addWidget(MakeRegisterWidget("IR0"));
-    irRegsLayout->addWidget(MakeRegisterWidget("IR1"));
-    mainLayout->addWidget(irRegsGroup);
-
-    // ---------- Clock Group ----------
-    QWidget* clockGroup = new QWidget;
-    FlowLayout* clockLayout = new FlowLayout(clockGroup);
-    clockLayout->addWidget(MakeClockWidget());
-    clockLayout->addWidget(MakeResetWidget());
-    mainLayout->addWidget(clockGroup);
-
-    // ---------- Finalize scroll area ----------
-    scrollContent->setLayout(mainLayout);
-    scrollArea->setWidget(scrollContent);
-
-    bottomLayout->addWidget(scrollArea);
-
-    HSplitter->addWidget(leftPanel);
-    HSplitter->addWidget(rightPanel);
-    HSplitter->setStretchFactor(0, 0);
-    HSplitter->setStretchFactor(1, 1);
-    HSplitter->setChildrenCollapsible(false);
-
-    // ---------- Bottom panel : IO Ports --------------
-
-    ioPanel = new IOPortsPanel();
-    QObject::connect(ioPanel, &IOPortsPanel::squareClicked, [](char portName, int){
-        for (int port = 0; port < 3; ++port) {
-            if (ioPanel->portNameFromIndex(port) == portName) {
-                auto guard = core.lock();
-                core.io[port] = ioPanel->portValue(portName);
+QStringList FindSamples()
+{
+    QDir dir(QCoreApplication::applicationDirPath());
+    for (int i = 0; i < 6; ++i) {
+        if (dir.exists("programs/asm")) {
+            QDir programs(dir.filePath("programs/asm"));
+            QStringList paths;
+            const QStringList preferred = {"cube", "pong", "fill_screen_red", "io", "stack", "tests", "division_by_0"};
+            QStringList names = programs.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+            for (const QString& name : preferred)
+                if (names.removeOne(name))
+                    names.prepend(name);
+            QStringList ordered;
+            for (const QString& name : preferred)
+                if (names.contains(name))
+                    ordered << name;
+            for (const QString& name : names)
+                if (!ordered.contains(name))
+                    ordered << name;
+            for (const QString& name : ordered) {
+                QDir sub(programs.filePath(name));
+                const QStringList bins = sub.entryList({"*.bin"}, QDir::Files, QDir::Name);
+                if (!bins.isEmpty())
+                    paths << sub.filePath(bins.first());
             }
+            return paths;
         }
-    });
-
-    HSplitterBottom->addWidget(bottomPanel);
-    HSplitterBottom->addWidget(ioPanel);
-
-    VSplitter->setChildrenCollapsible(false);
-
-    VSplitter->addWidget(HSplitter);
-    VSplitter->addWidget(HSplitterBottom);
-
-    window->setCentralWidget(VSplitter);
-    window->setWindowTitle("Organ 16 Emulator");
-    window->show();
+        if (!dir.cdUp())
+            break;
+    }
+    return {};
 }
 
-int main(int argc, char *argv[]) {
+void BuildDebugWindow()
+{
+    debugWindow = new QWidget;
+    debugWindow->setWindowTitle("Organ 16 debug");
+    debugWindow->setStyleSheet("QWidget{background:#23272d;color:#f4f5f6;}");
+    QGridLayout* grid = new QGridLayout(debugWindow);
+    const char* names[8] = {"IsCurrExt", "IsCurrAddrBase", "IsCurrAddr", "IsCurrAddrJsr", "IsCurrSpChange", "IsCurrJsr", "IsCurrRts", "RegIsCurrAddr"};
+    for (int i = 0; i < 8; ++i) {
+        QLabel* label = new QLabel(names[i]);
+        label->setFont(theme::mono(12));
+        label->setAlignment(Qt::AlignCenter);
+        QWidget* led = new QWidget;
+        led->setFixedSize(40, 40);
+        led->setStyleSheet("background:#3b414a;");
+        grid->addWidget(label, (i / 4) * 2, i % 4);
+        grid->addWidget(led, (i / 4) * 2 + 1, i % 4, Qt::AlignHCenter);
+        debugLeds.push_back({names[i], led});
+    }
+}
+
+void RefreshDebug()
+{
+    if (!debugWindow || !debugWindow->isVisible())
+        return;
+    std::array<bool, 8> values;
+    {
+        auto guard = core.lock();
+        values = {core.ffExt, core.ffAddrBase, core.ffAddrBase || core.ffAddrJsr, core.ffAddrJsr,
+                  core.ffSpChange, core.ffJsr, core.ffRts, core.ffRegAddr};
+    }
+    for (size_t i = 0; i < debugLeds.size(); ++i)
+        debugLeds[i].second->setStyleSheet(values[i] ? "background:#2ee66b;" : "background:#3b414a;");
+}
+
+void ShowContextMenu(const QPoint& pos)
+{
+    QMenu menu;
+    QAction* import = menu.addAction("Import program...");
+    menu.addSeparator();
+    QAction* shot = menu.addAction("Save screenshot (JPEG 800x800)...");
+    shot->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_P));
+    recordGifAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+    menu.addAction(recordGifAction);
+    menu.addSeparator();
+    QAction* debug = menu.addAction("Show debug panel");
+
+    QAction* chosen = menu.exec(pos);
+    if (chosen == import)
+        ImportProgram();
+    else if (chosen == shot)
+        SaveScreenshot();
+    else if (chosen == debug) {
+        if (!debugWindow)
+            BuildDebugWindow();
+        debugWindow->show();
+        debugWindow->raise();
+    }
+}
+
+}
+
+int main(int argc, char* argv[])
+{
     QApplication app(argc, argv);
+    app.setApplicationName("Emulator");
+    app.setOrganizationName("Organ16");
+    theme::loadFonts();
+    app.setStyleSheet(APP_STYLE);
 
-    shownRegisters.fill(-1);
-    clockFrequency = FrequencyFromSlider(savedClockFrequency);
-    sim.setFrequency(clockFrequency);
+    QCommandLineParser parser;
+    QCommandLineOption programOption("program", "Load a program at startup.", "file");
+    QCommandLineOption shotOption("shot", "Save a screenshot of the window to a PNG and quit.", "file");
+    QCommandLineOption sizeOption("size", "Window size for --shot.", "WxH", "1600x900");
+    QCommandLineOption ticksOption("ticks", "Half ticks to run before --shot.", "n", "0");
+    QCommandLineOption playOption("play", "Run the clock at this many Hz for 600 ms before --shot.", "hz");
+    QCommandLineOption breakOption("break", "Set a breakpoint at this hex address.", "addr");
+    parser.addOptions({programOption, shotOption, sizeOption, ticksOption, playOption, breakOption});
+    parser.process(app);
 
-    SetupGUI();
+    recordGifAction = new QAction("Start GIF recording...");
+    QObject::connect(recordGifAction, &QAction::triggered, &ToggleGifRecording);
+
+    workbench = new Workbench(core, sim);
+    workbench->setSamples(FindSamples());
 
     {
         auto guard = core.lock();
         core.init();
     }
-    ramPanel->updateRAM();
-    RefreshUi();
+
+    QObject::connect(workbench, &Workbench::loadRequested, &ImportProgram);
+    QObject::connect(workbench, &Workbench::contextMenuRequested, &ShowContextMenu);
+
+    const bool shotMode = parser.isSet(shotOption);
+
+    QScrollArea* scroll = nullptr;
+    if (shotMode) {
+        window = workbench;
+    }
+    else {
+        scroll = new QScrollArea;
+        scroll->setFrameShape(QFrame::NoFrame);
+        scroll->setWidgetResizable(true);
+        scroll->setWidget(workbench);
+        window = scroll;
+    }
+    window->setWindowTitle("Organ 16 Emulator");
+
+    if (parser.isSet(programOption))
+        workbench->loadProgram(parser.value(programOption));
+
+    if (shotMode) {
+        const QStringList dims = parser.value(sizeOption).split('x');
+        workbench->resize(dims.value(0).toInt(), dims.value(1).toInt());
+        const uint64_t ticks = parser.value(ticksOption).toULongLong();
+        if (ticks) {
+            auto guard = core.lock();
+            core.run(ticks);
+        }
+        workbench->show();
+        workbench->refresh();
+        app.processEvents();
+        if (parser.isSet(breakOption))
+            workbench->setBreakpointAt(static_cast<uint16_t>(parser.value(breakOption).toUInt(nullptr, 16)));
+        int wait = 150;
+        if (parser.isSet(playOption)) {
+            workbench->playAt(parser.value(playOption).toDouble());
+            sim.start();
+            wait = 700;
+        }
+        QTimer frames;
+        QObject::connect(&frames, &QTimer::timeout, [] { workbench->refresh(); });
+        frames.start(16);
+        QTimer::singleShot(wait, [&] {
+            workbench->refresh();
+            app.processEvents();
+            const bool ok = workbench->grab().save(parser.value(shotOption));
+            app.exit(ok ? 0 : 1);
+        });
+        return app.exec();
+    }
+
+    const QSize avail = app.primaryScreen() ? app.primaryScreen()->availableSize() : QSize(1600, 900);
+    window->resize(std::min(1600, avail.width()), std::min(900, avail.height()));
+    window->show();
+    workbench->setFocus();
 
     sim.start();
 
+    QShortcut shotShortcut(QKeySequence(Qt::CTRL | Qt::Key_P), window);
+    QObject::connect(&shotShortcut, &QShortcut::activated, &SaveScreenshot);
+    QShortcut gifShortcut(QKeySequence(Qt::CTRL | Qt::Key_R), window);
+    QObject::connect(&gifShortcut, &QShortcut::activated, &ToggleGifRecording);
+
+    QTimer frameTimer;
     frameTimer.setTimerType(Qt::PreciseTimer);
-    QObject::connect(&frameTimer, &QTimer::timeout, &OnFrame);
+    QObject::connect(&frameTimer, &QTimer::timeout, [] {
+        workbench->refresh();
+        RefreshDebug();
+    });
     frameTimer.start(16);
 
-    QObject::connect(&gifTimer, &QTimer::timeout, &OnGifCapture);
     gifTimer.setTimerType(Qt::PreciseTimer);
+    QObject::connect(&gifTimer, &QTimer::timeout, [] {
+        if (!gifRecorder.addFrame(CopyScreen()))
+            StopGifRecording();
+    });
     QObject::connect(&app, &QApplication::aboutToQuit, [] {
         if (gifRecorder.recording())
             StopGifRecording();
