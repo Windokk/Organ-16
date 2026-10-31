@@ -6,7 +6,7 @@
 
   </br>
   
-  <img src="https://img.shields.io/static/v1?label=Version&message=1.0.0&color=33cc33&style=for-the-badge"/>
+  <img src="https://img.shields.io/static/v1?label=Version&message=2.0.0&color=33cc33&style=for-the-badge"/>
 
 
 </br>
@@ -109,8 +109,9 @@ It will place every source file at the memory address specified in the linker sc
 
 - Support for signed operations is not enforced; it is up to the program to choose whether to work with signed or unsigned numbers.
 
-### Future plans : v3.0.0 :
+### Future plans : v2.5.0 :
 
+- [x] Mini-C compiler : occ (Organ C Compiler) v.0.2
 - [ ] Interrupts
 - [ ] Exceptions (a kind of interrupt)
 - [ ] Cache
@@ -118,5 +119,7 @@ It will place every source file at the memory address specified in the linker sc
 
 ### Future-future plans (v4.0.0?)
 
+- [ ] Multi-core
+- [ ] 32 bit evolution (Carillon 32)
 - [ ] IRL breadboard implementation (???)
 - [ ] PCB version (In a long long time 😄)

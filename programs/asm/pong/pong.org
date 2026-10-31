@@ -8,7 +8,6 @@
 @define SCREEN_HEIGHT  128
 
 @define N_MAX_SCORE 10
-@define N_MAX_ROUNDS 19
 
 @define PADDLE_HEIGHT 8
 
@@ -45,8 +44,6 @@
 
 @define PADDLE_MAX      0xc008
 
-@define ROUND_COUNTER   0xc009
-
 @define OLD_PADDLE1_Y 0xc010
 @define OLD_PADDLE2_Y 0xc011
 
@@ -57,9 +54,6 @@
 @define SCORE2 0xc014
 @define DIGIT_X0 0xc015
 @define DIGIT_Y0 0xc016
-
-@define FIRST_ROUND_START_DX 0xc020
-@define FIRST_ROUND_START_DY 0xc034
 
 @define DIGIT_FONT 0xc050
 @define PADDLE_ANGLES 0xc060
@@ -72,50 +66,6 @@
 @define DIGIT_HEIGHT 10
 
 pre_init:
-    MOVI R0, 1
-    STORE R0, FIRST_ROUND_START_DX
-    STORE R0, FIRST_ROUND_START_DY
-    STORE R0, (FIRST_ROUND_START_DX + 2)
-    STORE R0, (FIRST_ROUND_START_DY + 2)
-    STORE R0, (FIRST_ROUND_START_DX + 4)
-    STORE R0, (FIRST_ROUND_START_DY + 4)
-    STORE R0, (FIRST_ROUND_START_DX + 6)
-    STORE R0, (FIRST_ROUND_START_DY + 6)
-    STORE R0, (FIRST_ROUND_START_DX + 8)
-    STORE R0, (FIRST_ROUND_START_DY + 8)
-    STORE R0, (FIRST_ROUND_START_DX + 10)
-    STORE R0, (FIRST_ROUND_START_DY + 10)
-    STORE R0, (FIRST_ROUND_START_DX + 12)
-    STORE R0, (FIRST_ROUND_START_DY + 12)
-    STORE R0, (FIRST_ROUND_START_DX + 14)
-    STORE R0, (FIRST_ROUND_START_DY + 14)
-    STORE R0, (FIRST_ROUND_START_DX + 16)
-    STORE R0, (FIRST_ROUND_START_DY + 16)
-    STORE R0, (FIRST_ROUND_START_DX + 18)
-    STORE R0, (FIRST_ROUND_START_DY + 18)
-
-    MOVI R0, -1
-    STORE R0, (FIRST_ROUND_START_DX + 1)
-    STORE R0, (FIRST_ROUND_START_DY + 1)
-    STORE R0, (FIRST_ROUND_START_DX + 3)
-    STORE R0, (FIRST_ROUND_START_DY + 3)
-    STORE R0, (FIRST_ROUND_START_DX + 5)
-    STORE R0, (FIRST_ROUND_START_DY + 5)
-    STORE R0, (FIRST_ROUND_START_DX + 7)
-    STORE R0, (FIRST_ROUND_START_DY + 7)
-    STORE R0, (FIRST_ROUND_START_DX + 9)
-    STORE R0, (FIRST_ROUND_START_DY + 9)
-    STORE R0, (FIRST_ROUND_START_DX + 11)
-    STORE R0, (FIRST_ROUND_START_DY + 11)
-    STORE R0, (FIRST_ROUND_START_DX + 13)
-    STORE R0, (FIRST_ROUND_START_DY + 13)
-    STORE R0, (FIRST_ROUND_START_DX + 15)
-    STORE R0, (FIRST_ROUND_START_DY + 15)
-    STORE R0, (FIRST_ROUND_START_DX + 17)
-    STORE R0, (FIRST_ROUND_START_DY + 17)
-    STORE R0, (FIRST_ROUND_START_DX + 19)
-    STORE R0, (FIRST_ROUND_START_DY + 19)
-
     MOVI R0, 0x7b6f
     STORE R0, (DIGIT_FONT + 0)
     MOVI R0, 0x749a
@@ -159,9 +109,7 @@ pre_init:
 
 main:
 
-    ; Initialize round counter at 0
     MOVI R0, ZERO
-    STORE R0, ROUND_COUNTER
     STORE R0, BALL_TICK
     STORE R0, SCORE1
     STORE R0, SCORE2
@@ -415,22 +363,19 @@ start_round:
     ; Initialize paddle 2 at vcenter
     STORE R0, PADDLE2_Y
 
-    LOAD R0, ROUND_COUNTER
-    MOVI R7, FIRST_ROUND_START_DX    ; This round's initial DX is stored at FIRST_ROUND_START_DX + ROUND_COUNTER
-    ADD R7, R7, R0                  ; Add [first_round's_dx] + [round_counter] to obtain this round's dx
-    LOADR R0, R7                        
-    STORE R0, BALL_DX
+    ; Random launch direction : bit 0 of RAND gives DX, bit 1 gives DY (0 -> -1, 1 -> +1)
+    RAND R0
+    MOVI R1, ONE
+    AND R2, R0, R1
+    ADD R2, R2, R2
+    SUB R2, R2, R1
+    STORE R2, BALL_DX
 
-    LOAD R1, ROUND_COUNTER
-    MOVI R7, FIRST_ROUND_START_DY    ; This round's initial DY is stored at FIRST_ROUND_START_DY + ROUND_COUNTER
-    ADD R7, R7, R1                  ; Add [first_round's_dy] + [round_counter] to obtain this round's dy
-    LOADR R1, R7
-    STORE R1, BALL_DY
-
-    LOAD R0, ROUND_COUNTER  ; Round Counter += 1
-    MOVI R1, 1
-    ADD R0, R0, R1
-    STORE R0, ROUND_COUNTER
+    MOVI R1, 0b10
+    AND R2, R0, R1
+    MOVI R1, ONE
+    SUB R2, R2, R1
+    STORE R2, BALL_DY
 
     JMP gameLoop
 

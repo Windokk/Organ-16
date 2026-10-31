@@ -1,0 +1,439 @@
+    JSR F_main
+    HLT
+F_draw_pixel:
+    STORE R0, 61427
+    STORE R1, 61426
+    STORE R2, 61425
+    LOAD R0, 61426
+    MOVI R6, 128
+    MUL R0, R0, R6
+    LOAD R6, 61427
+    ADD R0, R0, R6
+    MOVI R6, 32768
+    ADD R0, R0, R6
+    LOAD R1, 61425
+    STORER R1, R0
+    RTS
+F_draw_paddle:
+    STORE R0, 61438
+    STORE R1, 61437
+    STORE R2, 61436
+    LOAD R0, 61437
+    MOVI R6, 8
+    ADD R0, R0, R6
+    STORE R0, 61435
+L1:
+    LOAD R0, 61437
+    COMPM R0, 61435
+    JE L2
+    LOAD R0, 61438
+    LOAD R1, 61437
+    LOAD R2, 61436
+    JSR F_draw_pixel
+    LOAD R0, 61437
+    INC R0
+    STORE R0, 61437
+    JMP L1
+L2:
+    RTS
+F_draw_cell:
+    STORE R0, 61430
+    STORE R1, 61429
+    STORE R2, 61428
+    LOAD R0, 61430
+    LOAD R1, 61429
+    LOAD R2, 61428
+    JSR F_draw_pixel
+    LOAD R0, 61430
+    INC R0
+    LOAD R1, 61429
+    LOAD R2, 61428
+    JSR F_draw_pixel
+    LOAD R0, 61430
+    INC R0
+    PUSH R0
+    LOAD R0, 61429
+    INC R0
+    PUSH R0
+    POP R1
+    POP R0
+    LOAD R2, 61428
+    JSR F_draw_pixel
+    LOAD R0, 61429
+    INC R0
+    MOV R1, R0
+    LOAD R0, 61430
+    LOAD R2, 61428
+    JSR F_draw_pixel
+    RTS
+F_draw_digit:
+    STORE R0, 61438
+    STORE R1, 61437
+    STORE R2, 61436
+    STORE R3, 61435
+    LOAD R0, 61435
+    MOVI R6, 49152
+    ADD R0, R0, R6
+    LOADR R0, R0
+    STORE R0, 61434
+    MOVI R0, 1
+    STORE R0, 61433
+    MOVI R0, 0
+    STORE R0, 61432
+L3:
+    LOAD R0, 61432
+    COMPI R0, 5
+    JGE L5
+    MOVI R0, 0
+    STORE R0, 61431
+L6:
+    LOAD R0, 61431
+    COMPI R0, 3
+    JGE L8
+    LOAD R0, 61434
+    LOAD R6, 61433
+    AND R0, R0, R6
+    COMPI R0, 0
+    JE L9
+    LOAD R0, 61438
+    LOAD R1, 61431
+    MOVI R6, 2
+    MUL R1, R1, R6
+    ADD R0, R0, R1
+    PUSH R0
+    LOAD R0, 61437
+    LOAD R1, 61432
+    MOVI R6, 2
+    MUL R1, R1, R6
+    ADD R0, R0, R1
+    PUSH R0
+    POP R1
+    POP R0
+    LOAD R2, 61436
+    JSR F_draw_cell
+L9:
+    LOAD R0, 61433
+    MOVI R6, 1
+    SHL R0, R0, R6
+    STORE R0, 61433
+L7:
+    LOAD R0, 61431
+    INC R0
+    STORE R0, 61431
+    JMP L6
+L8:
+L4:
+    LOAD R0, 61432
+    INC R0
+    STORE R0, 61432
+    JMP L3
+L5:
+    RTS
+F_draw_score1:
+    MOVI R0, 28
+    MOVI R1, 2
+    MOVI R2, 21791
+    LOAD R3, 49182
+    JSR F_draw_digit
+    RTS
+F_draw_score2:
+    MOVI R0, 94
+    MOVI R1, 2
+    MOVI R2, 64234
+    LOAD R3, 49183
+    JSR F_draw_digit
+    RTS
+F_clear_screen:
+    MOVI R0, 32768
+    STORE R0, 61438
+    MOVI R0, 49152
+    STORE R0, 61437
+L10:
+    LOAD R0, 61438
+    COMPM R0, 61437
+    JE L11
+    MOVI R0, 0
+    LOAD R1, 61438
+    STORERP R0, R1
+    STORE R1, 61438
+    JMP L10
+L11:
+    RTS
+F_start_round:
+    JSR F_clear_screen
+    JSR F_draw_score1
+    JSR F_draw_score2
+    MOVI R0, 64
+    STORE R0, 49171
+    MOVI R0, 64
+    STORE R0, 49172
+    MOVI R0, 64
+    STORE R0, 49177
+    MOVI R0, 64
+    STORE R0, 49178
+    RAND R0
+    STORE R0, 61439
+    LOAD R0, 61439
+    MOVI R6, 1
+    AND R0, R0, R6
+    COMPI R0, 0
+    JE L12
+    MOVI R0, 1
+    JMP L13
+L12:
+    MOVI R0, 65535
+L13:
+    STORE R0, 49173
+    LOAD R0, 61439
+    MOVI R6, 2
+    AND R0, R0, R6
+    COMPI R0, 0
+    JE L14
+    MOVI R0, 1
+    JMP L15
+L14:
+    MOVI R0, 65535
+L15:
+    STORE R0, 49174
+    RTS
+F_bounce_off_paddle:
+    STORE R0, 61439
+    STORE R1, 61438
+    LOAD R0, 49172
+    LOAD R6, 61439
+    SUB R0, R0, R6
+    STORE R0, 61437
+    LOAD R0, 61437
+    COMPI R0, 8
+    JA L16
+    LOAD R0, 61437
+    MOVI R6, 49162
+    ADD R0, R0, R6
+    LOADR R0, R0
+    STORE R0, 49174
+    LOAD R0, 61438
+    STORE R0, 49173
+L16:
+    RTS
+F_move_ball:
+    LOAD R0, 49173
+    COMPI R0, 0
+    JGE L17
+    LOAD R0, 49171
+    DEC R0
+    STORE R0, 49171
+    JMP L18
+L17:
+    LOAD R0, 49173
+    COMPI R0, 0
+    JLE L19
+    LOAD R0, 49171
+    INC R0
+    STORE R0, 49171
+L19:
+L18:
+    LOAD R0, 49172
+    LOAD R6, 49174
+    ADD R0, R0, R6
+    STORE R0, 49172
+    LOAD R0, 49172
+    COMPI R0, 0
+    JGE L20
+    LOAD R0, 49172
+    MOVI R6, 0
+    SUB R0, R6, R0
+    STORE R0, 49172
+    LOAD R0, 49174
+    MOVI R6, 0
+    SUB R0, R6, R0
+    STORE R0, 49174
+    JMP L21
+L20:
+    LOAD R0, 49172
+    COMPI R0, 127
+    JLE L22
+    MOVI R0, 254
+    LOAD R6, 49172
+    SUB R0, R0, R6
+    STORE R0, 49172
+    LOAD R0, 49174
+    MOVI R6, 0
+    SUB R0, R6, R0
+    STORE R0, 49174
+L22:
+L21:
+    RTS
+F_move_paddles:
+    IN0 R0
+    STORE R0, 61439
+    IN1 R0
+    STORE R0, 61438
+    LOAD R0, 61439
+    COMPI R0, 1
+    JNE L23
+    LOAD R0, 49177
+    DEC R0
+    STORE R0, 49177
+    LOAD R0, 49177
+    MOVI R6, 8
+    ADD R0, R0, R6
+    STORE R0, 49179
+    JMP L24
+L23:
+    LOAD R0, 61439
+    COMPI R0, 256
+    JNE L25
+    LOAD R0, 49177
+    STORE R0, 49179
+    LOAD R0, 49177
+    INC R0
+    STORE R0, 49177
+L25:
+L24:
+    LOAD R0, 61438
+    COMPI R0, 1
+    JNE L26
+    LOAD R0, 49178
+    DEC R0
+    STORE R0, 49178
+    LOAD R0, 49178
+    MOVI R6, 8
+    ADD R0, R0, R6
+    STORE R0, 49180
+    JMP L27
+L26:
+    LOAD R0, 61438
+    COMPI R0, 256
+    JNE L28
+    LOAD R0, 49178
+    STORE R0, 49180
+    LOAD R0, 49178
+    INC R0
+    STORE R0, 49178
+L28:
+L27:
+    RTS
+F_draw_frame:
+    LOAD R0, 49175
+    LOAD R1, 49176
+    MOVI R2, 0
+    JSR F_draw_pixel
+    MOVI R0, 3
+    LOAD R1, 49179
+    MOVI R2, 0
+    JSR F_draw_pixel
+    MOVI R0, 125
+    LOAD R1, 49180
+    MOVI R2, 0
+    JSR F_draw_pixel
+    LOAD R0, 49171
+    LOAD R1, 49172
+    MOVI R2, 65504
+    JSR F_draw_pixel
+    MOVI R0, 3
+    LOAD R1, 49177
+    MOVI R2, 21791
+    JSR F_draw_paddle
+    MOVI R0, 125
+    LOAD R1, 49178
+    MOVI R2, 64234
+    JSR F_draw_paddle
+    LOAD R0, 49181
+    COMPI R0, 0
+    JNE L29
+    LOAD R0, 49176
+    MOVI R6, 2
+    SUB R0, R0, R6
+    STORE R0, 61439
+    LOAD R0, 61439
+    COMPI R0, 10
+    JAE L30
+    LOAD R0, 49175
+    MOVI R6, 28
+    SUB R0, R0, R6
+    COMPI R0, 6
+    JAE L31
+    JSR F_draw_score1
+    JMP L32
+L31:
+    LOAD R0, 49175
+    MOVI R6, 94
+    SUB R0, R0, R6
+    COMPI R0, 6
+    JAE L33
+    JSR F_draw_score2
+L33:
+L32:
+L30:
+L29:
+    RTS
+F_main:
+    JSR F_start_round
+L34:
+    LOAD R0, 49181
+    INC R0
+    STORE R0, 49181
+    LOAD R0, 49181
+    COMPI R0, 3
+    JNE L36
+    MOVI R0, 0
+    STORE R0, 49181
+    LOAD R0, 49171
+    STORE R0, 49175
+    LOAD R0, 49172
+    STORE R0, 49176
+    LOAD R0, 49171
+    COMPI R0, 0
+    JNE L37
+    LOAD R0, 49183
+    INC R0
+    STORE R0, 49183
+    LOAD R0, 49183
+    COMPI R0, 10
+    JNE L38
+    RTS
+L38:
+    JSR F_start_round
+    JMP L34
+L37:
+    LOAD R0, 49171
+    COMPI R0, 127
+    JNE L39
+    LOAD R0, 49182
+    INC R0
+    STORE R0, 49182
+    LOAD R0, 49182
+    COMPI R0, 10
+    JNE L40
+    RTS
+L40:
+    JSR F_start_round
+    JMP L34
+L39:
+    LOAD R0, 49171
+    COMPI R0, 124
+    JNE L41
+    LOAD R0, 49178
+    MOVI R1, 65535
+    JSR F_bounce_off_paddle
+    JMP L42
+L41:
+    LOAD R0, 49171
+    COMPI R0, 4
+    JNE L43
+    LOAD R0, 49177
+    MOVI R1, 1
+    JSR F_bounce_off_paddle
+L43:
+L42:
+    JSR F_move_ball
+L36:
+    JSR F_move_paddles
+    JSR F_draw_frame
+    LOAD R0, 49171
+    STORE R0, 49175
+    LOAD R0, 49172
+    STORE R0, 49176
+    JMP L34
+L35:
+    RTS
