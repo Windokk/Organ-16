@@ -46,7 +46,6 @@ struct Fonts {
     QFont body = sans(14);
     QFont brand = sans(20, true);
     QFont button = sans(15, true);
-    QFont kbd = mono(11);
     QFont mono11 = mono(11);
     QFont mono10b = mono(10, true);
     QFont mono12 = mono(12);
@@ -522,16 +521,15 @@ Workbench::Layout Workbench::layout() const {
     }
 
     x = L.ix;
-    auto button = [&](const QString& label, double kbdWidthText) {
-        const double kbd = kbdWidthText + 8 + 2;
-        const double w = 18 + Width(f.button, label) + 10 + kbd + 18 + 1;
+    auto button = [&](const QString& label) {
+        const double w = 18 + Width(f.button, label) + 18 + 1;
         QRectF r(x, TRANSPORT_TOP, w, 40);
         x += w;
         return r;
     };
-    L.run = button(running_ ? "Pause" : "Run", Width(f.kbd, "Space"));
-    L.stepBtn = button("Step", Width(f.kbd, "S"));
-    L.reset = button("Reset", Width(f.kbd, "R"));
+    L.run = button(running_ ? "Pause" : "Run");
+    L.stepBtn = button("Step");
+    L.reset = button("Reset");
 
     L.clock = QRectF(x, TRANSPORT_TOP, 12 + Width(f.silk, "CLOCK") + 12 + 1, 44);
     x += L.clock.width();
@@ -679,28 +677,22 @@ void Workbench::paintHeader(QPainter& p, const Layout& L) {
 void Workbench::paintTransport(QPainter& p, const Layout& L) {
     const Fonts& f = F();
 
-    auto button = [&](const QRectF& r, const QString& label, const QString& key, int id, bool go) {
+    auto button = [&](const QRectF& r, const QString& label, int id, bool go) {
         const bool over = hover_ == id;
         QColor bg = go ? lampRun : panel;
         QColor fg = go ? black : ink;
-        QColor kbdFg = go ? black : inkFaint;
-        QColor kbdBorder = go ? black : ruleSoft;
         if (over) {
             bg = hi;
-            fg = kbdFg = kbdBorder = hiInk;
+            fg = hiInk;
         }
         Fill(p, QRectF(r.left(), r.top(), r.width() - 1, r.height()), bg);
         VLine(p, r.right() - 1, r.top(), r.height(), rule);
         const double cy = r.top() + 20;
-        const double tw = Text(p, f.button, fg, r.left() + 18, cy, label);
-        const double kw = Width(f.kbd, key) + 8 + 2;
-        const QRectF kr(r.left() + 18 + tw + 10, cy - 10, kw, 20);
-        Frame(p, kr, 1, kbdBorder);
-        Text(p, f.kbd, kbdFg, kr.left() + 5, cy, key);
+        Text(p, f.button, fg, r.left() + 18, cy, label);
     };
-    button(L.run, running_ ? "Pause" : "Run", "Space", 3, true);
-    button(L.stepBtn, "Step", "S", 4, false);
-    button(L.reset, "Reset", "R", 5, false);
+    button(L.run, running_ ? "Pause" : "Run", 3, true);
+    button(L.stepBtn, "Step", 4, false);
+    button(L.reset, "Reset", 5, false);
 
     const double cy = TRANSPORT_TOP + 22;
     Text(p, f.silk, ink, L.clock.left() + 12, cy, "CLOCK");
@@ -1335,14 +1327,7 @@ void Workbench::keyPressEvent(QKeyEvent* e) {
         QWidget::keyPressEvent(e);
         return;
     }
-    if (e->key() == Qt::Key_Space)
-        togglePlay();
-    else if (e->key() == Qt::Key_S)
-        step(e->modifiers() & Qt::ShiftModifier);
-    else if (e->key() == Qt::Key_R)
-        resetCore();
-    else
-        QWidget::keyPressEvent(e);
+    QWidget::keyPressEvent(e);
 }
 
 void Workbench::keyReleaseEvent(QKeyEvent* e) {

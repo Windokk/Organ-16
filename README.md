@@ -109,15 +109,39 @@ It will place every source file at the memory address specified in the linker sc
 
 - Support for signed operations is not enforced; it is up to the program to choose whether to work with signed or unsigned numbers.
 
-### Future plans : v2.5.0 :
-
+### Actual version : 2.5.0 :
 - [x] Mini-C compiler : occ (Organ C Compiler) v.0.2
 - [x] New emulator style
-- [ ] Instructions reader (in emulator)
+- [x] Instructions reader (in emulator)
+
+
+### Future plans : v3.0.0 :
+- [ ] ISA Enhancements :
+  - [ ] ALU-immediate group : ADDI, SUBI, MULI, ANDI, ORI, XORI, SHLI, SHRI, etc...
+  - [ ] LOADO + STOREO (replaces MOVI base + ADD + LOADR) : allows for : array[i] in two words (instead of 4)
+  - [ ] LOADRD + STORERD (store register at register held adress then decrement held adress)
+  - [ ] Relative short jump : PC = PC + 8 bit signed offset (9 bits offset total)
+    - [ ] BRA
+    - [ ] BE
+    - [ ] BNE
+    - [ ] BL
+    - [ ] BLE
+    - [ ] BB
+    - [ ] BBE
+    - [ ] BA
+    - [ ] BAE
+    - [ ] BG
+    - [ ] BGE
+    - [ ] BSR
+  - [ ] SAR, SDIV, SMOD
+  - [ ] NEG (negate)
+  - [ ] Allow access to SP and PC as a registers
+  - [ ] JSRR, JMPR, JER, JNER, JBR, JBER, JAR, JAER, JLR, JLER, JGR, JGER (jump to register held adresses)
+- [ ] Mini-C compiler : occ v.0.5
 - [ ] Interrupts
 - [ ] Exceptions (a kind of interrupt)
 - [ ] Cache
-- [ ] Peripherals support
+- [ ] Peripherals support : sound card, different screens sizes, keyboard, etc...
 
 ### Future-future plans (v4.0.0?)
 
