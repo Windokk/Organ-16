@@ -1,3 +1,6 @@
+# compiler.py : Organ 16 ASM Compiler
+# Compiles an assembly organ 16 program to binary
+
 import os
 import re
 import sys

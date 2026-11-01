@@ -142,7 +142,7 @@
     </comp>
     <comp lib="9" loc="(1255,435)" name="Text">
       <a name="font" val="SansSerif bold 46"/>
-      <a name="text" val="ORGAN-16 v2.0.0"/>
+      <a name="text" val="ORGAN-16 v2.5.0"/>
       <a name="valign" val="center"/>
     </comp>
     <comp loc="(1000,810)" name="CLOCK_MODULE"/>

@@ -6,13 +6,13 @@
 
   </br>
   
-  <img src="https://img.shields.io/static/v1?label=Version&message=2.0.0&color=33cc33&style=for-the-badge"/>
+  <img src="https://img.shields.io/static/v1?label=Version&message=2.5.0&color=33cc33&style=for-the-badge"/>
 
 
 </br>
 </br>
 
-A simple 16-bit CPU architecture and its assembly-to-machine-code compiler + emulator
+A "simple" 16-bit CPU architecture and its assembly-to-machine-code compiler + emulator
 
 Designed with CMOS IRL implementation in mind (on breadboard for now)
 
@@ -66,20 +66,19 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
   - Stack Pointer (SP) (16-bits) – points to the top of the software-managed stack in RAM. 
   - Status Register (FLAGS) (4-bits) – holds condition flags: Zero (Z), Negative (N), Carry (C), and Overflow (O).
 
-## ISA:
+## ISA : CISC
 
 (Currently there are 59 instructions, but by design the CPU could support 128 instructions)
 Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
-
 - The first 3 bits of the first word represent the Opcode.
 - The next 4 bits represent the SubOpcode.
 - The remaining 9 bits are used for operands, typically register identifiers.
   In certain instructions, a second 16-bit word may follow to hold a memory address or an immediate value.
 
-### File format/Compiler :
+### File format/ASM Compiler :
 
 The only file extensions recognized by the compiler are ".l" linker scripts and .org asm source files
-The compiler is implemented in Python 3.10.
+The asm compiler is implemented in Python 3.10.
 To compile a source file, first create a .l linker script and fill it with segments : 
 (using json synthax)
 
@@ -102,6 +101,8 @@ It will place every source file at the memory address specified in the linker sc
 
 (For example, if a program takes three words and is placed at 0xefff, its content will be cropped to let enough space for the stack) 
 
+The project also features a (WIP) Mini-C compiler (subset of the C programming language).
+
 ## More details can be found in the docs/ folder ! 
 
 
@@ -117,7 +118,7 @@ It will place every source file at the memory address specified in the linker sc
 
 ### Future plans : v3.0.0 :
 - [ ] ISA Enhancements :
-  - [ ] ALU-immediate group : ADDI, SUBI, MULI, ANDI, ORI, XORI, SHLI, SHRI, etc...
+  - [ ] ALU-immediate group : ADDI, SUBI, MULI, ANDI, ORI, XORI, SHLI, SHRI, MODI, DIVI, NANDI, NORI, NOTI, XNORI
   - [ ] LOADO + STOREO (replaces MOVI base + ADD + LOADR) : allows for : array[i] in two words (instead of 4)
   - [ ] LOADRD + STORERD (store register at register held adress then decrement held adress)
   - [ ] Relative short jump : PC = PC + 8 bit signed offset (9 bits offset total)
@@ -141,12 +142,12 @@ It will place every source file at the memory address specified in the linker sc
 - [ ] Interrupts
 - [ ] Exceptions (a kind of interrupt)
 - [ ] Cache
-- [ ] Peripherals support : sound card, different screens sizes, keyboard, etc...
 
 ### Future-future plans (v4.0.0?)
 
+- [ ] 32 bit evolution (Carillon 32) --> this means abandonning circuit simulation in Logisim Evolution (max = 24 bit adress space)
+- [ ] Peripherals support : sound card, different screens sizes, keyboard, etc...
 - [ ] Multi-core
-- [ ] 32 bit evolution (Carillon 32) --> this means abandonning circuit simulation in Logisim evolution (max = 24 bit adress space)
 - [ ] Doom port
 - [ ] IRL breadboard implementation (???)
 - [ ] PCB version (In a long long time 😄)
