@@ -2,7 +2,7 @@
   
   # Organ 16
 
-  <img src="LogoGithub.png" width="30%">
+  <img src=".github/LogoGithub.png" width="30%">
 
   </br>
   
@@ -20,10 +20,10 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 </br>
 
-<img src="Screenshot.png"/>
+<img src=".github/Screenshot.png"/>
 <div align="center"><i>Emulator playing pong.bin program</i></div>
 </br>
-<div align="center"><img src="organ16_cube.gif" width="50%"></br>
+<div align="center"><img src=".github/organ16_cube.gif" width="50%"></br>
 <i>Spinning cube (Rendered in emulator)</i></div>
 
 ## Repository Guide
