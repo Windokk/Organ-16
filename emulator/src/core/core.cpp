@@ -123,6 +123,21 @@ void Core::writeRam(uint16_t address, uint16_t data) {
     }
 }
 
+uint16_t Core::ioRead(uint16_t address) {
+    if (address == IO_RANDOM)
+        return nextRandom();
+    const uint16_t port = address - IO_BASE;
+    return port < io.size() ? io[port] : 0;
+}
+
+void Core::ioWrite(uint16_t address, uint16_t data) {
+    const uint16_t port = address - IO_BASE;
+    if (port < io.size() && io[port] != data) {
+        io[port] = data;
+        ioDirty = true;
+    }
+}
+
 void Core::halfTick() {
     const Decoded& cu = decodeTable[ir0 >> 9];
     const unsigned subOp = (ir0 >> 9) & 15;
@@ -175,7 +190,7 @@ void Core::halfTick() {
     }
 
     if (regWrite && ((pAddr && pExt) ? clk : !clk)) {
-        r[dstR] = cu.useIn ? (cu.ioPort == RANDOM_PORT ? nextRandom() : io[cu.ioPort])
+        r[dstR] = cu.useIn ? nextRandom()
                 : (pSp || pRegAddr) ? ramOut
                 : pExt ? ir1
                 : alu.result;
@@ -208,7 +223,10 @@ void Core::halfTick() {
             uint16_t address = prePc;
             if ((!pJsr && pAddr && pExt && !cu.loadPC) || pSp || pRegAddr)
                 address = pSp ? preSp : pRegAddr ? oldRB : preRamAddr;
-            writeRam(address, pJsr ? static_cast<uint16_t>(prePc + 2) : oldRA);
+            if (cu.ioSpace)
+                ioWrite(address, oldRA);
+            else
+                writeRam(address, pJsr ? static_cast<uint16_t>(prePc + 2) : oldRA);
         }
     }
 
@@ -218,21 +236,15 @@ void Core::halfTick() {
     const bool nRegAddr = ffRegAddr;
 
     uint16_t fetchAddress = pc;
-    if ((!nJsr && (ffAddrBase || ffAddrJsr) && nExt && !cu.loadPC) || nSp || nRegAddr)
+    const bool fetchesRamAddr = !nJsr && (ffAddrBase || ffAddrJsr) && nExt && !cu.loadPC;
+    if (fetchesRamAddr || nSp || nRegAddr)
         fetchAddress = nSp ? sp : nRegAddr ? r[srcRB] : ramAddr;
 
     if (!clk)
         writeFF = !nExt && !writeFF && nJsr;
 
-    const uint16_t newRam = ram[fetchAddress];
-
-    if (cu.useOut && cu.ioPort != RANDOM_PORT) {
-        const uint16_t value = r[srcRA];
-        if (io[cu.ioPort] != value) {
-            io[cu.ioPort] = value;
-            ioDirty = true;
-        }
-    }
+    const bool ioFetch = cu.ioSpace && fetchesRamAddr && !nSp && !nRegAddr;
+    const uint16_t newRam = ioFetch ? ioRead(fetchAddress) : ram[fetchAddress];
 
     if (!clk && !nExt && !nRegAddr && !nSp)
         ir0 = newRam;

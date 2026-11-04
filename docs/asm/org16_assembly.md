@@ -4,7 +4,7 @@
 
 ### Instructions :
 
-Here are the 59 currently usable instructions :
+Here are the 55 currently usable instructions :
 
 | | Instruction  | `OpCode` | `SubOpCode` | Word count | Example          | Description of the example            |
 |-|--------------|----------|-------------|------------|------------------|---------------------------------------|
@@ -43,47 +43,47 @@ Here are the 59 currently usable instructions :
 |33| PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack                                            |
 |34| POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1                                          |
 |35| IN          | `111`    | `0001`      | (2 word)   | IN R0, 0x1000    | Place input data from port mapped at address 0x1000 into R0       |
-|38| OUT         | `111`    | `0010`      | (2 word)   | OUT R0, 0x1000   | Outputs R0 to output port mapped at addresss 0x1000               |
-|41| RAND        | `111`    | `0011`      | (1 word)   | RAND R0          | Reads a 16 bit random number into R0                              |
-|42| SHL         | `000`    | `1011`      | (1 word)   | SHL R0, R1, R2   | Shifts R1 left by "R2 bits", places the result in R0 (logical)    |
-|43| SHR         | `000`    | `1100`      | (1 word)   | SHR R1, R0, R2   | Shifts R0 right by "R2 bits", places the result in R1 (logical)   |
-|44| XNOR        | `000`    | `1101`      | (1 word)   | XNOR R1, R2, R3  | Bitwise XNOR, store in R1                                         | 
-|45| MIN         | `000`    | `1110`      | (1 word)   | MIN R0, R1, R2   | Stores the smallest (unsigned) of R1 and R2 into R0               |
-|46| MAX         | `000`    | `1111`      | (1 word)   | MAX R0, R1, R2   | Stores the biggest (unsigned) of R1 and R2 into R0                |
-|47| SIN         | `001`    | `0000`      | (1 word)   | SIN R0, R1       | Stores sin(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
-|48| COS         | `001`    | `0001`      | (1 word)   | COS R0, R1       | Stores cos(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
-|49| TAN         | `001`    | `0010`      | (1 word)   | TAN R0, R1       | Stores tan(R1) into R0 (R1 = angle in turns, signed Q8.8 result, saturated) |
-|50| SQRT        | `001`    | `0011`      | (1 word)   | SQRT R0, R1      | Stores the integer square root of R1 (unsigned) into R0           |
-|51| POW         | `001`    | `0100`      | (1 word)   | POW R0, R1, R2   | Stores R1 raised to the power R2 (low 16 bits) into R0            |
-|52| ABS         | `001`    | `0101`      | (1 word)   | ABS R0, R1       | Stores the absolute value of R1 (signed) into R0                  |
-|53| NOP         | `000`    | `0000`      | (1 word)   | NOP              | No operation, but not halt either, just do nothing for one tick   |
-|54| INC         | `001`    | `0110`      | (1 word)   | INC R1           | R1 = R1 + 1 (wraps at 0xFFFF)                                     |
-|55| DEC         | `001`    | `0111`      | (1 word)   | DEC R1           | R1 = R1 - 1 (wraps at 0x0000)                                     |
-|56| LOADRP      | `011`    | `0100`      | (1 word)   | LOADRP R3, R1    | Load memory[R1] into R3, then R1 = R1 + 1                         |
-|57| STORERP     | `011`    | `0101`      | (1 word)   | STORERP R3, R1   | Store R3 at memory[R1], then R1 = R1 + 1                          |
-|58| COMPI       | `001`    | `1000`      | (2 words)  | COMPI R1, 0x10   | Compare R1's value with the 0x10                                  |
-|59| COMPM       | `001`    | `1001`      | (2 words)  | COMPM R1, 0x1000 | Compare R1's value with memory[0x1000]                            |
-|60| ADDI        | `010`    | ``          |
-|61| SUBI        | `010`    | ``          |
-|62| MULI        | `010`    | ``          |
-|63| ANDI        | `010`    | ``          |
-|64| ORI         | `010`    | ``          |
-|65| XORI        | `010`    | ``          |
-|66| SHLI        | `010`    | ``          |
-|67| SHRI        | `010`    | ``          |
-|68| MODI        | `010`    | ``          |
-|69| DIVI        | `010`    | ``          |
-|70| NANDI       | `010`    | ``          |
-|71| NORI        | `010`    | ``          |
-|72| NOTI        | `010`    | ``          |
-|73| XNORI       | `010`    | ``          |
+|36| OUT         | `111`    | `0010`      | (2 word)   | OUT R0, 0x1000   | Outputs R0 to output port mapped at addresss 0x1000               |
+|37| RAND        | `111`    | `0011`      | (1 word)   | RAND R0          | Reads a 16 bit random number into R0                              |
+|38| SHL         | `000`    | `1011`      | (1 word)   | SHL R0, R1, R2   | Shifts R1 left by "R2 bits", places the result in R0 (logical)    |
+|39| SHR         | `000`    | `1100`      | (1 word)   | SHR R1, R0, R2   | Shifts R0 right by "R2 bits", places the result in R1 (logical)   |
+|40| XNOR        | `000`    | `1101`      | (1 word)   | XNOR R1, R2, R3  | Bitwise XNOR, store in R1                                         | 
+|41| MIN         | `000`    | `1110`      | (1 word)   | MIN R0, R1, R2   | Stores the smallest (unsigned) of R1 and R2 into R0               |
+|42| MAX         | `000`    | `1111`      | (1 word)   | MAX R0, R1, R2   | Stores the biggest (unsigned) of R1 and R2 into R0                |
+|43| SIN         | `001`    | `0000`      | (1 word)   | SIN R0, R1       | Stores sin(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
+|44| COS         | `001`    | `0001`      | (1 word)   | COS R0, R1       | Stores cos(R1) into R0 (R1 = angle in turns, signed Q1.15 result) |
+|45| TAN         | `001`    | `0010`      | (1 word)   | TAN R0, R1       | Stores tan(R1) into R0 (R1 = angle in turns, signed Q8.8 result, saturated) |
+|46| SQRT        | `001`    | `0011`      | (1 word)   | SQRT R0, R1      | Stores the integer square root of R1 (unsigned) into R0           |
+|47| POW         | `001`    | `0100`      | (1 word)   | POW R0, R1, R2   | Stores R1 raised to the power R2 (low 16 bits) into R0            |
+|48| ABS         | `001`    | `0101`      | (1 word)   | ABS R0, R1       | Stores the absolute value of R1 (signed) into R0                  |
+|49| NOP         | `000`    | `0000`      | (1 word)   | NOP              | No operation, but not halt either, just do nothing for one tick   |
+|50| INC         | `001`    | `0110`      | (1 word)   | INC R1           | R1 = R1 + 1 (wraps at 0xFFFF)                                     |
+|51| DEC         | `001`    | `0111`      | (1 word)   | DEC R1           | R1 = R1 - 1 (wraps at 0x0000)                                     |
+|52| LOADRP      | `011`    | `0100`      | (1 word)   | LOADRP R3, R1    | Load memory[R1] into R3, then R1 = R1 + 1                         |
+|53| STORERP     | `011`    | `0101`      | (1 word)   | STORERP R3, R1   | Store R3 at memory[R1], then R1 = R1 + 1                          |
+|54| COMPI       | `001`    | `1000`      | (2 words)  | COMPI R1, 0x10   | Compare R1's value with the 0x10                                  |
+|55| COMPM       | `001`    | `1001`      | (2 words)  | COMPM R1, 0x1000 | Compare R1's value with memory[0x1000]                            |
+|56| ADDI        | `010`    | ``          |
+|57| SUBI        | `010`    | ``          |
+|58| MULI        | `010`    | ``          |
+|59| ANDI        | `010`    | ``          |
+|60| ORI         | `010`    | ``          |
+|61| XORI        | `010`    | ``          |
+|62| SHLI        | `010`    | ``          |
+|63| SHRI        | `010`    | ``          |
+|64| MODI        | `010`    | ``          |
+|65| DIVI        | `010`    | ``          |
+|66| NANDI       | `010`    | ``          |
+|67| NORI        | `010`    | ``          |
+|68| NOTI        | `010`    | ``          |
+|69| XNORI       | `010`    | ``          |
+|70|
+|71|
+|72|
+|73|
 |74|
 |75|
 |76|
-|77|
-|78|
-|79|
-|80|
 
 #### Notes : 
 
@@ -92,7 +92,9 @@ Here are the 59 currently usable instructions :
 - SQRT is floor(sqrt(R1)). POW is R1^R2 truncated to 16 bits (0^0 = 1). ABS is signed (0x8000 stays 0x8000).
 - INC, DEC leave the flags untouched. LOADRP, STORERP increment the pointer after the access; don't use the same register twice.
 - COMPI, COMPM only set the flags and are not commutative: the register is the left operand.
-- RAND reads (virtual) IO port 3 (random generator).
+- IN and OUT take a 16-bit port address in their second word. I/O ports live in their own address space, separate from RAM: `OUT R0, 0x2000` never writes RAM, and `IN R0, 0x2000` does not read it.
+- Ports of the Logisim circuit: `0x1000`, `0x1001`, `0x1002` are the bidirectional ports A, B and C, `0x1003` is the random generator (read only). Reading an unmapped port gives 0, writing to one is ignored.
+- RAND is the one-word form of `IN Rn, 0x1003`.
 
 ### Instruction decomposition : 
 

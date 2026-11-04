@@ -211,8 +211,8 @@ main:
 
         paddle_pos:
 
-            IN0 R0
-            IN1 R1
+            IN R0, 0x1000
+            IN R1, 0x1001
 
             MOVI R2, 1
             MOVI R3, 0b0000000100000000

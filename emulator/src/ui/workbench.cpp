@@ -126,7 +126,7 @@ struct Workbench::Layout {
     QRectF lamp[3];
     double lampText[3]{};
     QRectF run, stepBtn, reset;
-    QRectF clock, hz, unit, range, rates[4], real, stat;
+    QRectF hz, unit, range, rates[4], real, stat;
     QRectF logo;
 
     double midX = 0, midW = 0, rightX = 0, footTop = 0;
@@ -531,8 +531,6 @@ Workbench::Layout Workbench::layout() const {
     L.stepBtn = button("Step");
     L.reset = button("Reset");
 
-    L.clock = QRectF(x, TRANSPORT_TOP, 12 + Width(f.silk, "CLOCK") + 12 + 1, 44);
-    x += L.clock.width();
     L.hz = QRectF(x, TRANSPORT_TOP, 92, 40);
     x += 92;
     L.unit = QRectF(x, TRANSPORT_TOP, 62, 40);
@@ -695,9 +693,6 @@ void Workbench::paintTransport(QPainter& p, const Layout& L) {
     button(L.reset, "Reset", 5, false);
 
     const double cy = TRANSPORT_TOP + 22;
-    Text(p, f.silk, ink, L.clock.left() + 12, cy, "CLOCK");
-    VLine(p, L.clock.right() - 1, L.clock.top(), 44, rule);
-
     VLine(p, L.hz.right() - 1, L.hz.top(), 40, rule);
 
     Fill(p, L.unit, well);

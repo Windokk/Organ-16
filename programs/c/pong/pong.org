@@ -264,9 +264,9 @@ L22:
 L21:
     RTS
 F_move_paddles:
-    IN0 R0
+    IN R0, 0x1000
     STORE R0, 61439
-    IN1 R0
+    IN R0, 0x1001
     STORE R0, 61438
     LOAD R0, 61439
     COMPI R0, 1

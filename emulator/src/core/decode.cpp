@@ -55,14 +55,15 @@ Decoded decode(unsigned opCode, unsigned sub) {
     d.regWrite = (d.aluEnabled && d.aluOp != ALU_CMP) || (opCode == 2) ||
                  (opCode == 3 && (sub == 0 || sub == 3 || sub == 4)) ||
                  (opCode == 5 && sub == 1) ||
-                 (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
+                 (opCode == 7 && (sub == 1 || sub == 3));
 
     d.nextExt = (opCode == 2 && sub == 0) || d.aluUsesExt || (opCode == 4) ||
                 (opCode == 3 && sub < 2) ||
-                (opCode == 5 && sub == 1);
+                (opCode == 5 && sub == 1) ||
+                (opCode == 7 && (sub == 1 || sub == 2));
 
     d.flagsWrite = d.aluEnabled && d.aluOp == ALU_CMP;
-    d.memWrite = (opCode == 3 && (sub == 1 || sub == 2 || sub == 5));
+    d.memWrite = (opCode == 3 && (sub == 1 || sub == 2 || sub == 5)) || (opCode == 7 && sub == 2);
     d.loadPC = (opCode == 4);
     d.spPop = (opCode == 4 && sub == 12) || (opCode == 5 && sub == 1);
     d.spChange = (opCode == 4 && (sub == 11 || sub == 12)) || (opCode == 5);
@@ -71,18 +72,13 @@ Decoded decode(unsigned opCode, unsigned sub) {
     d.regIsAddress = (opCode == 3 && (sub >= 2 && sub <= 5));
     d.postInc = (opCode == 3 && (sub == 4 || sub == 5));
     d.hlt = (opCode == 7 && sub == 0);
-    d.useIn = (opCode == 7 && ((sub >= 1 && sub <= 3) || sub == 7));
-    d.useOut = (opCode == 7 && sub >= 4);
+    d.useIn = (opCode == 7 && sub == 3);
+    d.ioSpace = (opCode == 7 && (sub == 1 || sub == 2));
 
-    if (opCode == 3 || (opCode == 5 && sub == 1) || (opCode == 1 && sub == 9))
+    if (opCode == 3 || (opCode == 5 && sub == 1) || (opCode == 1 && sub == 9) || d.ioSpace)
         d.addressMode = ADDR_ALWAYS;
     else if (opCode == 4)
         d.addressMode = ADDR_IF_JUMP_TAKEN;
-
-    if (opCode == 7 && sub >= 1 && sub <= 6)
-        d.ioPort = (sub - 1) % 3;
-    else if (opCode == 7 && sub == 7)
-        d.ioPort = RANDOM_PORT;
 
     return d;
 }

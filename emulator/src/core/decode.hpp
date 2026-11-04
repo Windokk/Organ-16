@@ -13,7 +13,6 @@ struct Decoded {
     uint8_t aluOp = 0;
     bool aluEnabled = false;
     bool aluUsesExt = false;
-    uint8_t ioPort = 0;
     uint8_t addressMode = 0;
     bool regWrite = false;
     bool nextExt = false;
@@ -28,10 +27,8 @@ struct Decoded {
     bool postInc = false;
     bool hlt = false;
     bool useIn = false;
-    bool useOut = false;
+    bool ioSpace = false;
 };
-
-constexpr uint8_t RANDOM_PORT = 3;
 
 enum AddressMode : uint8_t { ADDR_NEVER = 0, ADDR_ALWAYS = 1, ADDR_IF_JUMP_TAKEN = 2 };
 

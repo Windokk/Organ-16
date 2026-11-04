@@ -31,8 +31,7 @@ std::array<Entry, 128> BuildTable() {
     def(4, 11, "JSR", 'J', 2); def(4, 12, "RTS", '-');
 
     def(5, 0, "PUSH", 'a'); def(5, 1, "POP", 'D');
-    def(7, 0, "HLT", '-'); def(7, 1, "IN0", 'D'); def(7, 2, "IN1", 'D'); def(7, 3, "IN2", 'D');
-    def(7, 4, "OUT0", 'a'); def(7, 5, "OUT1", 'a'); def(7, 6, "OUT2", 'a'); def(7, 7, "RAND", 'D');
+    def(7, 0, "HLT", '-'); def(7, 1, "IN", 'N', 2); def(7, 2, "OUT", 'O', 2); def(7, 3, "RAND", 'D');
     return t;
 }
 
@@ -84,6 +83,8 @@ std::vector<OperandPart> Operands(const Insn& i) {
         case 'I': return {{rd + ", " + Hex(i.imm), false}};
         case 'i': return {{ra + ", " + Hex(i.imm), false}};
         case 'L': return {{rd + ", ", false}, {Hex(i.imm), true}};
+        case 'N': return {{rd + ", " + Hex(i.imm), false}};
+        case 'O': return {{ra + ", " + Hex(i.imm), false}};
         case 'S':
         case 'm': return {{ra + ", ", false}, {Hex(i.imm), true}};
         case 'R': return {{rd + ", " + rb, false}};

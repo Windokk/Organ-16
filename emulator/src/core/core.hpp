@@ -11,6 +11,9 @@
 
 constexpr size_t ADDRESS_SPACE = 65536;
 constexpr uint16_t SCREEN_BASE = 0x8000;
+constexpr uint16_t IO_BASE = 0x1000;
+constexpr size_t IO_PORT_COUNT = 3;
+constexpr uint16_t IO_RANDOM = IO_BASE + IO_PORT_COUNT;
 constexpr size_t SCREEN_WIDTH = 128;
 constexpr size_t SCREEN_HEIGHT = 128;
 constexpr size_t SCREEN_PIXELS = SCREEN_WIDTH * SCREEN_HEIGHT;
@@ -65,7 +68,7 @@ class Core {
     bool prevClk = false;
         bool writeFF = false;
 
-        std::array<uint16_t, 3> io{};
+        std::array<uint16_t, IO_PORT_COUNT> io{};
         bool ioDirty = false;
         bool screenDirty = false;
         bool ramDirty = false;
@@ -82,6 +85,8 @@ class Core {
         using StateKey = std::array<uint16_t, 16>;
         StateKey stateKey() const;
         void writeRam(uint16_t address, uint16_t data);
+        uint16_t ioRead(uint16_t address);
+        void ioWrite(uint16_t address, uint16_t data);
         uint16_t nextRandom();
         uint32_t rngState = 1;
 };

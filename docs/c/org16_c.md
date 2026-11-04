@@ -105,8 +105,8 @@ Calls to these names compile directly to one instruction. They are predeclared a
 
 | Intrinsic | Instruction | Notes |
 |---|---|---|
-| `unsigned in0()`, `in1()`, `in2()` | `IN0/IN1/IN2` | |
-| `void out0(unsigned v)`, `out1`, `out2` | `OUT0/OUT1/OUT2` | |
+| `unsigned in0()`, `in1()`, `in2()` | `IN` | reads port `0x1000`, `0x1001`, `0x1002` |
+| `void out0(unsigned v)`, `out1`, `out2` | `OUT` | writes port `0x1000`, `0x1001`, `0x1002` |
 | `unsigned rand()` | `RAND` | |
 | `int sin(int a)`, `int cos(int a)` | `SIN`, `COS` | angle in turns (`0x4000` = 90 degrees), result Q1.15 |
 | `int tan(int a)` | `TAN` | result Q8.8, saturated |

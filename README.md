@@ -68,7 +68,7 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 ## ISA : CISC
 
-(Currently there are 59 instructions, but by design the CPU could support 128 instructions)
+(Currently there are 55 instructions, but by design the CPU could support 128 instructions)
 Each instruction is 16 bits wide but can be extended to 32 bits in some cases.
 - The first 3 bits of the first word represent the Opcode.
 - The next 4 bits represent the SubOpcode.
@@ -117,7 +117,7 @@ The project also features a (WIP) Mini-C compiler (subset of the C programming l
 
 ### Future plans : v3.0.0 :
 - [ ] ISA Enhancements :
-  - [ ] Fix : IO instructions : I/O ports should be named with immediates (allowing much more I/O ports and even memory mapped I/O)
+  - [x] Fix : IO instructions : I/O ports should be named with immediates (allowing much more I/O ports and even memory mapped I/O)
   - [ ] ALU-immediate group : ADDI, SUBI, MULI, ANDI, ORI, XORI, SHLI, SHRI, MODI, DIVI, NANDI, NORI, NOTI, XNORI
   - [ ] LOADO + STOREO (replaces MOVI base + ADD + LOADR) : allows for : array[i] in two words (instead of 4)
   - [ ] LOADRD + STORERD (store register at register held adress then decrement held adress)

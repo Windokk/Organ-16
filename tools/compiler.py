@@ -76,7 +76,7 @@ INSTR_FORMAT = {
     "PUSH": {"regs": 1, "imm": False},
     "POP":  {"regs": 1, "imm": False},
 
-    # IO ops — NO immediates
+    # IO ops — IN / OUT take the port address as immediate, RAND has none
     "IN":   {"regs": 1, "imm": True},
     "OUT":  {"regs": 1, "imm": True},
     "RAND": {"regs": 1, "imm": False},
@@ -242,7 +242,9 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
         )
 
     if not imm and fmt["imm"]:
-        pass
+        raise ValueError(
+            f"{instr} requires an immediate value (e.g. a port address for IN/OUT). Invalid line: '{line}'"
+        )
 
     # Here we are sure that the instruction is valid, the number of registers is correct, immediates are only allowed where expected
 
@@ -259,7 +261,7 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
                 return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)
         if op_bin == "0010110" or op_bin == "0010111":
             return op_bin + DataToBinData(regs) + "000" + DataToBinData(regs)
-        if op_bin == "1010001" or op_bin == "1110001" or op_bin == "1110010" or op_bin == "1110011" or op_bin == "1110111":
+        if op_bin == "1010001" or op_bin == "1110011":
             return op_bin + DataToBinData(regs) + "000000"
         else:
             return op_bin + "000" + DataToBinData(regs) + "000"

@@ -213,9 +213,13 @@ def same_type(a, b):
     return True
 
 
+IO_BASE = 0x1000
+
 INTRINSICS = {
-    'in0': (UINT, [], 'IN0'), 'in1': (UINT, [], 'IN1'), 'in2': (UINT, [], 'IN2'),
-    'out0': (VOID, [UINT], 'OUT0'), 'out1': (VOID, [UINT], 'OUT1'), 'out2': (VOID, [UINT], 'OUT2'),
+    'in0': (UINT, [], f'IN 0x{IO_BASE:04X}'), 'in1': (UINT, [], f'IN 0x{IO_BASE + 1:04X}'),
+    'in2': (UINT, [], f'IN 0x{IO_BASE + 2:04X}'),
+    'out0': (VOID, [UINT], f'OUT 0x{IO_BASE:04X}'), 'out1': (VOID, [UINT], f'OUT 0x{IO_BASE + 1:04X}'),
+    'out2': (VOID, [UINT], f'OUT 0x{IO_BASE + 2:04X}'),
     'rand': (UINT, [], 'RAND'),
     'sin': (INT, [INT], 'SIN'), 'cos': (INT, [INT], 'COS'), 'tan': (INT, [INT], 'TAN'),
     'sqrt': (UINT, [UINT], 'SQRT'),
@@ -1512,15 +1516,21 @@ class Gen:
         if ins == 'HLT':
             self.emit('HLT')
             return None
+        if ins.startswith('IN '):
+            op, port = ins.split()
+            r = self.alloc()
+            self.emit(f'{op} R{r}, {port}')
+            return r
+        if ins.startswith('OUT '):
+            op, port = ins.split()
+            r = self.gen(e.args[0])
+            self.emit(f'{op} R{r}, {port}')
+            self.free(r)
+            return None
         if n == 0:
             r = self.alloc()
             self.emit(f'{ins} R{r}')
             return r
-        if ins.startswith('OUT'):
-            r = self.gen(e.args[0])
-            self.emit(f'{ins} R{r}')
-            self.free(r)
-            return None
         if n == 1:
             r = self.gen(e.args[0])
             self.emit(f'{ins} R{r}, R{r}')
