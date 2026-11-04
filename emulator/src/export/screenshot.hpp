@@ -5,6 +5,6 @@
 
 #include "export/export_geometry.hpp"
 
-QImage RenderExportImage(const ScreenPixels& pixels);
+QImage renderExportImage(const ScreenPixels& pixels);
 
-bool SaveScreenshotJpeg(const ScreenPixels& pixels, const QString& path);
+bool saveScreenshotJpeg(const ScreenPixels& pixels, const QString& path);

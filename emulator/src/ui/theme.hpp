@@ -9,28 +9,31 @@
 
 namespace theme {
 
-inline const QColor paper("#23272d");
-inline const QColor panel("#2d3239");
-inline const QColor well("#181b1f");
-inline const QColor ink("#f4f5f6");
-inline const QColor inkSoft("#c0c5cc");
-inline const QColor inkFaint("#939aa5");
-inline const QColor rule("#6c7480");
-inline const QColor ruleSoft("#3c424b");
-inline const QColor focus("#7f9fff");
+inline const QColor paper("#222222");
+inline const QColor panel("#2c2c2c");
+inline const QColor well("#181818");
+inline const QColor ink("#f2f2f2");
+inline const QColor inkSoft("#c2c2c2");
+inline const QColor inkFaint("#929292");
+inline const QColor rule("#6e6e6e");
+inline const QColor ruleSoft("#3c3c3c");
+inline const QColor focus("#9cc0e8");
+// colour is only used for an active state, everything else is grey
 inline const QColor lampRun("#2ee66b");
-inline const QColor lampHalt("#ff3d3d");
 inline const QColor lampWait("#ff8a1f");
-inline const QColor lampOff("#3b414a");
-inline const QColor bitOn("#4477ff");
-inline const QColor bar("#24489a");
+inline const QColor lampHalt("#ff3d3d");
+inline const QColor lampOff("#3b3b3b");
+inline const QColor bitOn("#ffd23f");
+inline const QColor bar("#2c4d78");
 inline const QColor barInk("#ffffff");
-inline const QColor hi("#4477ff");
+inline const QColor hi("#4a7fbb");
 inline const QColor hiInk("#ffffff");
 inline const QColor regGeneral("#75a7ea");
 inline const QColor regPointer("#e98a24");
 inline const QColor regInstruction("#52ad40");
 inline const QColor regInk("#16150f");
+inline const QColor stepBtn("#ffd23f");
+inline const QColor resetBtn("#ff3d3d");
 inline const QColor black("#000000");
 
 inline QStringList fontDirs() {
@@ -44,8 +47,9 @@ inline QStringList fontDirs() {
 }
 
 inline void loadFonts() {
-    for (const QString& name : {":/fonts/B612-Regular.ttf", ":/fonts/B612-Bold.ttf", ":/fonts/B612Mono-Regular.ttf", ":/fonts/B612Mono-Bold.ttf"})
-        QFontDatabase::addApplicationFont(name);
+    const QDir bundled(":/fonts");
+    for (const QString& file : bundled.entryList({"*.ttf", "*.otf"}, QDir::Files))
+        QFontDatabase::addApplicationFont(bundled.filePath(file));
     for (const QString& dir : fontDirs()) {
         const QDir d(dir);
         for (const QString& file : d.entryList({"*.ttf", "*.otf"}, QDir::Files))
@@ -66,11 +70,11 @@ inline QFont make(const QStringList& families, double px, bool bold, double spac
 }
 
 inline QFont sans(double px, bool bold = false, double spacing = 0) {
-    return make({"B612", "Arial Narrow", "Liberation Sans Narrow", "Helvetica Neue", "Arial", "sans-serif"}, px, bold, spacing);
+    return make({"IBM Plex Sans", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"}, px, bold, spacing);
 }
 
 inline QFont mono(double px, bool bold = false) {
-    return make({"B612 Mono", "Consolas", "DejaVu Sans Mono", "Courier New", "monospace"}, px, bold);
+    return make({"IBM Plex Mono", "Consolas", "DejaVu Sans Mono", "Courier New", "monospace"}, px, bold);
 }
 
 inline QColor mix(const QColor& a, const QColor& b, double t) {

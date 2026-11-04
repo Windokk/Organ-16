@@ -1,8 +1,8 @@
 ; Pong for Organ16 Assembly v1.5.0
 ; 
 ; How to play :
-; Left paddle : bit 0, 8 of port A
-; Right paddle : bit 0, 8 of port B
+; Left paddle : bit 0, 8 of port 0
+; Right paddle : bit 0, 8 of port 1
 
 @define SCREEN_WIDTH   128
 @define SCREEN_HEIGHT  128

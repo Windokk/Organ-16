@@ -1,5 +1,5 @@
 // Pong written in Organ 16's C language subset
-// Left paddle: bit 0 (up) and bit 8 (down) of port A, right paddle: same on port B
+// Left paddle: bit 0 (up) and bit 8 (down) of port 0, right paddle: same on port 1
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 128

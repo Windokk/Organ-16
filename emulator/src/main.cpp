@@ -35,50 +35,50 @@ QAction* recordGifAction = nullptr;
 constexpr int GIF_CAPTURE_INTERVAL_MS = 40;
 
 const char* const APP_STYLE = R"(
-QMenu { background: #2d3239; color: #f4f5f6; border: 1px solid #6c7480; padding: 0; }
+QMenu { background: #2c2c2c; color: #f2f2f2; border: 1px solid #6e6e6e; padding: 0; }
 QMenu::item { padding: 6px 18px; }
-QMenu::item:selected { background: #4477ff; color: #ffffff; }
-QMenu::item:disabled { color: #939aa5; }
-QMenu::separator { height: 1px; background: #3c424b; }
-QToolTip { background: #2d3239; color: #f4f5f6; border: 1px solid #6c7480; }
-QScrollArea { background: #23272d; border: 0; }
-QScrollBar:vertical { background: #181b1f; width: 12px; margin: 0; }
-QScrollBar::handle:vertical { background: #6c7480; min-height: 24px; }
-QScrollBar:horizontal { background: #181b1f; height: 12px; margin: 0; }
-QScrollBar::handle:horizontal { background: #6c7480; min-width: 24px; }
+QMenu::item:selected { background: #4a7fbb; color: #ffffff; }
+QMenu::item:disabled { color: #929292; }
+QMenu::separator { height: 1px; background: #3c3c3c; }
+QToolTip { background: #2c2c2c; color: #f2f2f2; border: 1px solid #6e6e6e; }
+QScrollArea { background: #222222; border: 0; }
+QScrollBar:vertical { background: #181818; width: 12px; margin: 0; }
+QScrollBar::handle:vertical { background: #6e6e6e; min-height: 24px; }
+QScrollBar:horizontal { background: #181818; height: 12px; margin: 0; }
+QScrollBar::handle:horizontal { background: #6e6e6e; min-width: 24px; }
 QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; }
 )";
 
-ScreenPixels CopyScreen()
+ScreenPixels copyScreen()
 {
     auto guard = core.lock();
     return core.screen;
 }
 
-QString WithSuffix(QString path, const QString& suffix)
+QString withSuffix(QString path, const QString& suffix)
 {
     if (QFileInfo(path).suffix().isEmpty())
         path += "." + suffix;
     return path;
 }
 
-QString DefaultExportName(const QString& suffix)
+QString defaultExportName(const QString& suffix)
 {
     return "organ16_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "." + suffix;
 }
 
-void SaveScreenshot()
+void saveScreenshot()
 {
-    const ScreenPixels pixels = CopyScreen();
-    QString path = QFileDialog::getSaveFileName(window, "Save screenshot", DefaultExportName("jpg"), "JPEG image (*.jpg *.jpeg)");
+    const ScreenPixels pixels = copyScreen();
+    QString path = QFileDialog::getSaveFileName(window, "Save screenshot", defaultExportName("jpg"), "JPEG image (*.jpg *.jpeg)");
     if (path.isEmpty())
         return;
-    path = WithSuffix(path, "jpg");
-    if (!SaveScreenshotJpeg(pixels, path))
+    path = withSuffix(path, "jpg");
+    if (!saveScreenshotJpeg(pixels, path))
         QMessageBox::warning(window, "File Error", "Could not save the screenshot to " + path);
 }
 
-void StopGifRecording()
+void stopGifRecording()
 {
     gifTimer.stop();
     const bool ok = gifRecorder.stop();
@@ -88,38 +88,38 @@ void StopGifRecording()
         QMessageBox::warning(window, "File Error", "The GIF file could not be written completely.");
 }
 
-void StartGifRecording()
+void startGifRecording()
 {
-    QString path = QFileDialog::getSaveFileName(window, "Record GIF", DefaultExportName("gif"), "GIF image (*.gif)");
+    QString path = QFileDialog::getSaveFileName(window, "Record GIF", defaultExportName("gif"), "GIF image (*.gif)");
     if (path.isEmpty())
         return;
-    path = WithSuffix(path, "gif");
+    path = withSuffix(path, "gif");
     if (!gifRecorder.start(path.toStdString())) {
         QMessageBox::warning(window, "File Error", "Could not create " + path);
         return;
     }
-    gifRecorder.addFrame(CopyScreen());
+    gifRecorder.addFrame(copyScreen());
     gifTimer.start(GIF_CAPTURE_INTERVAL_MS);
     recordGifAction->setText("Stop GIF recording");
     window->setWindowTitle("Organ 16 Emulator - recording GIF");
 }
 
-void ToggleGifRecording()
+void toggleGifRecording()
 {
     if (gifRecorder.recording())
-        StopGifRecording();
+        stopGifRecording();
     else
-        StartGifRecording();
+        startGifRecording();
 }
 
-void ImportProgram()
+void importProgram()
 {
     const QString fileName = QFileDialog::getOpenFileName(window, "Open Program File", "", "Program Files (*.bin)");
     if (!fileName.isEmpty())
         workbench->loadProgram(fileName);
 }
 
-QStringList FindSamples()
+QStringList findSamples()
 {
     QDir dir(QCoreApplication::applicationDirPath());
     for (int i = 0; i < 6; ++i) {
@@ -152,11 +152,11 @@ QStringList FindSamples()
     return {};
 }
 
-void BuildDebugWindow()
+void buildDebugWindow()
 {
     debugWindow = new QWidget;
     debugWindow->setWindowTitle("Organ 16 debug");
-    debugWindow->setStyleSheet("QWidget{background:#23272d;color:#f4f5f6;}");
+    debugWindow->setStyleSheet("QWidget{background:#222222;color:#f2f2f2;}");
     QGridLayout* grid = new QGridLayout(debugWindow);
     const char* names[8] = {"IsCurrExt", "IsCurrAddrBase", "IsCurrAddr", "IsCurrAddrJsr", "IsCurrSpChange", "IsCurrJsr", "IsCurrRts", "RegIsCurrAddr"};
     for (int i = 0; i < 8; ++i) {
@@ -165,14 +165,14 @@ void BuildDebugWindow()
         label->setAlignment(Qt::AlignCenter);
         QWidget* led = new QWidget;
         led->setFixedSize(40, 40);
-        led->setStyleSheet("background:#3b414a;");
+        led->setStyleSheet("background:#3b3b3b;");
         grid->addWidget(label, (i / 4) * 2, i % 4);
         grid->addWidget(led, (i / 4) * 2 + 1, i % 4, Qt::AlignHCenter);
         debugLeds.push_back({names[i], led});
     }
 }
 
-void RefreshDebug()
+void refreshDebug()
 {
     if (!debugWindow || !debugWindow->isVisible())
         return;
@@ -183,10 +183,10 @@ void RefreshDebug()
                   core.ffSpChange, core.ffJsr, core.ffRts, core.ffRegAddr};
     }
     for (size_t i = 0; i < debugLeds.size(); ++i)
-        debugLeds[i].second->setStyleSheet(values[i] ? "background:#2ee66b;" : "background:#3b414a;");
+        debugLeds[i].second->setStyleSheet(values[i] ? "background:#2ee66b;" : "background:#3b3b3b;");
 }
 
-void ShowContextMenu(const QPoint& pos)
+void showContextMenu(const QPoint& pos)
 {
     QMenu menu;
     QAction* import = menu.addAction("Import program...");
@@ -200,12 +200,12 @@ void ShowContextMenu(const QPoint& pos)
 
     QAction* chosen = menu.exec(pos);
     if (chosen == import)
-        ImportProgram();
+        importProgram();
     else if (chosen == shot)
-        SaveScreenshot();
+        saveScreenshot();
     else if (chosen == debug) {
         if (!debugWindow)
-            BuildDebugWindow();
+            buildDebugWindow();
         debugWindow->show();
         debugWindow->raise();
     }
@@ -232,18 +232,18 @@ int main(int argc, char* argv[])
     parser.process(app);
 
     recordGifAction = new QAction("Start GIF recording...");
-    QObject::connect(recordGifAction, &QAction::triggered, &ToggleGifRecording);
+    QObject::connect(recordGifAction, &QAction::triggered, &toggleGifRecording);
 
     workbench = new Workbench(core, sim);
-    workbench->setSamples(FindSamples());
+    workbench->setSamples(findSamples());
 
     {
         auto guard = core.lock();
         core.init();
     }
 
-    QObject::connect(workbench, &Workbench::loadRequested, &ImportProgram);
-    QObject::connect(workbench, &Workbench::contextMenuRequested, &ShowContextMenu);
+    QObject::connect(workbench, &Workbench::loadRequested, &importProgram);
+    QObject::connect(workbench, &Workbench::contextMenuRequested, &showContextMenu);
 
     const bool shotMode = parser.isSet(shotOption);
 
@@ -264,6 +264,7 @@ int main(int argc, char* argv[])
         workbench->loadProgram(parser.value(programOption));
 
     if (shotMode) {
+        workbench->toast(QString());  // keep the load message out of the picture
         const QStringList dims = parser.value(sizeOption).split('x');
         workbench->resize(dims.value(0).toInt(), dims.value(1).toInt());
         const uint64_t ticks = parser.value(ticksOption).toULongLong();
@@ -302,26 +303,26 @@ int main(int argc, char* argv[])
     sim.start();
 
     QShortcut shotShortcut(QKeySequence(Qt::CTRL | Qt::Key_P), window);
-    QObject::connect(&shotShortcut, &QShortcut::activated, &SaveScreenshot);
+    QObject::connect(&shotShortcut, &QShortcut::activated, &saveScreenshot);
     QShortcut gifShortcut(QKeySequence(Qt::CTRL | Qt::Key_R), window);
-    QObject::connect(&gifShortcut, &QShortcut::activated, &ToggleGifRecording);
+    QObject::connect(&gifShortcut, &QShortcut::activated, &toggleGifRecording);
 
     QTimer frameTimer;
     frameTimer.setTimerType(Qt::PreciseTimer);
     QObject::connect(&frameTimer, &QTimer::timeout, [] {
         workbench->refresh();
-        RefreshDebug();
+        refreshDebug();
     });
     frameTimer.start(16);
 
     gifTimer.setTimerType(Qt::PreciseTimer);
     QObject::connect(&gifTimer, &QTimer::timeout, [] {
-        if (!gifRecorder.addFrame(CopyScreen()))
-            StopGifRecording();
+        if (!gifRecorder.addFrame(copyScreen()))
+            stopGifRecording();
     });
     QObject::connect(&app, &QApplication::aboutToQuit, [] {
         if (gifRecorder.recording())
-            StopGifRecording();
+            stopGifRecording();
     });
 
     const int result = app.exec();

@@ -18,7 +18,7 @@ struct OperandPart {
     bool address = false;
 };
 
-Insn Disassemble(const uint16_t* ram, uint16_t address);
-std::vector<OperandPart> Operands(const Insn& insn);
-QString FormatInsn(const Insn& insn);
-QString Hex(unsigned value, int digits = 4);
+Insn disassemble(const uint16_t* ram, uint16_t address);
+std::vector<OperandPart> operands(const Insn& insn);
+QString formatInsn(const Insn& insn);
+QString hex(unsigned value, int digits = 4);

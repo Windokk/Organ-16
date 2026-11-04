@@ -64,8 +64,8 @@ class Core {
         bool ffJsr = false;
         bool ffRts = false;
         bool ffRegAddr = false;
-    bool ffPostInc = false;
-    bool prevClk = false;
+        bool ffPostInc = false;
+        bool prevClk = false;
         bool writeFF = false;
 
         std::array<uint16_t, IO_PORT_COUNT> io{};

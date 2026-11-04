@@ -8,7 +8,7 @@ constexpr int JPEG_QUALITY = 95;
 
 }
 
-QImage RenderExportImage(const ScreenPixels& pixels)
+QImage renderExportImage(const ScreenPixels& pixels)
 {
     std::array<uint32_t, SCREEN_PIXELS> colors;
     for (size_t i = 0; i < SCREEN_PIXELS; ++i)
@@ -28,7 +28,7 @@ QImage RenderExportImage(const ScreenPixels& pixels)
     return image;
 }
 
-bool SaveScreenshotJpeg(const ScreenPixels& pixels, const QString& path)
+bool saveScreenshotJpeg(const ScreenPixels& pixels, const QString& path)
 {
-    return RenderExportImage(pixels).save(path, "JPEG", JPEG_QUALITY);
+    return renderExportImage(pixels).save(path, "JPEG", JPEG_QUALITY);
 }

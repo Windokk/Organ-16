@@ -20,8 +20,8 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 
 </br>
 
-<img src=".github/Screenshot.png"/>
-<div align="center"><i>Emulator playing pong.bin program</i></div>
+<div align="center"><img src=".github/Screenshot.png"/>
+<i>Emulator playing pong.bin program</i></div>
 </br>
 <div align="center"><img src=".github/organ16_cube.gif" width="50%"></br>
 <i>Spinning cube (Rendered in emulator)</i></div>
@@ -31,9 +31,19 @@ Designed with CMOS IRL implementation in mind (on breadboard for now)
 - [asm-lang/](asm-lang/)  : contains extension(s) for common IDEs to support Organ16 assembly
 - [circuits/](circuits/)  : contains every logisim (evolution) related files
 - [docs/](docs/)          : documentation on the whole project (logisim, emulator, asm, irl implementation)
-- [emulator/](emulator/)  : the source code for the emulator (written in C++ with Qt). Put the B612 `.ttf` fonts in `emulator/src/fonts/` before building
+- [emulator/](emulator/)  : the source code for the emulator (written in C++ with Qt). Put the IBM Plex Sans and IBM Plex Mono `.ttf` fonts (from the `emulator/submodules/plex` submodule, `packages/plex-sans` and `packages/plex-mono`) in `emulator/src/fonts/` before building
 - [programs/](programs/)  : various test/demo programs to be executed on the emulator/on logisim
 - [tools/](tools/)        : various tools used for developping and building the CPU and its extensions
+
+## Emulator
+
+Qt 6 / C++17, see [emulator/](emulator/). Run it, then load a program with **Load .bin**, **Samples**, by dropping a file on the window, or with `--program file.bin`.
+
+- `.bin` files are either raw little-endian 16-bit words or a text dump of hex words
+- **Run / Pause**, **Step** (hold Shift to step one half clock instead of a whole instruction), **Reset**. The clock goes from 1 Hz to 20 MHz, type a value (`500k`, `2M`) or drag the slider
+- Click a bit under IO PORTS to toggle it, right-click one to bind a keyboard key to it
+- Listing: click the square in the margin for a breakpoint, click a row to find it in memory, untick *follow PC* to scroll freely
+- Ctrl+P saves a JPEG of the screen, Ctrl+R starts/stops a GIF recording
 
 ## Architecture - Overview
 

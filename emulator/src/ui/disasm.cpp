@@ -10,7 +10,7 @@ struct Entry {
     int words = 1;
 };
 
-std::array<Entry, 128> BuildTable() {
+std::array<Entry, 128> buildTable() {
     std::array<Entry, 128> t{};
     auto def = [&](int op, int sub, const char* name, char fmt, int words = 1) { t[op * 16 + sub] = {name, fmt, words}; };
 
@@ -35,25 +35,25 @@ std::array<Entry, 128> BuildTable() {
     return t;
 }
 
-const std::array<Entry, 128>& Table() {
-    static const auto t = BuildTable();
+const std::array<Entry, 128>& opTable() {
+    static const auto t = buildTable();
     return t;
 }
 
-QString Reg(int n) { return "R" + QString::number(n); }
+QString regName(int n) { return "R" + QString::number(n); }
 
 }
 
-QString Hex(unsigned value, int digits) {
+QString hex(unsigned value, int digits) {
     return "0x" + QString::number(value, 16).rightJustified(digits, '0').toUpper();
 }
 
-Insn Disassemble(const uint16_t* ram, uint16_t address) {
+Insn disassemble(const uint16_t* ram, uint16_t address) {
     Insn insn;
     insn.w = ram[address];
     const int op = insn.w >> 13;
     const int sub = (insn.w >> 9) & 15;
-    const Entry& e = Table()[op * 16 + sub];
+    const Entry& e = opTable()[op * 16 + sub];
     insn.d = (insn.w >> 6) & 7;
     insn.a = (insn.w >> 3) & 7;
     insn.b = insn.w & 7;
@@ -70,35 +70,35 @@ Insn Disassemble(const uint16_t* ram, uint16_t address) {
     return insn;
 }
 
-std::vector<OperandPart> Operands(const Insn& i) {
-    const QString ra = Reg(i.a), rb = Reg(i.b), rd = Reg(i.d);
+std::vector<OperandPart> operands(const Insn& i) {
+    const QString ra = regName(i.a), rb = regName(i.b), rd = regName(i.d);
     switch (i.fmt) {
-        case 'W': return {{Hex(i.w), false}};
+        case 'W': return {{hex(i.w), false}};
         case 'T': return {{rd + ", " + ra + ", " + rb, false}};
         case 'P': return {{rd + ", " + ra, false}};
         case 'c': return {{ra + ", " + rb, false}};
         case 'd': return {{i.b != i.d ? rd + ", " + rb : rd, false}};
         case 'D': return {{rd, false}};
         case 'a': return {{ra, false}};
-        case 'I': return {{rd + ", " + Hex(i.imm), false}};
-        case 'i': return {{ra + ", " + Hex(i.imm), false}};
-        case 'L': return {{rd + ", ", false}, {Hex(i.imm), true}};
-        case 'N': return {{rd + ", " + Hex(i.imm), false}};
-        case 'O': return {{ra + ", " + Hex(i.imm), false}};
+        case 'I': return {{rd + ", " + hex(i.imm), false}};
+        case 'i': return {{ra + ", " + hex(i.imm), false}};
+        case 'L': return {{rd + ", ", false}, {hex(i.imm), true}};
+        case 'N': return {{rd + ", " + hex(i.imm), false}};
+        case 'O': return {{ra + ", " + hex(i.imm), false}};
         case 'S':
-        case 'm': return {{ra + ", ", false}, {Hex(i.imm), true}};
+        case 'm': return {{ra + ", ", false}, {hex(i.imm), true}};
         case 'R': return {{rd + ", " + rb, false}};
-        case 'J': return {{Hex(i.imm), true}};
+        case 'J': return {{hex(i.imm), true}};
         default: return {};
     }
 }
 
-QString FormatInsn(const Insn& insn) {
+QString formatInsn(const Insn& insn) {
     QString out = insn.name;
-    QString operands;
-    for (const OperandPart& part : Operands(insn))
-        operands += part.text;
-    if (!operands.isEmpty())
-        out += " " + operands;
+    QString joined;
+    for (const OperandPart& part : operands(insn))
+        joined += part.text;
+    if (!joined.isEmpty())
+        out += " " + joined;
     return out;
 }
