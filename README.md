@@ -115,9 +115,9 @@ The project also features a (WIP) Mini-C compiler (subset of the C programming l
 - [x] New emulator style
 - [x] Instructions reader (in emulator)
 
-
 ### Future plans : v3.0.0 :
 - [ ] ISA Enhancements :
+  - [ ] Fix : IO instructions : I/O ports should be named with immediates (allowing much more I/O ports and even memory mapped I/O)
   - [ ] ALU-immediate group : ADDI, SUBI, MULI, ANDI, ORI, XORI, SHLI, SHRI, MODI, DIVI, NANDI, NORI, NOTI, XNORI
   - [ ] LOADO + STOREO (replaces MOVI base + ADD + LOADR) : allows for : array[i] in two words (instead of 4)
   - [ ] LOADRD + STORERD (store register at register held adress then decrement held adress)

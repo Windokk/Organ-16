@@ -77,12 +77,8 @@ INSTR_FORMAT = {
     "POP":  {"regs": 1, "imm": False},
 
     # IO ops — NO immediates
-    "IN0":  {"regs": 1, "imm": False},
-    "IN1":  {"regs": 1, "imm": False},
-    "IN2":  {"regs": 1, "imm": False},
-    "OUT0": {"regs": 1, "imm": False},
-    "OUT1": {"regs": 1, "imm": False},
-    "OUT2": {"regs": 1, "imm": False},
+    "IN":   {"regs": 1, "imm": True},
+    "OUT":  {"regs": 1, "imm": True},
     "RAND": {"regs": 1, "imm": False},
 
     # Halt / no-op
@@ -156,12 +152,11 @@ def OpCodeToBinOpCode(instruction: str) -> str:
         "JG":   ("100", "1001"), "JGE":  ("100", "1010"), "JSR":  ("100", "1011"),
         "RTS":  ("100", "1100"), "HLT":  ("111", "0000"), "PUSH": ("101", "0000"),
         "POP":  ("101", "0001"), "STORER": ("011", "0010"), "LOADR": ("011", "0011"),
-        "IN0":  ("111", "0001"), "IN1":  ("111", "0010"), "IN2":  ("111", "0011"),
-        "OUT0":  ("111", "0100"), "OUT1":  ("111", "0101"), "OUT2":  ("111", "0110"),
-        "RAND": ("111", "0111"), "ADD":  ("000", "1010"), "SHL":  ("000", "1011"),
-        "SHR":  ("000", "1100"), "XNOR": ("000", "1101"), "MIN":  ("000", "1110"),
-        "MAX":  ("000", "1111"), "SIN":  ("001", "0000"), "COS":  ("001", "0001"),
-        "TAN":  ("001", "0010"), "SQRT": ("001", "0011"), "POW":  ("001", "0100"),
+        "IN":  ("111", "0001"), "OUT":  ("111", "0010"), "RAND": ("111", "0011"), 
+        "ADD":  ("000", "1010"), "SHL":  ("000", "1011"), "SHR":  ("000", "1100"),
+        "XNOR": ("000", "1101"), "MIN":  ("000", "1110"), "MAX":  ("000", "1111"), 
+        "SIN":  ("001", "0000"), "COS":  ("001", "0001"), "TAN":  ("001", "0010"), 
+        "SQRT": ("001", "0011"), "POW":  ("001", "0100"),
         "ABS":  ("001", "0101"), "MOV":  ("010", "0001"),
         "INC":  ("001", "0110"), "DEC":  ("001", "0111"),
         "COMPI": ("001", "1000"), "COMPM": ("001", "1001"),
@@ -258,7 +253,7 @@ def LineToBinary(line: str, label_map: dict = None, constants_map: dict = None):
         return op_bin + "000000000"
     elif len(regs) == 1:
         if imm:
-            if op_bin == "0110001" or op_bin == "0011000" or op_bin == "0011001":
+            if op_bin == "0110001" or op_bin == "0011000" or op_bin == "0011001" or op_bin == "1110010":
                 return op_bin + "000" + DataToBinData(regs) + "000", ImmediateToBin(imm, label_map, constants_map)
             else:
                 return op_bin + DataToBinData(regs) + "000000", ImmediateToBin(imm, label_map, constants_map)

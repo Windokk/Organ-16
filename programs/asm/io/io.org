@@ -1,8 +1,4 @@
 loop:
-    IN1 R0
-    IN2 R1
-    IN0 R2
-    OUT0 R0
-    OUT1 R1
-    OUT2 R2
+    IN R0, 0x1000
+    OUT R0, 0x1000
     JMP loop

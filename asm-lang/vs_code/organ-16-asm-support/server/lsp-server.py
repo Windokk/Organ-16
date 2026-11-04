@@ -1,8 +1,12 @@
 import json
 import sys
-from pygls.server import LanguageServer
+try:
+    from pygls.lsp.server import LanguageServer
+except ImportError:
+    from pygls.server import LanguageServer
 from lsprotocol.types import (
     Diagnostic,
+    PublishDiagnosticsParams,
     DiagnosticSeverity,
     DidOpenTextDocumentParams,
     DidChangeTextDocumentParams,
@@ -95,12 +99,8 @@ VALID_OPCODES = {
     # Register-only instructions
     "PUSH":  ["R"],
     "POP":   ["R"],
-    "IN0":   ["R"],
-    "IN1":   ["R"],
-    "IN2":   ["R"],
-    "OUT0":  ["R"],
-    "OUT1":  ["R"],
-    "OUT2":  ["R"],
+    "IN":   ["R", "I"],
+    "OUT":  ["R", "I"],
     "RAND":  ["R"],
 }
 
@@ -331,19 +331,26 @@ def validate_org_source(lines):
     return diagnostics
 
 
+def publish(ls, uri, diagnostics):
+    if hasattr(ls, "text_document_publish_diagnostics"):
+        ls.text_document_publish_diagnostics(PublishDiagnosticsParams(uri=uri, diagnostics=diagnostics))
+    else:
+        ls.publish_diagnostics(uri, diagnostics)
+
+
 @server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def on_change(ls: LanguageServer, params: DidChangeTextDocumentParams):
     text = ls.workspace.get_text_document(params.text_document.uri).source
     lines = text.splitlines()
     asm_diags = validate_org_source(lines)
-    ls.publish_diagnostics(params.text_document.uri, asm_diags)
+    publish(ls, params.text_document.uri, asm_diags)
 
 @server.feature(TEXT_DOCUMENT_DID_OPEN)
 def on_open(ls: LanguageServer, params: DidOpenTextDocumentParams):
     text = ls.workspace.get_text_document(params.text_document.uri).source
     lines = text.splitlines()
     asm_diags = validate_org_source(lines)
-    ls.publish_diagnostics(params.text_document.uri, asm_diags)
+    publish(ls, params.text_document.uri, asm_diags)
 
 @server.feature(TEXT_DOCUMENT_COMPLETION)
 def completions(ls: LanguageServer, params: CompletionParams):

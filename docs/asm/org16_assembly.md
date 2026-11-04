@@ -42,13 +42,9 @@ Here are the 59 currently usable instructions :
 |32| CMP         | `001`    | `1010`      | (1 word)   | CMP R1, R2       | Compare R1 and R2 (Not commutative)                               |
 |33| PUSH        | `101`    | `0000`      | (1 word)   | PUSH R1          | Push R1 onto the stack                                            |
 |34| POP         | `101`    | `0001`      | (1 word)   | POP R1           | Pop top of stack into R1                                          |
-|35| IN0         | `111`    | `0001`      | (1 word)   | IN0 R0           | Place input data from port A into R0                              |
-|36| IN1         | `111`    | `0010`      | (1 word)   | IN1 R0           | Place input data from port B into R0                              |
-|37| IN2         | `111`    | `0011`      | (1 word)   | IN2 R0           | Place input data from port C into R0                              |
-|38| OUT0        | `111`    | `0100`      | (1 word)   | OUT0 R0          | Outputs R0 to output port A                                       |
-|39| OUT1        | `111`    | `0101`      | (1 word)   | OUT1 R0          | Outputs R0 to output port B                                       |
-|40| OUT2        | `111`    | `0110`      | (1 word)   | OUT2 R0          | Outputs R0 to output port C                                       |
-|41| RAND        | `111`    | `0111`      | (1 word)   | RAND R0          | Reads a 16 bit random number into R0                              |
+|35| IN          | `111`    | `0001`      | (2 word)   | IN R0, 0x1000    | Place input data from port mapped at address 0x1000 into R0       |
+|38| OUT         | `111`    | `0010`      | (2 word)   | OUT R0, 0x1000   | Outputs R0 to output port mapped at addresss 0x1000               |
+|41| RAND        | `111`    | `0011`      | (1 word)   | RAND R0          | Reads a 16 bit random number into R0                              |
 |42| SHL         | `000`    | `1011`      | (1 word)   | SHL R0, R1, R2   | Shifts R1 left by "R2 bits", places the result in R0 (logical)    |
 |43| SHR         | `000`    | `1100`      | (1 word)   | SHR R1, R0, R2   | Shifts R0 right by "R2 bits", places the result in R1 (logical)   |
 |44| XNOR        | `000`    | `1101`      | (1 word)   | XNOR R1, R2, R3  | Bitwise XNOR, store in R1                                         | 
